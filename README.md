@@ -1,4 +1,6 @@
-# FAF5_Analysis
+# FAF5 Analysis with QGIS
+
+The purpose of this repo is to document geospatial analysis of data from the "freight analysis framework" (FAF5) database with QGIS that documents freight flows in the US. The ultimate goal is to combine the geospatial freight flow data with lifecycle emissions 
 
 ## Get the data
 
@@ -30,8 +32,8 @@ rm FAF5_highway_network_assignments.zip
 
 ### FAF5 
 ```bash
-# FAF5 regional database of tonnage and value by origin-destination pair, commodity type, and mode (from https://www.bts.gov/faf)
-wget "https://faf.ornl.gov/faf5/data/download_files/FAF5.4.1.zip" -O FAF5_regional_od.zip
+# FAF5 regional database of tonnage and value by origin-destination pair, commodity type, and mode from 2018-2020 (from https://www.bts.gov/faf)
+wget "https://faf.ornl.gov/faf5/data/download_files/FAF5.4.1_2018-2020.zip" -O FAF5_regional_od.zip
 unzip FAF5_regional_od.zip -d FAF5_regional_od
 rm FAF5_regional_od.zip
 ```
