@@ -1,6 +1,13 @@
 # FAF5 Analysis with QGIS
 
-The purpose of this repo is to document geospatial analysis of data from the "freight analysis framework" (FAF5) database with QGIS that documents freight flows in the US. The ultimate goal is to combine the geospatial freight flow data with lifecycle emissions 
+The purpose of this repo is to document geospatial analysis of data from the "freight analysis framework" (FAF5) database with QGIS that documents freight flows in the US. The ultimate goal is to evaluate lifecycle emissions associated with the transportation of freight flows, and incorporate these evaluated emissions into the geospatial visualization. 
+
+Users can interact with QGIS either through the user interface ([link to user manual](https://docs.qgis.org/3.22/en/docs/user_manual/), or via the Python API (links to [developer's cookbook](https://docs.qgis.org/3.22/en/docs/pyqgis_developer_cookbook/) and [API documentation](https://qgis.org/pyqgis/3.22/)). My general approach has been as follows:
+
+* Start by 
+
+## Pre-requisites
+* An installation of QGIS: [link to downloads for Mac, Windows and Linux](https://qgis.org/en/site/forusers/download.html)
 
 ## Get the data
 
@@ -37,3 +44,7 @@ wget "https://faf.ornl.gov/faf5/data/download_files/FAF5.4.1_2018-2020.zip" -O F
 unzip FAF5_regional_od.zip -d FAF5_regional_flows_origin_destination
 rm FAF5_regional_od.zip
 ```
+
+## Analyzing highway assignments
+
+Users 
