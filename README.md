@@ -4,20 +4,31 @@ The purpose of this repo is to document geospatial analysis of data from the "fr
 
 Users can interact with QGIS either through the user interface ([link to user manual](https://docs.qgis.org/3.22/en/docs/user_manual/), or via the Python API (links to [developer's cookbook](https://docs.qgis.org/3.22/en/docs/pyqgis_developer_cookbook/) and [API documentation](https://qgis.org/pyqgis/3.22/)). My general approach has been as follows:
 
-* Start by 
+1. Interact initially via the user interface (UI) to get a feel for the functionality available to perform whatever analysis I'm trying to do. 
+2. Complete a first round of the analysis with the UI
+3. Encode the analysis with the python API to make it reproducible and configurable. 
+
 
 ## Pre-requisites
 * An installation of QGIS: [link to downloads for Mac, Windows and Linux](https://qgis.org/en/site/forusers/download.html)
 
-## Get the data
+## How to run python scripts
+Python scripts to encode analysis steps are stored in the [source](./source) directory. To run a script in QGIS:
+1. Open up the QGIS GUI and press the `New Project` option (white page on the top left)
+2. Select `Plugins --> Python Console` to open the python console.
+3. Press the `Show Editor` option (white script icon at the top) to open an empty python script. 
+4. Press the `Open Script...` option (yellow folder icon in the menu above the empty python script) to open an existing script. 
+5. Execute the script by pressing the `Run Script` option (green play button in the menu above the python script). 
 
-### FAF5 Regions
+## Downloading the data
+
+### FAF5 Zones
 
 ```bash
-# FAF5 regions (from https://geodata.bts.gov/datasets/usdot::freight-analysis-framework-faf5-regions)
-wget "https://opendata.arcgis.com/api/v3/datasets/e3bcc5d26e5e42709e2bacd6fc37ab43_0/downloads/data?format=shp&spatialRefId=3857&where=1%3D1" -O FAF5_regions.zip
-unzip FAF5_regions.zip -d FAF5_regions
-rm FAF5_regions.zip
+# FAF5 zones (from https://geodata.bts.gov/datasets/usdot::freight-analysis-framework-faf5-regions)
+wget "https://opendata.arcgis.com/api/v3/datasets/e3bcc5d26e5e42709e2bacd6fc37ab43_0/downloads/data?format=shp&spatialRefId=3857&where=1%3D1" -O FAF5_zones.zip
+unzip FAF5_regions.zip -d FAF5_zones
+rm FAF5_zones.zip
 ```
 
 ### FAF5 Network Links
@@ -47,4 +58,6 @@ rm FAF5_regional_od.zip
 
 ## Analyzing highway assignments
 
-Users 
+The script [AnalyzeFAFData.py](./source/AnalyzeFAFData.py) encodes an initial geospatial analysis of the FAF5 highway network assignment data. Follow the [instructions above]()
+
+Currently, the script reads in shapefiles for the FAF5 network links and FAF5 zones for the entire US, and applies a filter to visualize only the state of Texas (mainly for tractability). It then reads in the highway network assignments for total trucking flows, joins the total flows for 2022 (all commodities combined) with the FAF5 network links via their common link IDs, and visualizes the network links as lines on the map, with the line width of each link weighted by its total annual freight flow (in tons). 
