@@ -10,7 +10,6 @@ def main():
     
     # Get the path to top level of the git directory so we can use relative paths
     source_dir = os.path.dirname(_console.console.tabEditorWidget.currentWidget().path)
-    print(source_dir)
     if source_dir.endswith('/source'):
         top_dir = source_dir[:-7]
     elif source_dir.endswith('/source/'):
@@ -18,15 +17,10 @@ def main():
     else:
         print("ERROR: Expect current directory to end with 'source'. Cannot use relative directories as-is. Exiting...")
         sys.exitfunc()
-        
-        
-    print(top_dir)
 
-    """
     ######################################## Load and process FAF5 regions #########################################
     # Load the FAF5 regions shapefile and add it to the registry if it isn't already there
-    print(f'{top_dir}/FAF5_zones/Freight_Analysis_Framework_(FAF5)_Regions.shp')
-    regions = QgsVectorLayer(f'{top_dir}/FAF5_zones/Freight_Analysis_Framework_(FAF5)_Regions.shp', 'FAF5 Regions', 'ogr')
+    regions = QgsVectorLayer(f'{top_dir}/data/FAF5_regions/Freight_Analysis_Framework_(FAF5)_Regions.shp', 'FAF5 Regions', 'ogr')
 
     # Confirm that the regions got loaded in correctly
     if not regions.isValid():
@@ -58,7 +52,7 @@ def main():
 
     ##################################### Load and process FAF5 netowrk links ######################################
     # Load in the FAF5 network links shapefile
-    links = QgsVectorLayer('/Users/danikamacdonell/GIS/QGIS/FAF5/Freight_Analysis_Framework_(FAF5)_Network_Links/Freight_Analysis_Framework_(FAF5)_Network_Links.shp', 'FAF5 Links', 'ogr')
+    links = QgsVectorLayer(f'{top_dir}/data/FAF5_network_links/Freight_Analysis_Framework_(FAF5)_Network_Links.shp', 'FAF5 Links', 'ogr')
 
     # Confirm that the netowrk links got loaded in correctly
     if not links.isValid():
@@ -72,9 +66,11 @@ def main():
     links.setSubsetString('STATE LIKE \'%TX%\'')
     ################################################################################################################
 
+
+
     ################################## Load and process FAF5 highway assignments ###################################
     # Read in the total highway trucking flows by commodity for 2022
-    uri = '/Users/danikamacdonell/GIS/QGIS/FAF5/FAF5_Highway_Assignment_Results/FAF5_2022_Highway_Assignment_Results/CSV Format/FAF5 Total Truck Flows by Commodity_2022.csv'
+    uri = f'{top_dir}/data/FAF5_Highway_Assignment_Results/FAF5_2022_Highway_Assignment_Results/CSV Format/FAF5 Total Truck Flows by Commodity_2022.csv'
     assignments = QgsVectorLayer(uri, 'FAF5 Assignments', 'ogr')
 
     # Skim the assignments down to what we want to work with, and make sure the variable types are correct (by default QGIS reads in CSV data as strings, even if they're actually numbers)
@@ -90,7 +86,7 @@ def main():
     if not QgsProject.instance().mapLayersByName('Refactored'):
         QgsProject.instance().addMapLayer(assignments)
     ################################################################################################################
-        
+
     ################## Join the FAF5 assignments to the highway networks via the highway link IDs ##################
     #assignments = iface.activeLayer()
 
@@ -138,5 +134,5 @@ def main():
     # Apply the graduated symbol renderer defined above to the network links
     links.setRenderer(renderer)
     ################################################################################################################
-    """
+
 main()
