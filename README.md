@@ -30,10 +30,10 @@ unzip FAF5_highway_network_assignments.zip
 rm FAF5_highway_network_assignments.zip
 ```
 
-### FAF5 
+### FAF5 regional database 
 ```bash
 # FAF5 regional database of tonnage and value by origin-destination pair, commodity type, and mode from 2018-2020 (from https://www.bts.gov/faf)
 wget "https://faf.ornl.gov/faf5/data/download_files/FAF5.4.1_2018-2020.zip" -O FAF5_regional_od.zip
-unzip FAF5_regional_od.zip -d FAF5_regional_od
+unzip FAF5_regional_od.zip -d FAF5_regional_flows_origin_destination
 rm FAF5_regional_od.zip
 ```
