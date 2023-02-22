@@ -14,7 +14,7 @@ rm FAF5_regions.zip
 ### FAF5 Network Links
 
 ```bash
-# FAF5 regions (from https://geodata.bts.gov/datasets/usdot::freight-analysis-framework-faf5-regions)
+# FAF5 regions (from https://geodata.bts.gov/datasets/usdot::freight-analysis-framework-faf5-network-links)
 wget "https://opendata.arcgis.com/api/v3/datasets/cbfd7a1457d749ae865f9212c978c645_0/downloads/data?format=shp&spatialRefId=3857&where=1%3D1" -O FAF5_network_links.zip
 unzip FAF5_network_links.zip -d FAF5_network_links
 rm FAF5_network_links.zip
