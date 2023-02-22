@@ -58,6 +58,6 @@ rm FAF5_regional_od.zip
 
 ## Analyzing highway assignments
 
-The script [AnalyzeFAFData.py](./source/AnalyzeFAFData.py) encodes an initial geospatial analysis of the FAF5 highway network assignment data. Follow the [instructions above]()
+The script [AnalyzeFAFData.py](./source/AnalyzeFAFData.py) encodes an initial geospatial analysis of the FAF5 highway network assignment data. Follow the [instructions above](#how-to-run-python-scripts)
 
 Currently, the script reads in shapefiles for the FAF5 network links and FAF5 zones for the entire US, and applies a filter to visualize only the state of Texas (mainly for tractability). It then reads in the highway network assignments for total trucking flows, joins the total flows for 2022 (all commodities combined) with the FAF5 network links via their common link IDs, and visualizes the network links as lines on the map, with the line width of each link weighted by its total annual freight flow (in tons). 
