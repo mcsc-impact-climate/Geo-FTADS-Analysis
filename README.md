@@ -22,13 +22,13 @@ Python scripts to encode analysis steps are stored in the [source](./source) dir
 
 ## Downloading the data
 
-### FAF5 Zones
+### FAF5 Regions
 
 ```bash
-# FAF5 zones (from https://geodata.bts.gov/datasets/usdot::freight-analysis-framework-faf5-regions)
-wget "https://opendata.arcgis.com/api/v3/datasets/e3bcc5d26e5e42709e2bacd6fc37ab43_0/downloads/data?format=shp&spatialRefId=3857&where=1%3D1" -O FAF5_zones.zip
-unzip FAF5_regions.zip -d FAF5_zones
-rm FAF5_zones.zip
+# FAF5 regions (from https://geodata.bts.gov/datasets/usdot::freight-analysis-framework-faf5-regions)
+wget "https://opendata.arcgis.com/api/v3/datasets/e3bcc5d26e5e42709e2bacd6fc37ab43_0/downloads/data?format=shp&spatialRefId=3857&where=1%3D1" -O FAF5_regions.zip
+unzip FAF5_regions.zip -d FAF5_regions
+rm FAF5_regions.zip
 ```
 
 ### FAF5 Network Links
@@ -62,4 +62,4 @@ The script [AnalyzeFAFData.py](./source/AnalyzeFAFData.py) encodes an initial ge
 
 ![Highway network assigmments in Texas](./images/texas_highway_Assignments.png "Texas Highway Network Assignments")
 
-Currently, the script reads in shapefiles for the FAF5 network links and FAF5 zones for the entire US, and applies a filter to visualize only the state of Texas (mainly for tractability). It then reads in the highway network assignments for total trucking flows, joins the total flows for 2022 (all commodities combined) with the FAF5 network links via their common link IDs, and visualizes the network links as lines on the map, with the line width of each link weighted by its total annual freight flow (in tons). 
+Currently, the script reads in shapefiles for the FAF5 network links and FAF5 regions for the entire US, and applies a filter to visualize only the state of Texas (mainly for tractability). It then reads in the highway network assignments for total trucking flows, joins the total flows for 2022 (all commodities combined) with the FAF5 network links via their common link IDs, and visualizes the network links as lines on the map, with the line width of each link weighted by its total annual freight flow (in tons). 
