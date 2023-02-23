@@ -75,7 +75,7 @@ def main():
 
     # Skim the assignments down to what we want to work with, and make sure the variable types are correct (by default QGIS reads in CSV data as strings, even if they're actually numbers)
     # Note:
-    proc = processing.run("native:refactorfields", {'INPUT':'/Users/danikamacdonell/GIS/QGIS/FAF5/FAF5_Highway_Assignment_Results/FAF5_2022_Highway_Assignment_Results/CSV Format/FAF5 Total Truck Flows by Commodity_2022.csv','FIELDS_MAPPING':[{'expression': '"ID"','length': 0,'name': 'ID','precision': 0,'sub_type': 0,'type': 2,'type_name': 'integer'},{'expression': '"TOT Tons_22 All"','length': 0,'name': 'TOT Tons_22 All','precision': 0,'sub_type': 0,'type': 6,'type_name': 'double precision'}],'OUTPUT':'TEMPORARY_OUTPUT'})
+    proc = processing.run("native:refactorfields", {'INPUT':uri,'FIELDS_MAPPING':[{'expression': '"ID"','length': 0,'name': 'ID','precision': 0,'sub_type': 0,'type': 2,'type_name': 'integer'},{'expression': '"TOT Tons_22 All"','length': 0,'name': 'TOT Tons_22 All','precision': 0,'sub_type': 0,'type': 6,'type_name': 'double precision'}],'OUTPUT':'TEMPORARY_OUTPUT'})
     assignments = proc['OUTPUT']
 
     # Confirm that the highway assignments got loaded in correctly
