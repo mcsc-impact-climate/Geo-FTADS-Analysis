@@ -1,8 +1,8 @@
 # FAF5 Analysis with QGIS
 
-The purpose of this repo is to document geospatial analysis of data from the "freight analysis framework" (FAF5) database with QGIS that documents freight flows in the US. The ultimate goal is to evaluate lifecycle emissions associated with the transportation of freight flows, and incorporate these evaluated emissions into the geospatial visualization. 
+The purpose of this repo is to document the development of a geospatial analysis tool with QGIS that utilizes data from the "freight analysis framework" (FAF5) database. The ultimate goal is to evaluate lifecycle emissions associated with the transportation of freight flows, and incorporate these evaluated emissions into the geospatial visualization. 
 
-Users can interact with QGIS either through the user interface ([link to user manual](https://docs.qgis.org/3.22/en/docs/user_manual/), or via the Python API (links to [developer's cookbook](https://docs.qgis.org/3.22/en/docs/pyqgis_developer_cookbook/) and [API documentation](https://qgis.org/pyqgis/3.22/)). My general approach has been as follows:
+Users can interact with QGIS either through the user interface ([link to user manual](https://docs.qgis.org/3.22/en/docs/user_manual/)), or via the Python API (links to [developer's cookbook](https://docs.qgis.org/3.22/en/docs/pyqgis_developer_cookbook/) and [API documentation](https://qgis.org/pyqgis/3.22/)). My general approach has been as follows:
 
 1. Interact initially via the user interface (UI) to get a feel for the functionality available to perform whatever analysis I'm trying to do. 
 2. Complete a first round of the analysis with the UI
