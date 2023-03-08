@@ -2,6 +2,7 @@
 from qgis.core import *
 import qgis.utils
 from qgis.PyQt import QtGui
+import processing
 import os
 from console.console import _console
 import sys
@@ -16,9 +17,9 @@ elif source_dir.endswith('/source/'):
 else:
     print("ERROR: Expect current directory to end with 'source'. Cannot use relative directories as-is. Exiting...")
     sys.exitfunc()
+    
 
-
-def loadRegions(st):
+def loadRegions(st=None):
     '''
     Load and process FAF5 regions
     '''
@@ -32,29 +33,79 @@ def loadRegions(st):
     # Add the regions to the map if they aren't already there
     if not QgsProject.instance().mapLayersByName('FAF5 Regions'):
         QgsProject.instance().addMapLayer(regions)
+    
+        
+    # Load the data csv and add it to the registry if it isn't already there
+    data = QgsVectorLayer(f'file:///{top_dir}/data/total_tons.csv', 'Total Tons', 'delimitedtext')
+    QgsProject.instance().addMapLayer(data)
+    
+    # Confirm that the data got loaded in correctly
+    if not data.isValid():
+      print('Layer failed to load!')
+    
+    shpField = 'FAF_Zone_D'
+    csvField = 'Short Description'
+    
+    joinObject = QgsVectorLayerJoinInfo()
+    joinObject.setJoinFieldName(csvField)
+    joinObject.setTargetFieldName(shpField)
+    joinObject.setJoinLayerId(data.id())
+    joinObject.setUsingMemoryCache(True)
+    joinObject.setJoinLayer(data)
+    regions.addJoin(joinObject)
+    
 
     passin = f'FAF_Zone_D LIKE {st}'
     # print(passin, len(states))
     # Apply a filter to only show regions in 'State'
-    regions.setSubsetString(passin)
+    if st is not None: regions.setSubsetString(st)
 
-    # Give each FAF zone a different color
-    field_name = 'FAF_Zone_D'
-    field_index = regions.fields().indexFromName(field_name)
-    unique_values = regions.uniqueValues(field_index)
-
-    category_list = []
-    for value in unique_values:
-        symbol = QgsSymbol.defaultSymbol(regions.geometryType())
-        category = QgsRendererCategory(value, symbol, str(value))
-        category_list.append(category)
-
-    renderer = QgsCategorizedSymbolRenderer(field_name, category_list)
+    fieldName = 'Total Tons_Total Import'
+    fieldIndex = regions.fields().indexFromName(fieldName)
+    uniqueValues = regions.uniqueValues(fieldIndex)
+    
+    vals = []
+    for f in regions.getFeatures():
+        vals.append(f[fieldName])
+    # print(vals)
+    
+    colors = ['#b7f7f3', '#8ce1e8', '#5ccbdf', '#14b5d8', '#009dd2', '#0086ca', '#006dc0', '#0054b2', '#003a9f', '#001b87']
+    lower = sorted(vals)[0]
+    upper = sorted(vals)[-1]
+    step = (upper-lower)/len(colors)
+    
+    catList = []
+    for color in colors:
+        cat = [lower, lower+step, color]
+        sym = QgsSymbol.defaultSymbol(regions.geometryType())
+        sym.setColor(QColor(cat[2]))
+        rng = QgsRendererRange(cat[0], cat[1], sym, '{0:.1f}-{1:.1f}'.format(cat[0], cat[1]))
+        catList.append(rng)
+        lower = (lower+step)+0.1
+        
+    renderer = QgsGraduatedSymbolRenderer(fieldName, catList)
     regions.setRenderer(renderer)
     regions.triggerRepaint()
+    
+# =============================================================================
+#     # Give each FAF zone a different color
+#     field_name = 'FAF_Zone_D'
+#     field_index = regions.fields().indexFromName(field_name)
+#     unique_values = regions.uniqueValues(field_index)
+# 
+#     category_list = []
+#     for value in unique_values:
+#         symbol = QgsSymbol.defaultSymbol(regions.geometryType())
+#         category = QgsRendererCategory(value, symbol, str(value))
+#         category_list.append(category)
+# 
+#     renderer = QgsCategorizedSymbolRenderer(field_name, category_list)
+#     regions.setRenderer(renderer)
+#     regions.triggerRepaint()
+# =============================================================================
 
 
-def loadNetworkLinks(st):
+def loadNetworkLinks(st=None):
     ''' 
     Load and process FAF5 network links 
     '''
@@ -70,10 +121,11 @@ def loadNetworkLinks(st):
         QgsProject.instance().addMapLayer(links)
         
     # Apply a filter to only show links in 'State'
-    links.setSubsetString(f'STATE LIKE {st}')
+    if st is not None: links.setSubsetString(st)
+    return links
     
     
-def loadHighways():
+def highways(links):
     '''
     Load and process FAF5 highway assignments
     '''
@@ -93,21 +145,7 @@ def loadHighways():
     # Add the highway assignments to the QGIS project
     if not QgsProject.instance().mapLayersByName('Refactored'):
         QgsProject.instance().addMapLayer(assignments)
-    
-
-def main():
-    states = ['CA', 'NV']
-    st = ''
-    for i in range(len(states)):
-        st += '\'%' + states[i] + '%\''
-        if i < len(states)-1:
-            st += ' AND '
-    
-    loadRegions(st)
-    loadNetworkLinks(st)
-    loadHighways()
-    
-
+        
     ################## Join the FAF5 assignments to the highway networks via the highway link IDs ##################
     #assignments = iface.activeLayer()
 
@@ -154,6 +192,30 @@ def main():
 
     # Apply the graduated symbol renderer defined above to the network links
     links.setRenderer(renderer)
-    ################################################################################################################
+    
 
+def loadFilteredData():
+    pass
+
+
+def regionFilter(key, states):
+    st = ''
+    for i in range(len(states)):
+        st += key + ' LIKE ' + '\'%' + states[i] + '%\''
+        if i < len(states)-1:
+            st += ' OR '
+            
+    return st
+
+def main():
+    states = ['Maine', 'NH', 'MA', 'Vermont']    
+    # regionFilter('FAF_Zone_D', states)
+    loadRegions()
+    loadFilteredData()
+    
+    # regionFilter('STATE', states)
+    links = loadNetworkLinks()
+    highways(links)
+    
+    
 main()
