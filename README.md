@@ -8,17 +8,16 @@ Users can interact with QGIS either through the user interface ([link to user ma
 2. Complete a first round of the analysis with the UI
 3. Encode the analysis with the python API to make it reproducible and configurable. 
 
-
 ## Pre-requisites
 * An installation of QGIS: [link to downloads for Mac, Windows and Linux](https://qgis.org/en/site/forusers/download.html)
+* python3
 
-## How to run python scripts
-Python scripts to encode analysis steps are stored in the [source](./source) directory. To run a script in QGIS:
-1. Open up the QGIS GUI and press the `New Project` option (white page on the top left)
-2. Select `Plugins --> Python Console` to open the python console.
-3. Press the `Show Editor` option (white script icon at the top) to open an empty python script. 
-4. Press the `Open Script...` option (yellow folder icon in the menu above the empty python script) to open an existing script. 
-5. Execute the script by pressing the `Run Script` option (green play button in the menu above the python script). 
+## Setup
+
+Install python requirements
+```bash
+pip install -r requirements.txt
+```
 
 ## Downloading the data
 
@@ -56,6 +55,34 @@ unzip FAF5_regional_od.zip -d FAF5_regional_flows_origin_destination
 rm FAF5_regional_od.zip
 ```
 
+## How to run python scripts
+
+Python scripts to encode analysis steps are stored in the [source](./source) directory. 
+
+### Running scripts in QGIS
+
+The following scripts should be run in QGIS: 
+* [AnalyzeFAFData.py](./source/AnalyzeFAFData.py)
+* [PlotWithQGIS.py](./source/PlotWithQGIS.py)
+
+To run a script in QGIS:
+1. Open up the QGIS GUI and press the `New Project` option (white page on the top left)
+2. Select `Plugins --> Python Console` to open the python console.
+3. Press the `Show Editor` option (white script icon at the top) to open an empty python script. 
+4. Press the `Open Script...` option (yellow folder icon in the menu above the empty python script) to open an existing script. 
+5. Execute the script by pressing the `Run Script` option (green play button in the menu above the python script). 
+
+### Running scripts outside of QGIS
+The following scripts should be run outside of QGIS:
+* [Point2PointFAF.py](./source/Point2PointFAF.py)
+
+Scripts run outside of QGIS should be executed directly with the python installation that was used to install the requirements in `requirements.txt`(./requirements.txt). For example:
+
+```bash
+cd source
+python Point2PointFAF.py
+```
+
 ## Analyzing highway assignments
 
 The script [AnalyzeFAFData.py](./source/AnalyzeFAFData.py) encodes an initial geospatial analysis of the FAF5 highway network assignment data. Follow the [instructions above](#how-to-run-python-scripts) to execute the script in an empty project. Currently, the result should look something like this:
@@ -63,3 +90,16 @@ The script [AnalyzeFAFData.py](./source/AnalyzeFAFData.py) encodes an initial ge
 ![Highway network assigmments in Texas](./images/texas_highway_Assignments.png "Texas Highway Network Assignments")
 
 Currently, the script reads in shapefiles for the FAF5 network links and FAF5 regions for the entire US, and applies a filter to visualize only the state of Texas (mainly for tractability). It then reads in the highway network assignments for total trucking flows, joins the total flows for 2022 (all commodities combined) with the FAF5 network links via their common link IDs, and visualizes the network links as lines on the map, with the line width of each link weighted by its total annual freight flow (in tons). 
+
+## Creating and plotting total domestic imports and exports
+
+The script [Point2PointFAF.py](./source/Point2PointFAF.py) uses the csv data in the FAF5 regional database to calculate the total domestic imports and exports of all commodities to and from all FAF5 regions, and merged this data with the FAF5 shapefiles. To run:
+
+```bash
+cd source
+python Point2PointFAF.py
+```
+
+The script [PlotWithQGIS.py](./PlotWithQGIS.py) then plots the total imports and exports for all of the FAF5 regions (excluding Alaska and Hawaii) as colormaps, and saves them as PDF files. Executing [PlotWithQGIS.py](./PlotWithQGIS.py) in the QGIS GUI (after first running [Point2PointFAF.py](./source/Point2PointFAF.py)) should produce output PDF files in the [layouts](./layouts) directory, which look something like:
+
+
