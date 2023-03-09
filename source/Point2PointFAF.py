@@ -104,10 +104,12 @@ def readData(cols=None):
     '''
     dataPath = f'{top_dir}/data/FAF5_regional_flows_origin_destination/FAF5.4.1_2018-2020.csv'
     data = pd.read_csv(dataPath)
+    #data = pd.read_csv(dataPath, nrows=10)  # DMM: This line is just for testing/development, to reduce processing time
     
     if cols is not None: data = data[cols]
     
     return data
+
 
 # @jit(target_backend='cuda')
 def processData(dest):
@@ -147,18 +149,71 @@ def processData(dest):
     dest['Total Import'] = tons_in # pd.Series(np.rint(tons_in).astype(int)).astype(str).str.zfill(9)
     dest['Total Export'] = tons_out
     dest['Numeric Label'] = dest['Numeric Label'].apply(str).apply(lambda x: x.zfill(3))
+    dest = dest.rename(columns={'Numeric Label': 'FAF_Zone'})  # DMM: Renaming for consistency with shapefile
     return dest
+
+def mergeShapefile(dest, shapefile_path):
+    '''
+    Merges the shapefile containing FAF5 region borders with the csv file containing total tonnage
+    calculated in processData()
+
+    Parameters
+    ----------
+    dest (pd.DataFrame): A pandas dataframe containing (currently) all domestic regions from the FAF5_metadata, along
+    with total tonnages calculated in processData()
+
+    shapefile_path (string): Path to the shapefile to be joined with the dataframe
+
+    Returns
+    -------
+    merged_Dataframe (pd.DataFrame): Joined dataframe
+    '''
+    shapefile = gpd.read_file(shapefile_path)
+    merged_dataframe = shapefile.merge(dest, on='FAF_Zone', how='left')
+    return merged_dataframe
 
 
 def saveFile(file, name):
     savePath = f'{top_dir}/data/'
     file.to_csv(savePath + f'{name}.csv', index=False)
     print(f'file has been saved as a csv')
-            
+
+def saveShapefile(file, name):
+    '''
+    Saves a pandas dataframe as a shapefile
+
+    Parameters
+    ----------
+    file (pd.DataFrame): Dataframe to be saved as a shapefile
+
+    name (string): Filename to the shapefile save to (must end in .shp)
+
+    Returns
+    -------
+    None
+    '''
+    # Make sure the filename ends in .shp
+    if not name.endswith('.shp'):
+        print("ERROR: Filename for shapefile must end in '.shp'. File will not be saved.")
+        exit()
+    # Make sure the full directory path to save to exists, otherwise create it
+    dir = os.path.dirname(name)
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    file.to_file(name)
 
 def main ():
     # Load FAF5 Regional Metadata
     dest = readMeta()
-    saveFile(processData(dest), 'total_tons')
-    
+    dest_with_tonnage = processData(dest)
+    saveFile(dest_with_tonnage, 'total_tons_short')
+
+    # DMM: To save time for testing and development, can read in saved csv with the following three lines
+    # and comment out above two lines
+    #dest = pd.read_csv(f'{top_dir}/data/total_tons.csv', dtype=object)
+    #dest['Total Import'] = dest['Total Import'].astype('float')
+    #dest['Total Export'] = dest['Total Export'].astype('float')
+
+    merged_dataframe = mergeShapefile(dest_with_tonnage, f'{top_dir}/data/FAF5_regions/Freight_Analysis_Framework_(FAF5)_Regions.shp')
+    saveShapefile(merged_dataframe, f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp')
 main()
