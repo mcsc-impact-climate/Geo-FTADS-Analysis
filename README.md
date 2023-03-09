@@ -9,8 +9,23 @@ Users can interact with QGIS either through the user interface ([link to user ma
 3. Encode the analysis with the python API to make it reproducible and configurable. 
 
 
-## Pre-requisites
-* An installation of QGIS: [link to downloads for Mac, Windows and Linux](https://qgis.org/en/site/forusers/download.html)
+## Setup
+
+1. Set up conda environment with python 3.9
+```bash
+conda create -n faf5_env pip python=3.9
+conda activate faf5_env
+```
+
+2. Install python requirements
+```bash
+pip install -r requirements.txt
+```
+
+3. Install qgis with conda
+```bash
+conda install -c conda-forge qgis
+```
 
 ## How to run python scripts
 Python scripts to encode analysis steps are stored in the [source](./source) directory. To run a script in QGIS:
