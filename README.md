@@ -100,4 +100,6 @@ cd source
 python Point2PointFAF.py
 ```
 
-The script [PlotWithQGIS.py](./PlotWithQGIS.py) then plots the total imports and exports for all of the FAF5 regions (excluding Alaska and Hawaii) as colormaps, and saves them as PDF files. Executing [PlotWithQGIS.py](./PlotWithQGIS.py) in the QGIS GUI (after first running [Point2PointFAF.py](./source/Point2PointFAF.py)) should produce output PDF files in the [layouts](./layouts) directory.
+The script [PlotWithQGIS.py](./PlotWithQGIS.py) then plots the total imports and exports for all of the FAF5 regions (excluding Alaska and Hawaii) as colormaps, and saves them as PDF files. Executing [PlotWithQGIS.py](./PlotWithQGIS.py) in the QGIS GUI (after first running [Point2PointFAF.py](./source/Point2PointFAF.py)) should produce output PDF files in the [layouts](./layouts) directory, which look something like:
+
+
