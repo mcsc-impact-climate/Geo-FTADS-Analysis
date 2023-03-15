@@ -11,8 +11,15 @@ Users can interact with QGIS either through the user interface ([link to user ma
 ## Pre-requisites
 * An installation of QGIS: [link to downloads for Mac, Windows and Linux](https://qgis.org/en/site/forusers/download.html)
 * python3
+* Access to the [sesame-core](https://github.mit.edu/sesame/sesame-core) repository
 
 ## Setup
+
+Clone this repo, including submodules. **Note:** You will need access to the [sesame-core](https://github.mit.edu/sesame/sesame-core) repository in order to clone it as a submodule. 
+
+```bash
+git clone --recurse-submodules git@github.com:cubicalknight/FAF5-Analysis.git
+```
 
 Install python requirements
 ```bash
