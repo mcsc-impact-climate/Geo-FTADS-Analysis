@@ -2,3 +2,4 @@ data/*
 !data/GREET_LCA
 .DS_Store
 *~
+plots/*

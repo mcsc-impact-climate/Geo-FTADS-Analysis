@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+
+"""
+Created on Mon Mar 27 10:28:00 2023
+@author: danikam
+"""
+
+# Import needed modules
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -7,9 +15,13 @@ import matplotlib
 matplotlib.rc('xtick', labelsize=20)
 matplotlib.rc('ytick', labelsize=20)
 
+# Conversion from pounds to tons
 LB_TO_TONS = 1/2000.
 
+# List of weight class names used by GREET, from heaviest to lightest
 GREET_classes = ['Heavy Heavy-duty', 'Medium Heavy-duty', 'Light Heavy-duty', 'Light-duty']
+
+# Dictionary to map fuel integer identifiers in VIUS survey to fuel names
 fuels_dict = {
     1: 'Gasoline',
     2: 'Diesel',
@@ -28,6 +40,8 @@ fuels_dict = {
     15: 'Not reported',
     16: 'Not applicable',
 }
+
+# Dictionary to map string identifiers of percentage of ton-miles spent carrying a given commodity to human-readable commodity names
 pretty_commodities_dict = {
     'PALCOHOLIC': 'Alcoholic Beverages',
     'PANIMALFEED': 'Animal Feed',
@@ -72,6 +86,7 @@ pretty_commodities_dict = {
     'PRECYCLABLE': 'Recyclable Products',
 }
 
+# Dictionary to map FAF5 commodity names to VIUS identifiers (including aggregation in some cases)
 FAF5_VIUS_commodity_map = {
     'Live animals/fish': {
         'VIUS': ['PLIVEANIMAL'],
@@ -240,6 +255,7 @@ FAF5_VIUS_commodity_map = {
     },
 }
 
+# Dictionary to map trip range windows used in FAF5 data to trip range windows in VIUS survey
 FAF5_VIUS_range_map = {
     'Below 100 miles': {
         'VIUS': ['TRIP0_50', 'TRIP051_100'],
@@ -263,20 +279,21 @@ FAF5_VIUS_range_map = {
     },
 }
 
+# Dictionary to coarsely map trip range windows used in FAF5 data to trip range windows in VIUS survey into two categories
 FAF5_VIUS_range_map_coarse = {
     'Below 250 miles': {
         'VIUS': ['TRIP0_50', 'TRIP051_100', 'TRIP101_200'],
         'FAF5': ['Below 100', '100 - 249'],
         'short name': 'below_250'
     },
-    '250 to 500 miles': {
+    'Over 250 miles': {
         'VIUS': ['TRIP201_500', 'TRIP500MORE'],
         'FAF5': ['250 - 499', '500 - 749', '750 - 999', '1,000 - 1,499', '1,500 - 2,000', 'Over 2,000'],
         'short name': 'over_250'
     },
 }
 
-
+# Dictionary to map string identifiers of trip range used in VIUS data to human-readable descriptions
 pretty_range_dict = {
     'TRIP0_50': 'Range <= 50 miles',
     'TRIP051_100': '51 miles <= Range <= 100 miles',
@@ -285,6 +302,7 @@ pretty_range_dict = {
     'TRIP500MORE': 'Range >= 501 miles'
 }
 
+# Dictionary to map integer identifiers of administrative states used in the VIUS data to state names
 states_dict = {
     1: 'Alabama',
     2: 'Alaska',
@@ -346,8 +364,22 @@ top_dir = os.path.dirname(source_dir)
 
 ######################################### Functions defined here ##########################################
 
-# Make a new dataframe with commodity columns aggregated according to the rules defined in the FAF5_VIUS_commodity_map
 def make_aggregated_df(df, range_map=FAF5_VIUS_range_map):
+    '''
+    Makes a new dataframe with trip range and commodity columns aggregated according to the rules defined in the FAF5_VIUS_commodity_map and the provided range_map
+        
+    Parameters
+    ----------
+    df (pd.DataFrame): A pandas dataframe containing the VIUS data
+    
+    range_map (dictionary): A python dictionary containing the mapping of FAF5 trip ranges to VIUS trip ranges. This is used to determine how to aggregate the trip range columns in the VIUS dataframe to produce the new trip range colunns in the output dataframe.
+
+    Returns
+    -------
+    df_agg (pd.DataFrame): A pandas dataframe containing the VIUS data, with additional columns to: 1) contain percentages of ton-miles carried over aggregated trip range, and 2) contain percentages of loaded ton-miles spent carrying aggregated commodity categories.
+        
+    NOTE: None.
+    '''
     
     # Make a deep copy of the VIUS dataframe
     df_agg = df.copy(deep=True)
@@ -361,11 +393,12 @@ def make_aggregated_df(df, range_map=FAF5_VIUS_range_map):
             i_comm = 0
             for vius_commodity in vius_commodities:
                 if i_comm == 0:
-                    df_agg_column = df[vius_commodity]
+                    df_agg_column = df[vius_commodity].fillna(0)
                 else:
-                    df_agg_column += df[vius_commodity]
+                    df_agg_column += df[vius_commodity].fillna(0)
                 i_comm += 1
-            df_agg[commodity] = df_agg_column
+            df_agg[commodity] = df_agg_column.replace(0, float('NaN'))
+
             
     # Loop through all the ranges in the VIUS dataframe and combine them as needed to produce the aggregated mapping defined in the FAF5_VIUS_range_map
     for truck_range in range_map:
@@ -376,20 +409,28 @@ def make_aggregated_df(df, range_map=FAF5_VIUS_range_map):
             i_range = 0
             for vius_range in vius_ranges:
                 if i_range == 0:
-                    df_agg_column = df[vius_range]
+                    df_agg_column = df[vius_range].fillna(0)
                 else:
-                    df_agg_column += df[vius_range]
+                    df_agg_column += df[vius_range].fillna(0)
                 i_range += 1
-            df_agg[truck_range] = df_agg_column
-                    
-#    # Remove the columns with the original commodity names to save space
-#    for column in df:
-#        if column.startswith('P') and not column.startswith('P_'):
-#            df_agg = df_agg.drop(columns=column)
+            df_agg[truck_range] = df_agg_column.replace(0, float('NaN'))
+                
     return df_agg
 
-# Add a column to the dataframe that specifies the GREET truck class
 def add_GREET_class(df):
+    '''
+    Adds a column to the dataframe that specifies the GREET truck class, determined by a mapping of averaged loaded gross vehicle weight to weight classes
+        
+    Parameters
+    ----------
+    df (pd.DataFrame): A pandas dataframe containing the VIUS data
+
+    Returns
+    -------
+    df: The pandas dataframe containing the VIUS data, with an additional column containing the GREET class of each truck
+        
+    NOTE: None.
+    '''
     df['GREET_CLASS'] = df.copy(deep=False)['WEIGHTAVG']
     
     df.loc[df['WEIGHTAVG'] >= 33000, 'GREET_CLASS'] = 1
@@ -399,6 +440,33 @@ def add_GREET_class(df):
     return df
     
 def get_annual_ton_miles(df, cSelection, cRange, cCommodity, truck_range, commodity, fuel='all', greet_class='all'):
+    '''
+    Calculates the annual ton-miles that each truck (row) in the VIUS dataframe satisfying requirements defined by cSelection carries the given commodity over the given trip range burning the given fuel
+        
+    Parameters
+    ----------
+    df (pd.DataFrame): A pandas dataframe containing the VIUS data
+    
+    cSelection (pd.Series): Boolean criteria to apply basic selection to rows of the input dataframe
+    
+    cRange (pd.Series): Boolean criterion to select samples that report carrying out some percentage of loaded trips covering a range specifed by parameter truck_range
+    
+    cCommodity (pd.Series): Boolean criterion to select samples that report carrying out some percentage of loaded trips carrying the commodity given by parameter commodity
+    
+    truck_range (string): Name of the column of VIUS data containing the percentage of ton-miles carried over the given trip range
+    
+    commodity (string): Name of the column of VIUS data containing the percentage of ton-miles carrying the given commodity
+    
+    fuel (string): Name of the column of the VIUS data containing an integier identifier of the fuel used by the truck
+    
+    greet_class (string): Name of the column of the VIUS data containing an integer identifier of the GREET truck class
+
+    Returns
+    -------
+    df: The pandas dataframe containing the VIUS data, with an additional column containing the GREET class of each truck
+        
+    NOTE: None.
+    '''
     # Add the given fuel to the selection
     if not fuel=='all':
         cSelection = (df['FUEL'] == fuel) & cSelection
@@ -428,6 +496,19 @@ def get_annual_ton_miles(df, cSelection, cRange, cCommodity, truck_range, commod
     return annual_ton_miles
     
 def get_commodity_pretty(commodity='all'):
+    '''
+    Gets a human-readable name of the input commodity column name, using the mapping specified in the dictionary pretty_commodities_dict
+        
+    Parameters
+    ----------
+    commodity (string): Column name of the given commodity
+
+    Returns
+    -------
+    commodity_pretty (string): Human-readable version of the input column name
+        
+    NOTE: None.
+    '''
     if commodity == 'all':
         commodity_pretty = 'All commodities'
     else:
@@ -435,6 +516,19 @@ def get_commodity_pretty(commodity='all'):
     return commodity_pretty
     
 def get_region_pretty(region='US'):
+    '''
+    Gets a human-readable name of the input column name associated with the truck's administrative state or region (a.k.a. region), using the mapping specified in the dictionary states_dict
+        
+    Parameters
+    ----------
+    region (string): Column name of the given administrative state or region
+
+    Returns
+    -------
+    region_pretty (string): Human-readable version of the input column name
+        
+    NOTE: None.
+    '''
     if region == 'US':
         region_pretty = 'US'
     else:
@@ -442,14 +536,39 @@ def get_region_pretty(region='US'):
     return region_pretty
     
 def get_range_pretty(truck_range='all'):
+    '''
+    Gets a human-readable name of the input column name associated with the truck's trip range window, using the mapping specified in the dictionary pretty_range_dict
+        
+    Parameters
+    ----------
+    truck_range (string): Column name of the given trip range window
+
+    Returns
+    -------
+    range_pretty (string): Human-readable version of the input column name
+        
+    NOTE: None.
+    '''
     if truck_range == 'all':
         range_pretty = 'All Ranges'
     else:
         range_pretty = pretty_range_dict[truck_range]
     return range_pretty
 
-# Print out the number of samples of each commodity in the VIUS, as well as the total number of commodities
 def print_all_commodities(df):
+    '''
+    Prints out the number of samples of each commodity in the VIUS, as well as the total number of commodities
+        
+    Parameters
+    ----------
+    df (pd.DataFrame): A pandas dataframe containing the VIUS data
+
+    Returns
+    -------
+    None
+        
+    NOTE: None.
+    '''
     n_comm=0
     for column in df:
         if column.startswith('P') and not column.startswith('P_'):
@@ -458,8 +577,20 @@ def print_all_commodities(df):
             n_comm += 1
     print(f'Total number of commodities: {n_comm}\n\n')
     
-# Print out the number of samples for each state in the VIUS, as well as the total number of samples
 def print_all_states(df):
+    '''
+    Prints out the number of samples for each state in the VIUS, as well as the total number of samples
+        
+    Parameters
+    ----------
+    df (pd.DataFrame): A pandas dataframe containing the VIUS data
+
+    Returns
+    -------
+    None
+        
+    NOTE: None.
+    '''
     n_samples=0
     for state in range(1,57):
         if not state in states_dict: continue
@@ -469,9 +600,40 @@ def print_all_states(df):
         n_samples += n_state
     print(f'total number of samples: {n_samples}\n\n')
     
-# Calculate and plot the distribution of vehicle types for each range,
-# weighted by the average annual ton-miles driven for the given range
 def plot_greet_class_hist(df, commodity='all', truck_range='all', region='US', range_threshold=0, commodity_threshold=0, set_commodity_title='default', set_commodity_save='default', set_range_title='default', set_range_save='default', aggregated=False):
+    '''
+    Calculates and plots the distributions of GREET class and fuel type for different commodities ('commmodity' parameter), trip range windows ('truck_range' parameter), and administrative states ('region' parameter). Samples used to produce the distributions are weighted by the average annual ton-miles reported carrying the given 'commodity' over the given 'truck_range', for the given administrative 'region'.
+        
+    Parameters
+    ----------
+    df (pd.DataFrame): A pandas dataframe containing the VIUS data
+    
+    commodity (string): Name of the column of VIUS data containing the percentage of ton-miles carrying the given commodity
+
+    truck_range (string): Name of the column of VIUS data containing the percentage of ton-miles carried over the given trip range
+    
+    region (string): Name of the column of VIUS data containing boolean data to indicate the truck's administrative state
+    
+    range_threshold (float): Threshold percentage of ton-miles carried over the given range required to include the a truck in the analysis, in cases where the truck_range is not 'all'
+    
+    commodity_threshold (float): Threshold percentage of ton-miles carried over the given range required to include the a truck in the analysis, in cases where the commodity is not 'all'
+    
+    set_commodity_title (string): Allows the user to set the human-readable name for the plotted commodity to be shown in the plot title
+    
+    set_commodity_save (string): Allows the user to set the keyword for the plotted commodity to be included in the filenames of the saved plots
+    
+    set_commodity_title (string): Allows the user to set the human-readable name for the plotted trip range to be shown in the plot title
+    
+    set_range_save (string): Allows the user to set the keyword for the plotted trip range to be included in the filenames of the saved plots
+    
+    aggregated (boolean): If set to True, adds an additional string '_aggregated' to the filenames of the saved plots to indicate that aggregation has been done to obtain common commodity and/or trip range definitions between FAF5 and VIUS data
+    
+    Returns
+    -------
+    None
+        
+    NOTE: None.
+    '''
 
     region_pretty = get_region_pretty(region)
     
@@ -551,6 +713,39 @@ def plot_greet_class_hist(df, commodity='all', truck_range='all', region='US', r
     plt.close()
     
 def plot_age_hist(df, commodity='all', truck_range='all', region='US', range_threshold=0, commodity_threshold=0, set_commodity_title='default', set_commodity_save='default', set_range_title='default', set_range_save='default', aggregated=False):
+    '''
+    Calculates and plots the distributions of truck age and GREET truck class for different commodities ('commmodity' parameter), trip range windows ('truck_range' parameter), and administrative states ('region' parameter). Samples used to produce the distributions are weighted by the average annual ton-miles reported carrying the given 'commodity' over the given 'truck_range', for the given administrative 'region'.
+        
+    Parameters
+    ----------
+    df (pd.DataFrame): A pandas dataframe containing the VIUS data
+    
+    commodity (string): Name of the column of VIUS data containing the percentage of ton-miles carrying the given commodity
+
+    truck_range (string): Name of the column of VIUS data containing the percentage of ton-miles carried over the given trip range
+    
+    region (string): Name of the column of VIUS data containing boolean data to indicate the truck's administrative state
+    
+    range_threshold (float): Threshold percentage of ton-miles carried over the given range required to include the a truck in the analysis, in cases where the truck_range is not 'all'
+    
+    commodity_threshold (float): Threshold percentage of ton-miles carried over the given range required to include the a truck in the analysis, in cases where the commodity is not 'all'
+    
+    set_commodity_title (string): Allows the user to set the human-readable name for the plotted commodity to be shown in the plot title
+    
+    set_commodity_save (string): Allows the user to set the keyword for the plotted commodity to be included in the filenames of the saved plots
+    
+    set_commodity_title (string): Allows the user to set the human-readable name for the plotted trip range to be shown in the plot title
+    
+    set_range_save (string): Allows the user to set the keyword for the plotted trip range to be included in the filenames of the saved plots
+    
+    aggregated (boolean): If set to True, adds an additional string '_aggregated' to the filenames of the saved plots to indicate that aggregation has been done to obtain common commodity and/or trip range definitions between FAF5 and VIUS data
+    
+    Returns
+    -------
+    None
+        
+    NOTE: None.
+    '''
 
     region_pretty = get_region_pretty(region)
     
@@ -620,10 +815,6 @@ def plot_age_hist(df, commodity='all', truck_range='all', region='US', range_thr
         plt.bar(range(17), n, width = 0.4, alpha=1, zorder=1, label=GREET_classes[i_class-1], bottom=bottom)
         bottom += n
         
-    # Also calculate the mean (+/-stdev) age and report it on the plot
-#    mean_age = np.mean(df[cSelection]['ACQUIREYEAR']-1)
-#    std_age = np.std(df[cSelection]['ACQUIREYEAR']-1)
-#    plt.text(0.6, 0.7, f'mean age: %.1f±%.1f years'%(mean_age, std_age), transform=fig.axes[0].transAxes, fontsize=13)
     plt.legend(fontsize=18)
     
     region_save = region_pretty.replace(' ', '_')
@@ -639,7 +830,39 @@ def plot_age_hist(df, commodity='all', truck_range='all', region='US', range_thr
     plt.close()
     
 def plot_payload_hist(df, commodity='all', truck_range='all', region='US', range_threshold=0, commodity_threshold=0, set_commodity_title='default', set_commodity_save='default', set_range_title='default', set_range_save='default', aggregated=False, greet_class='all'):
+    '''
+    Calculates and plots the distributions of truck payload for different commodities ('commmodity' parameter), trip range windows ('truck_range' parameter), and administrative states ('region' parameter). Samples used to produce the distributions are weighted by the average annual ton-miles reported carrying the given 'commodity' over the given 'truck_range', for the given administrative 'region'.
+        
+    Parameters
+    ----------
+    df (pd.DataFrame): A pandas dataframe containing the VIUS data
+    
+    commodity (string): Name of the column of VIUS data containing the percentage of ton-miles carrying the given commodity
 
+    truck_range (string): Name of the column of VIUS data containing the percentage of ton-miles carried over the given trip range
+    
+    region (string): Name of the column of VIUS data containing boolean data to indicate the truck's administrative state
+    
+    range_threshold (float): Threshold percentage of ton-miles carried over the given range required to include the a truck in the analysis, in cases where the truck_range is not 'all'
+    
+    commodity_threshold (float): Threshold percentage of ton-miles carried over the given range required to include the a truck in the analysis, in cases where the commodity is not 'all'
+    
+    set_commodity_title (string): Allows the user to set the human-readable name for the plotted commodity to be shown in the plot title
+    
+    set_commodity_save (string): Allows the user to set the keyword for the plotted commodity to be included in the filenames of the saved plots
+    
+    set_commodity_title (string): Allows the user to set the human-readable name for the plotted trip range to be shown in the plot title
+    
+    set_range_save (string): Allows the user to set the keyword for the plotted trip range to be included in the filenames of the saved plots
+    
+    aggregated (boolean): If set to True, adds an additional string '_aggregated' to the filenames of the saved plots to indicate that aggregation has been done to obtain common commodity and/or trip range definitions between FAF5 and VIUS data
+    
+    Returns
+    -------
+    None
+        
+    NOTE: None.
+    '''
     region_pretty = get_region_pretty(region)
     
     if set_commodity_title == 'default':
@@ -742,7 +965,19 @@ df_vius = pd.read_csv(f'{top_dir}/data/VIUS_2002/bts_vius_2002_data_items.csv')
 df_vius = add_GREET_class(df_vius)
 
 df_agg = make_aggregated_df(df_vius)
+
+
 df_agg_coarse_range = make_aggregated_df(df_vius, range_map=FAF5_VIUS_range_map_coarse)
+
+## Basic sanity checks to make sure sum of aggregated column is equal to combined sum of its constituent columns
+#df_agg_wood_sum = np.sum(df_agg['Wood products'])
+#df_vius_wood_sum = np.sum(df_vius['PPAPER']) + np.sum(df_vius['PNEWSPRINT']) + np.sum(df_vius['PPRINTPROD'])
+#print(f'Sum of wood product percentages from df_agg: {df_agg_wood_sum}\nSum of wood product percentages from df_vius: {df_vius_wood_sum}')
+#
+#df_agg_coarse_below_250 = np.sum(df_agg_coarse_range['Below 250 miles'])
+#df_agg_below_250 = np.sum(df_agg['Below 100 miles']) + np.sum(df_agg['100 to 250 miles'])
+#df_vius_below_250 = np.sum(df_vius['TRIP0_50']) + np.sum(df_vius['TRIP051_100']) + np.sum(df_vius['TRIP101_200'])
+#print(f'Sum of trip range percentages below 250 miles from df_agg_coarse_range: {df_agg_coarse_below_250}\nSum of trip range percentages below 250 miles from df_agg: {df_agg_below_250}\nSum of trip range percentages below 250 miles from df_vius: {df_vius_below_250}')
 
 ####################### Informational printouts #######################
 ## Print out the total number of samples of each commodity, and the total number of commodities
@@ -759,16 +994,15 @@ df_agg_coarse_range = make_aggregated_df(df_vius, range_map=FAF5_VIUS_range_map_
 
 
 ################### GREET truck class distributions ###################
-## Make a distribution of GREET truck class for all regions, commodities, and vehicle range
-#plot_greet_class_hist(df_vius, commodity='all', truck_range='all', region='US', range_threshold=0, commodity_threshold=0)
+
+#------- Without aggregated commodities/ranges -------#
+
+# Make a distribution of GREET truck class for all regions, commodities, and vehicle range
+plot_greet_class_hist(df_vius, commodity='all', truck_range='all', region='US', range_threshold=0, commodity_threshold=0)
 
 ## Make distributions of GREET truck class and fuel types for each commodity
 #for commodity in pretty_commodities_dict:
 #    plot_greet_class_hist(df_vius, commodity=commodity, truck_range='all', region='US', range_threshold=0, commodity_threshold=0)
-    
-## Make distributions of GREET truck class and fuel types for each aggregated commodity
-#for commodity in FAF5_VIUS_commodity_map:
-#    plot_greet_class_hist(df_agg, commodity=commodity, truck_range='all', region='US', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True)
 
 ## Make distributions of GREET truck class and fuel types for each state
 #for state in states_dict:
@@ -779,51 +1013,68 @@ df_agg_coarse_range = make_aggregated_df(df_vius, range_map=FAF5_VIUS_range_map_
 #    for commodity in pretty_commodities_dict:
 #        plot_greet_class_hist(df_vius, region=state, commodity=commodity)
 
-## Make distributions of GREET truck class and fuel types for each state and aggregated commodity
-#for state in states_dict:
-#    for commodity in FAF5_VIUS_commodity_map:
-#        plot_greet_class_hist(df_agg, commodity=commodity, truck_range='all', region=state, range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True)
-
-
 ## Make distributions of GREET truck class with respect to both commodity and range
 #for truck_range in pretty_range_dict:
 #    for commodity in pretty_commodities_dict:
 #        plot_greet_class_hist(df_vius, commodity=commodity, truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0)
+
+## Make distributions of GREET truck class and fuel types for each vehicle range
+#for truck_range in pretty_range_dict:
+#    plot_greet_class_hist(df_vius, commodity='all', truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0)
+
+#-----------------------------------------------------#
+    
+#-------- With aggregated commodities/ranges ---------#
+
+## Make distributions of GREET truck class and fuel types for each aggregated commodity
+#for commodity in FAF5_VIUS_commodity_map:
+#    plot_greet_class_hist(df_agg, commodity=commodity, truck_range='all', region='US', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True)
+
+## Make distributions of GREET truck class and fuel types for each state and aggregated commodity
+#for state in states_dict:
+#    for commodity in FAF5_VIUS_commodity_map:
+#        plot_greet_class_hist(df_agg, commodity=commodity, truck_range='all', region=state, range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True)
         
 ## Make distributions of GREET truck class with respect to both aggregated commodity and range
 #for truck_range in FAF5_VIUS_range_map:
 #    for commodity in FAF5_VIUS_commodity_map:
 #        plot_greet_class_hist(df_agg, commodity=commodity, truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = FAF5_VIUS_commodity_map[commodity]['short name'], set_range_title = truck_range, set_range_save = FAF5_VIUS_range_map[truck_range]['short name'], aggregated=True)
-#
+
 ## Make distributions of GREET truck class with respect to both aggregated commodity and coarsely-aggregated range
 #for truck_range in FAF5_VIUS_range_map_coarse:
 #    for commodity in FAF5_VIUS_commodity_map:
 #        plot_greet_class_hist(df_agg_coarse_range, commodity=commodity, truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = FAF5_VIUS_commodity_map[commodity]['short name'], set_range_title = truck_range, set_range_save = FAF5_VIUS_range_map_coarse[truck_range]['short name'], aggregated=True)
-
-## Make distributions of GREET truck class and fuel types for each vehicle range
-#for truck_range in pretty_range_dict:
-#    plot_greet_class_hist(df_vius, commodity='all', truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0)
     
 ## Make distributions of GREET truck class and fuel types for each aggregated vehicle range
 #for truck_range in FAF5_VIUS_range_map:
 #    plot_greet_class_hist(df_agg, commodity='all', truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0, set_range_title = truck_range, set_range_save = FAF5_VIUS_range_map[truck_range]['short name'], aggregated=True)
+
+#-----------------------------------------------------#
+
 #######################################################################
 
 ################### Truck age distributions ###########################
+
+#------- Without aggregated commodities/ranges -------#
+
 ## Make distributions of truck age for all regions, commodities, and vehicle range
 #plot_age_hist(df_vius, region='US', commodity='all', truck_range='all', range_threshold=0, commodity_threshold=0)
 #
 ## Make distributions of truck age and GREET class for each commodity
 #for commodity in pretty_commodities_dict:
 #    plot_age_hist(df_vius, region='US', commodity=commodity, truck_range='all', range_threshold=0, commodity_threshold=0)
+
+## Make distributions of truck age and GREET class for each range
+#for truck_range in pretty_range_dict:
+#    plot_age_hist(df_vius, region='US', commodity='all', truck_range=truck_range, range_threshold=0, commodity_threshold=0)
+
+#-----------------------------------------------------#
+
+#-------- With aggregated commodities/ranges ---------#
     
 ## Make distributions of truck age and GREET class for each aggregated commodity
 #for commodity in FAF5_VIUS_commodity_map:
 #    plot_age_hist(df_agg, region='US', commodity=commodity, truck_range='all', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True)
-#
-## Make distributions of truck age and GREET class for each range
-#for truck_range in pretty_range_dict:
-#    plot_age_hist(df_vius, region='US', commodity='all', truck_range=truck_range, range_threshold=0, commodity_threshold=0)
 
 ## Make distributions of truck age and GREET class for each aggregated range
 #for truck_range in FAF5_VIUS_range_map:
@@ -832,20 +1083,30 @@ df_agg_coarse_range = make_aggregated_df(df_vius, range_map=FAF5_VIUS_range_map_
 ## Make distributions of truck age and GREET class for each coarsely aggregated range
 #for truck_range in FAF5_VIUS_range_map_coarse:
 #    plot_age_hist(df_agg_coarse_range, commodity='all', truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0, set_range_title = truck_range, set_range_save = FAF5_VIUS_range_map_coarse[truck_range]['short name'], aggregated=True)
+
+#-----------------------------------------------------#
+
 #######################################################################
 
 ################## Truck payload distributions ########################
+
+#------- Without aggregated commodities/ranges -------#
 ## Make payload distributions of truck age for all regions, commodities, and vehicle range
 #plot_payload_hist(df_vius, region='US', commodity='all', truck_range='all', range_threshold=0, commodity_threshold=0)
 
+#-----------------------------------------------------#
+
+#------- Without aggregated commodities/ranges -------#
 ## Make distributions of payload for each aggregated commodity
 #for commodity in FAF5_VIUS_commodity_map:
 #    plot_payload_hist(df_agg, region='US', commodity=commodity, truck_range='all', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True)
-#
-# Make distributions of payload for each aggregated commodity and truck class
-for commodity in FAF5_VIUS_commodity_map:
-    for greet_class in range(1,5):
-        plot_payload_hist(df_agg, region='US', commodity=commodity, truck_range='all', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True, greet_class=greet_class)
+
+## Make distributions of payload for each aggregated commodity and truck class
+#for commodity in FAF5_VIUS_commodity_map:
+#    for greet_class in range(1,5):
+#        plot_payload_hist(df_agg, region='US', commodity=commodity, truck_range='all', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True, greet_class=greet_class)
+
+#-----------------------------------------------------#
 
 #######################################################################
 
