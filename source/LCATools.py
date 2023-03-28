@@ -234,12 +234,12 @@ def fillLcaDf(df_dict, top_dir, commodity='all'):
     '''
     
     # Emission rates (g / ton-mile) from GREET outputs
-    df_dict['truck'][commodity] = readGreetWtwTruck(f'{top_dir}/data/GREET_LCA/truck_combination_long_haul_diesel_wtw.csv')
-    df_dict['rail'][commodity] = readGreetWtwRail(f'{top_dir}/data/GREET_LCA/rail_freight_diesel_wtw.csv')
-    df_dict['ship'][commodity] = readGreetWthShip(f'{top_dir}/data/GREET_LCA/marine_msd_mdo_05sulfur_wth_feedstock.csv', f'{top_dir}/data/GREET_LCA/marine_msd_mdo_05sulfur_wth_conversion.csv', f'{top_dir}/data/GREET_LCA/marine_msd_mdo_05sulfur_wth_combustion.csv')
+    df_dict['truck'][commodity] = readGreetWtwTruck(f'{top_dir}/data/GREET_LCA/truck_combination_long_haul_diesel_wtw.csv', commodity=commodity)
+    df_dict['rail'][commodity] = readGreetWtwRail(f'{top_dir}/data/GREET_LCA/rail_freight_diesel_wtw.csv', commodity=commodity)
+    df_dict['ship'][commodity] = readGreetWthShip(f'{top_dir}/data/GREET_LCA/marine_msd_mdo_05sulfur_wth_feedstock.csv', f'{top_dir}/data/GREET_LCA/marine_msd_mdo_05sulfur_wth_conversion.csv', f'{top_dir}/data/GREET_LCA/marine_msd_mdo_05sulfur_wth_combustion.csv', commodity=commodity)
     
     # From SESAME
-    #df_dict['truck_sesame'][commodity] = readSesameWtwTruck()
+    #df_dict['truck_sesame'][commodity] = readSesameWtwTruck(, commodity=commodity)
     
     
 def main():
