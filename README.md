@@ -28,6 +28,11 @@ pip install -r requirements.txt
 
 ## Downloading the data
 
+Cd into the data directory
+```bash
+cd data
+```
+
 ### FAF5 Regions
 
 ```bash
@@ -60,6 +65,19 @@ rm FAF5_highway_network_assignments.zip
 wget "https://faf.ornl.gov/faf5/data/download_files/FAF5.4.1_2018-2020.zip" -O FAF5_regional_od.zip
 unzip FAF5_regional_od.zip -d FAF5_regional_flows_origin_destination
 rm FAF5_regional_od.zip
+```
+
+### Vehicle Inventory and Use Survey (VIUS) data
+```bash
+# 2002 Vehicle Inventory and Use Survey (from https://www.bts.gov/faf)
+wget "https://rosap.ntl.bts.gov/view/dot/42632/dot_42632_DS2.zip" -O VIUS_2002.zip
+unzip VIUS_2002.zip -d VIUS_2002
+rm VIUS_2002.zip
+```
+
+You can now cd back out of the data directory
+```bash
+cd ..
 ```
 
 ## How to run python scripts
@@ -110,3 +128,11 @@ python Point2PointFAF.py
 The script [PlotWithQGIS.py](./PlotWithQGIS.py) then plots the total imports and exports for all of the FAF5 regions (excluding Alaska and Hawaii) as colormaps, and saves them as PDF files. Executing [PlotWithQGIS.py](./PlotWithQGIS.py) in the QGIS GUI (after first running [Point2PointFAF.py](./source/Point2PointFAF.py)) should produce output PDF files in the [layouts](./layouts) directory, which look something like:
 
 ![Total domestic exports](./images/total_domestic_exports.png "Total Domestic Exports")
+
+## Analyzing VIUS data
+
+The script [AnalyzeVius.py] produces distributions of GREET vehicle class, fuel type, age, and payload from the VIUS data. To run:
+
+```bash
+python source/AnalyzeVius.py
+```
