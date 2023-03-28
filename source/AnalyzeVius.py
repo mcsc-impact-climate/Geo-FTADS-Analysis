@@ -12,350 +12,12 @@ from pathlib import Path
 import os
 import matplotlib.pyplot as plt
 import matplotlib
+import InfoObjects
 matplotlib.rc('xtick', labelsize=20)
 matplotlib.rc('ytick', labelsize=20)
 
 # Conversion from pounds to tons
 LB_TO_TONS = 1/2000.
-
-# List of weight class names used by GREET, from heaviest to lightest
-GREET_classes = ['Heavy Heavy-duty', 'Medium Heavy-duty', 'Light Heavy-duty', 'Light-duty']
-
-# Dictionary to map fuel integer identifiers in VIUS survey to fuel names
-fuels_dict = {
-    1: 'Gasoline',
-    2: 'Diesel',
-    3: 'Natural gas',
-    4: 'Propane',
-    5: 'Alcohol fuels',
-    6: 'Electricity',
-    7: 'Gasoline and natural gas',
-    8: 'Gasoline and propane',
-    9: 'Gasoline and alcohol fuels',
-    10: 'Gasoline and electricity',
-    11: 'Diesel and natural gas',
-    12: 'Diesel and propane',
-    13: 'Diesel and alcohol fuels',
-    14: 'Diesel and electricity',
-    15: 'Not reported',
-    16: 'Not applicable',
-}
-
-# Dictionary to map string identifiers of percentage of ton-miles spent carrying a given commodity to human-readable commodity names
-pretty_commodities_dict = {
-    'PALCOHOLIC': 'Alcoholic Beverages',
-    'PANIMALFEED': 'Animal Feed',
-    'PBAKERYPROD': 'Bakery Products',
-    'PBASEMETAL': 'Articles of Base Metal',
-    'PCHEMICALS': 'Basic Chemicals',
-    'PCOAL': 'Coal',
-    'PCRUDEPETRLM': 'Crude Petroleum',
-    'PELECTRONIC': 'Electronics',
-    'PEMPCONTAIN': 'EShipping Containers',
-    'PFERTILIZER': 'Fertilizer',
-    'PFUELOIL': 'Fuel oil',
-    'PFURNITURE': 'Furniture',
-    'PGASOLINE': 'Gasoline',
-    'PGRAINS': 'Cereal Grains',
-    'PGRAVEL': 'Gravel',
-    'PHAZWASTE': 'Hazardous waste',
-    'PLIVEANIMAL': 'Live Animal',
-    'PLOGS': 'Logs',
-    'PMACHINERY': 'Machinery',
-    'PMAIL': 'Mail',
-    'PMEATS': 'Meats',
-    'PMETALPRIM': 'Base Metal in Primary or Semifinished Forms',
-    'PMISCPROD': 'Miscellaneous Manufactured Products',
-    'PMIXFREIGHT': 'Mixed Freight (For-Hire Carriers Only)',
-    'PNEWSPRINT': 'Pulp, Newsprint, Paper, and Paperboard',
-    'PNONMETAL': 'Nonmetallic Mineral Products',
-    'PORES': 'Metallic Ores and Concentrates',
-    'POTHER': 'Products, Equipment, or Materials Not Elsewhere Classified',
-    'POTHERAGRIC': 'All Other Agricultural Products',
-    'POTHERCHEM': 'All Other Chemical Products and Preparations',
-    'POTHERCOAL': 'All Other Coal and Refined Petroleum Products',
-    'POTHERFOOD': 'All Other Prepared Foodstuffs',
-    'POTHERMIN': 'All Other Nonmetallic Minerals',
-    'POTHERTRANS': 'All Other Transportation Equipment',
-    'POTHERWASTE': 'All Other Waste and Scrap',
-    'PPAPER': 'Paper or Paperboard Articles',
-    'PPHARMACEUT': 'Pharmaceutical Products',
-    'PPLASTICS': 'Plastics and Rubber',
-    'PPRECISION': 'Precision Instruments and Apparatus',
-    'PPRINTPROD': 'Printed Products',
-    'PRECYCLABLE': 'Recyclable Products',
-}
-
-# Dictionary to map FAF5 commodity names to VIUS identifiers (including aggregation in some cases)
-FAF5_VIUS_commodity_map = {
-    'Live animals/fish': {
-        'VIUS': ['PLIVEANIMAL'],
-        'FAF5': ['Live animals/fish'],
-        'short name': 'live_animals_fish'
-    },
-    'Cereal grains': {
-        'VIUS': ['PGRAINS'],
-        'FAF5': ['Cereal grains'],
-        'short name': 'cereal_grains'
-    },
-    'Other agricultural products': {
-        'VIUS': ['POTHERAGRIC'],
-        'FAF5': ['Other ag prods.', 'Tobacco prods.'],
-        'short name': 'other_ag_prods'
-    },
-    'Animal feed': {
-        'VIUS': ['PANIMALFEED'],
-        'FAF5': ['Animal feed'],
-        'short name': 'animal_feed'
-    },
-    'Meat/seafood': {
-        'VIUS': ['PMEATS'],
-        'FAF5': ['Meat/seafood'],
-        'short name': 'meat_seafood'
-    },
-    'Milled grain prods.': {
-        'VIUS': ['PBAKERYPROD'],
-        'FAF5': ['Milled grain prods.'],
-        'short name': 'milled_grain_prods'
-    },
-    'Other foodstuffs': {
-        'VIUS': ['POTHERFOOD'],
-        'FAF5': ['Other foodstuffs'],
-        'short name': 'other_food'
-    },
-    'Alcoholic beverages': {
-        'VIUS': ['PALCOHOLIC'],
-        'FAF5': ['Alcoholic beverages'],
-        'short name': 'alcohol'
-    },
-    'Nonmetallic mineral products': {
-        'VIUS': ['PNONMETAL'],
-        'FAF5': ['Building stone', 'Natural sands', 'Gravel', 'Nonmetallic minerals'],
-        'short name': 'nonmetal_min_prods'
-    },
-    'Metallic ores': {
-        'VIUS': ['PORES'],
-        'FAF5': ['Metallic ores'],
-        'short name': 'metal_ores'
-    },
-    'Coal': {
-        'VIUS': ['PCOAL'],
-        'FAF5': ['Coal'],
-        'short name': 'coal'
-    },
-    'Crude petroleum': {
-        'VIUS': ['PCRUDEPETRLM'],
-        'FAF5': ['Crude petroleum'],
-        'short name': 'crude_petroleum'
-    },
-    'Gasoline': {
-        'VIUS': ['PGASOLINE'],
-        'FAF5': ['Gasoline'],
-        'short name': 'gasoline'
-    },
-    'Fuel oils': {
-        'VIUS': ['PFUELOIL'],
-        'FAF5': ['Fuel oils'],
-        'short name': 'fuel_oils'
-    },
-    'All other coal and refined petroleum products': {
-        'VIUS': ['POTHERCOAL'],
-        'FAF5': ['Coal-n.e.c.'],
-        'short name': 'other_coal_petrol'
-    },
-    'Basic chemicals': {
-        'VIUS': ['PCHEMICALS'],
-        'FAF5': ['Basic chemicals'],
-        'short name': 'basic_chems'
-    },
-    'Pharmaceuticals': {
-        'VIUS': ['PPHARMACEUT'],
-        'FAF5': ['Pharmaceuticals'],
-        'short name': 'pharmaceut'
-    },
-    'Fertilizers': {
-        'VIUS': ['PFERTILIZER'],
-        'FAF5': ['Fertilizers'],
-        'short name': 'fertilizer'
-    },
-    'Chemical prodsucts': {
-        'VIUS': ['POTHERCHEM'],
-        'FAF5': ['Chemical prods.'],
-        'short name': 'chem_prods'
-    },
-    'Plastics/rubber': {
-        'VIUS': ['PPLASTICS'],
-        'FAF5': ['Plastics/rubber'],
-        'short name': 'plastics_rubber'
-    },
-    'Logs': {
-        'VIUS': ['PLOGS'],
-        'FAF5': ['Logs'],
-        'short name': 'logs'
-    },
-    'Wood products': {
-        'VIUS': ['PNEWSPRINT', 'PPAPER', 'PPRINTPROD'],
-        'FAF5': ['Newsprint/paper', 'Wood prods.', 'Paper articles', 'Printed prods.'],
-        'short name': 'wood_prods'
-    },
-    'Miscellaneous manufactured products': {
-        'VIUS': ['PMISCPROD'],
-        'FAF5': ['Textiles/leather', 'Misc. mfg. prods.', 'motorized vehicles'],
-        'short name': 'misc_manuf_prods'
-    },
-    'Nonmetallic mineral products': {
-        'VIUS': ['PNONMETAL'],
-        'FAF5': ['Nonmetal min. prods.'],
-        'short name': 'nonmetal_min_prods'
-    },
-    'Base metal in primary or semifinished forms': {
-        'VIUS': ['PMETALPRIM'],
-        'FAF5': ['Base metals'],
-        'short name': 'base_metals'
-    },
-    'Articles of Base Metal': {
-        'VIUS': ['PBASEMETAL'],
-        'FAF5': ['Articles-base metal'],
-        'short name': 'base_metal'
-    },
-    'Machinery': {
-        'VIUS': ['PMACHINERY'],
-        'FAF5': ['Machinery'],
-        'short name': 'machinery'
-    },
-    'Electronics': {
-        'VIUS': ['PELECTRONIC'],
-        'FAF5': ['Electronics'],
-        'short name': 'electronics'
-    },
-    'Transportation equipment': {
-        'VIUS': ['POTHERTRANS'],
-        'FAF5': ['Transport equip.'],
-        'short name': 'transport_equip'
-    },
-    'Precision instruments': {
-        'VIUS': ['PPRECISION'],
-        'FAF5': ['Precision instruments'],
-        'short name': 'precision_inst'
-    },
-    'Furniture': {
-        'VIUS': ['PFURNITURE'],
-        'FAF5': ['Furniture'],
-        'short name': 'furniture'
-    },
-    'Waste/scrap': {
-        'VIUS': ['POTHERWASTE', 'PHAZWASTE'],
-        'FAF5': ['Waste/scrap'],
-        'short name': 'waste_scrap'
-    },
-    'Mixed freight': {
-        'VIUS': ['PMIXFREIGHT'],
-        'FAF5': ['Mixed freight'],
-        'short name': 'mixed_freight'
-    },
-}
-
-# Dictionary to map trip range windows used in FAF5 data to trip range windows in VIUS survey
-FAF5_VIUS_range_map = {
-    'Below 100 miles': {
-        'VIUS': ['TRIP0_50', 'TRIP051_100'],
-        'FAF5': ['Below 100'],
-        'short name': 'below_100'
-    },
-    '100 to 250 miles': {
-        'VIUS': ['TRIP101_200'],
-        'FAF5': ['100 - 249'],
-        'short name': '100_250'
-    },
-    '250 to 500 miles': {
-        'VIUS': ['TRIP201_500'],
-        'FAF5': ['250 - 499'],
-        'short name': '250_500'
-    },
-    'Over 500 miles': {
-        'VIUS': ['TRIP500MORE'],
-        'FAF5': ['500 - 749', '750 - 999', '1,000 - 1,499', '1,500 - 2,000', 'Over 2,000'],
-        'short name': 'over_500'
-    },
-}
-
-# Dictionary to coarsely map trip range windows used in FAF5 data to trip range windows in VIUS survey into two categories
-FAF5_VIUS_range_map_coarse = {
-    'Below 250 miles': {
-        'VIUS': ['TRIP0_50', 'TRIP051_100', 'TRIP101_200'],
-        'FAF5': ['Below 100', '100 - 249'],
-        'short name': 'below_250'
-    },
-    'Over 250 miles': {
-        'VIUS': ['TRIP201_500', 'TRIP500MORE'],
-        'FAF5': ['250 - 499', '500 - 749', '750 - 999', '1,000 - 1,499', '1,500 - 2,000', 'Over 2,000'],
-        'short name': 'over_250'
-    },
-}
-
-# Dictionary to map string identifiers of trip range used in VIUS data to human-readable descriptions
-pretty_range_dict = {
-    'TRIP0_50': 'Range <= 50 miles',
-    'TRIP051_100': '51 miles <= Range <= 100 miles',
-    'TRIP101_200': '101 miles <= Range <= 200 miles',
-    'TRIP201_500': '201 miles <= Range <= 500 miles',
-    'TRIP500MORE': 'Range >= 501 miles'
-}
-
-# Dictionary to map integer identifiers of administrative states used in the VIUS data to state names
-states_dict = {
-    1: 'Alabama',
-    2: 'Alaska',
-    4: 'Arizona',
-    5: 'Arkansas',
-    6: 'California',
-    8: 'Colorado',
-    9: 'Connecticut',
-    10: 'Delaware',
-    11: 'District of Columbia',
-    12: 'Florida',
-    13: 'Georgia',
-    15: 'Hawaii',
-    16: 'Idaho',
-    17: 'Illinois',
-    18: 'Indiana',
-    19: 'Iowa',
-    20: 'Kansas',
-    21: 'Kentucky',
-    22: 'Louisiana',
-    23: 'Maine',
-    24: 'Maryland',
-    25: 'Massachusetts',
-    26: 'Michigan',
-    27: 'Minnesota',
-    28: 'Mississippi',
-    29: 'Missouri',
-    30: 'Montana',
-    31: 'Nebraska',
-    32: 'Nevada',
-    33: 'New Hampshire',
-    34: 'New Jersey',
-    35: 'New Mexico',
-    36: 'New York',
-    37: 'North Carolina',
-    38: 'North Dakota',
-    39: 'Ohio',
-    40: 'Oklahoma',
-    41: 'Oregon',
-    42: 'Pennsylvania',
-    44: 'Rhode Island',
-    45: 'South Carolina',
-    46: 'South Dakota',
-    47: 'Tennessee',
-    48: 'Texas',
-    49: 'Utah',
-    50: 'Vermont',
-    51: 'Virginia',
-    53: 'Washington',
-    54: 'West Virginia',
-    55: 'Wisconsin',
-    56: 'Wyoming'
-}
 
 # Get the path to the top level of the git repo
 source_path = Path(__file__).resolve()
@@ -364,7 +26,7 @@ top_dir = os.path.dirname(source_dir)
 
 ######################################### Functions defined here ##########################################
 
-def make_aggregated_df(df, range_map=FAF5_VIUS_range_map):
+def make_aggregated_df(df, range_map=InfoObjects.FAF5_VIUS_range_map):
     '''
     Makes a new dataframe with trip range and commodity columns aggregated according to the rules defined in the FAF5_VIUS_commodity_map and the provided range_map
         
@@ -385,8 +47,8 @@ def make_aggregated_df(df, range_map=FAF5_VIUS_range_map):
     df_agg = df.copy(deep=True)
     
     # Loop through all commodities in the VIUS dataframe and combine them as needed to produce the aggregated mapping defined in the FAF5_VIUS_commodity_map
-    for commodity in FAF5_VIUS_commodity_map:
-        vius_commodities = FAF5_VIUS_commodity_map[commodity]['VIUS']
+    for commodity in InfoObjects.FAF5_VIUS_commodity_map:
+        vius_commodities = InfoObjects.FAF5_VIUS_commodity_map[commodity]['VIUS']
         if len(vius_commodities) == 1:
             df_agg[commodity] = df[vius_commodities[0]]
         elif len(vius_commodities) > 1:
@@ -512,7 +174,7 @@ def get_commodity_pretty(commodity='all'):
     if commodity == 'all':
         commodity_pretty = 'All commodities'
     else:
-        commodity_pretty = pretty_commodities_dict[commodity]
+        commodity_pretty = InfoObjects.pretty_commodities_dict[commodity]
     return commodity_pretty
     
 def get_region_pretty(region='US'):
@@ -532,7 +194,7 @@ def get_region_pretty(region='US'):
     if region == 'US':
         region_pretty = 'US'
     else:
-        region_pretty = states_dict[region]
+        region_pretty = InfoObjects.states_dict[region]
     return region_pretty
     
 def get_range_pretty(truck_range='all'):
@@ -552,7 +214,7 @@ def get_range_pretty(truck_range='all'):
     if truck_range == 'all':
         range_pretty = 'All Ranges'
     else:
-        range_pretty = pretty_range_dict[truck_range]
+        range_pretty = InfoObjects.pretty_range_dict[truck_range]
     return range_pretty
 
 def print_all_commodities(df):
@@ -593,9 +255,9 @@ def print_all_states(df):
     '''
     n_samples=0
     for state in range(1,57):
-        if not state in states_dict: continue
+        if not state in InfoObjects.states_dict: continue
         n_state = len(df[(~df['ADM_STATE'].isna())&(df['ADM_STATE']==state)]['ADM_STATE'])
-        state_str = states_dict[state]
+        state_str = InfoObjects.states_dict[state]
         print(f'Total number of samples in {state_str}: {n_state}')
         n_samples += n_state
     print(f'total number of samples: {n_samples}\n\n')
@@ -684,7 +346,7 @@ def plot_greet_class_hist(df, commodity='all', truck_range='all', region='US', r
     plt.ylabel('Commodity flow (ton-miles)', fontsize=20)
     
     # Plot the total along with error bars (the bars themselves are invisible since I only want to show the error bars)
-    plt.bar(GREET_classes, n, yerr=n_err, width = 0.4, ecolor='black', capsize=5, alpha=0, zorder=1000)
+    plt.bar(InfoObjects.GREET_classes, n, yerr=n_err, width = 0.4, ecolor='black', capsize=5, alpha=0, zorder=1000)
     
     # Add in the distribution for each fuel, stacked on top of one another
     bottom = np.zeros(4)
@@ -694,7 +356,7 @@ def plot_greet_class_hist(df, commodity='all', truck_range='all', region='US', r
         annual_ton_miles_fuel = get_annual_ton_miles(df, cSelection=cSelection, cRange=cRange, cCommodity=cCommodity, truck_range=truck_range, commodity=commodity, fuel=i_fuel, greet_class='all')
         n, bins = np.histogram(df[cFuel]['GREET_CLASS'], bins=[0.5,1.5,2.5,3.5,4.5], weights=annual_ton_miles_fuel)
         n_err = np.sqrt(np.histogram(df[cFuel]['GREET_CLASS'], bins=[0.5,1.5,2.5,3.5,4.5], weights=annual_ton_miles_fuel**2)[0])
-        plt.bar(GREET_classes, n, width = 0.4, alpha=1, zorder=1, label=fuels_dict[i_fuel], bottom=bottom)
+        plt.bar(InfoObjects.GREET_classes, n, width = 0.4, alpha=1, zorder=1, label=InfoObjects.fuels_dict[i_fuel], bottom=bottom)
         bottom += n
     plt.legend(fontsize=18)
     
@@ -812,7 +474,7 @@ def plot_age_hist(df, commodity='all', truck_range='all', region='US', range_thr
         annual_ton_miles_fuel = get_annual_ton_miles(df, cSelection=cSelection, cRange=cRange, cCommodity=cCommodity, truck_range=truck_range, commodity=commodity, fuel='all', greet_class=i_class)
         n, bins = np.histogram(df[cClass]['ACQUIREYEAR']-1, bins=np.arange(18)-0.5, weights=annual_ton_miles_fuel)
         n_err = np.sqrt(np.histogram(df[cClass]['ACQUIREYEAR']-1, bins=np.arange(18)-0.5, weights=annual_ton_miles_fuel**2)[0])
-        plt.bar(range(17), n, width = 0.4, alpha=1, zorder=1, label=GREET_classes[i_class-1], bottom=bottom)
+        plt.bar(range(17), n, width = 0.4, alpha=1, zorder=1, label=InfoObjects.GREET_classes[i_class-1], bottom=bottom)
         bottom += n
         
     plt.legend(fontsize=18)
@@ -920,7 +582,7 @@ def plot_payload_hist(df, commodity='all', truck_range='all', region='US', range
     if greet_class == 'all':
         greet_class_title = 'all'
     else:
-        greet_class_title = GREET_classes[greet_class-1]
+        greet_class_title = InfoObjects.GREET_classes[greet_class-1]
     plt.title(f'Commodity: {commodity_title}\nGREET Class: {greet_class_title}', fontsize=20)
     plt.ylabel('Commodity flow (ton-miles)', fontsize=20)
     plt.xlabel('Payload (tons)', fontsize=20)
@@ -949,7 +611,7 @@ def plot_payload_hist(df, commodity='all', truck_range='all', region='US', range
     if greet_class == 'all':
         greet_class_str = 'all'
     else:
-        greet_class_str = (GREET_classes[greet_class-1]).replace(' ', '_').replace('-', '_')
+        greet_class_str = (InfoObjects.GREET_classes[greet_class-1]).replace(' ', '_').replace('-', '_')
     
     plt.tight_layout()
     print(f'Saving figure to plots/payload_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}_greet_class_{greet_class_str}.png')
@@ -967,7 +629,7 @@ df_vius = add_GREET_class(df_vius)
 df_agg = make_aggregated_df(df_vius)
 
 
-df_agg_coarse_range = make_aggregated_df(df_vius, range_map=FAF5_VIUS_range_map_coarse)
+df_agg_coarse_range = make_aggregated_df(df_vius, range_map=InfoObjects.FAF5_VIUS_range_map_coarse)
 
 ## Basic sanity checks to make sure sum of aggregated column is equal to combined sum of its constituent columns
 #df_agg_wood_sum = np.sum(df_agg['Wood products'])
@@ -987,7 +649,7 @@ df_agg_coarse_range = make_aggregated_df(df_vius, range_map=FAF5_VIUS_range_map_
 #print_all_states(df_vius)
 
 ## Print out the number of aggregated commodities
-#n_aggregated_commodities = len(FAF5_VIUS_commodity_map)
+#n_aggregated_commodities = len(InfoObjects.FAF5_VIUS_commodity_map)
 #print(f'Number of aggregated commodities: {n_aggregated_commodities}')
 
 #######################################################################
@@ -1001,25 +663,25 @@ df_agg_coarse_range = make_aggregated_df(df_vius, range_map=FAF5_VIUS_range_map_
 plot_greet_class_hist(df_vius, commodity='all', truck_range='all', region='US', range_threshold=0, commodity_threshold=0)
 
 ## Make distributions of GREET truck class and fuel types for each commodity
-#for commodity in pretty_commodities_dict:
+#for commodity in InfoObjects.pretty_commodities_dict:
 #    plot_greet_class_hist(df_vius, commodity=commodity, truck_range='all', region='US', range_threshold=0, commodity_threshold=0)
 
 ## Make distributions of GREET truck class and fuel types for each state
-#for state in states_dict:
+#for state in InfoObjects.states_dict:
 #    plot_greet_class_hist(df_vius, commodity='all', truck_range='all', region=state, range_threshold=0, commodity_threshold=0)
 
 ## Make distributions of GREET truck class and fuel types for each state and commodity
-#for state in states_dict:
-#    for commodity in pretty_commodities_dict:
+#for state in InfoObjects.states_dict:
+#    for commodity in InfoObjects.pretty_commodities_dict:
 #        plot_greet_class_hist(df_vius, region=state, commodity=commodity)
 
 ## Make distributions of GREET truck class with respect to both commodity and range
-#for truck_range in pretty_range_dict:
-#    for commodity in pretty_commodities_dict:
+#for truck_range in InfoObjects.pretty_range_dict:
+#    for commodity in InfoObjects.pretty_commodities_dict:
 #        plot_greet_class_hist(df_vius, commodity=commodity, truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0)
 
 ## Make distributions of GREET truck class and fuel types for each vehicle range
-#for truck_range in pretty_range_dict:
+#for truck_range in InfoObjects.pretty_range_dict:
 #    plot_greet_class_hist(df_vius, commodity='all', truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0)
 
 #-----------------------------------------------------#
@@ -1027,27 +689,27 @@ plot_greet_class_hist(df_vius, commodity='all', truck_range='all', region='US', 
 #-------- With aggregated commodities/ranges ---------#
 
 ## Make distributions of GREET truck class and fuel types for each aggregated commodity
-#for commodity in FAF5_VIUS_commodity_map:
-#    plot_greet_class_hist(df_agg, commodity=commodity, truck_range='all', region='US', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True)
+#for commodity in InfoObjects.FAF5_VIUS_commodity_map:
+#    plot_greet_class_hist(df_agg, commodity=commodity, truck_range='all', region='US', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True)
 
 ## Make distributions of GREET truck class and fuel types for each state and aggregated commodity
-#for state in states_dict:
-#    for commodity in FAF5_VIUS_commodity_map:
-#        plot_greet_class_hist(df_agg, commodity=commodity, truck_range='all', region=state, range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True)
+#for state in InfoObjects.states_dict:
+#    for commodity in InfoObjects.FAF5_VIUS_commodity_map:
+#        plot_greet_class_hist(df_agg, commodity=commodity, truck_range='all', region=state, range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True)
         
 ## Make distributions of GREET truck class with respect to both aggregated commodity and range
-#for truck_range in FAF5_VIUS_range_map:
-#    for commodity in FAF5_VIUS_commodity_map:
-#        plot_greet_class_hist(df_agg, commodity=commodity, truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = FAF5_VIUS_commodity_map[commodity]['short name'], set_range_title = truck_range, set_range_save = FAF5_VIUS_range_map[truck_range]['short name'], aggregated=True)
+#for truck_range in InfoObjects.FAF5_VIUS_range_map:
+#    for commodity in InfoObjects.FAF5_VIUS_commodity_map:
+#        plot_greet_class_hist(df_agg, commodity=commodity, truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name'], set_range_title = truck_range, set_range_save = InfoObjects.FAF5_VIUS_range_map[truck_range]['short name'], aggregated=True)
 
 ## Make distributions of GREET truck class with respect to both aggregated commodity and coarsely-aggregated range
-#for truck_range in FAF5_VIUS_range_map_coarse:
-#    for commodity in FAF5_VIUS_commodity_map:
-#        plot_greet_class_hist(df_agg_coarse_range, commodity=commodity, truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = FAF5_VIUS_commodity_map[commodity]['short name'], set_range_title = truck_range, set_range_save = FAF5_VIUS_range_map_coarse[truck_range]['short name'], aggregated=True)
+#for truck_range in InfoObjects.FAF5_VIUS_range_map_coarse:
+#    for commodity in InfoObjects.FAF5_VIUS_commodity_map:
+#        plot_greet_class_hist(df_agg_coarse_range, commodity=commodity, truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name'], set_range_title = truck_range, set_range_save = InfoObjects.FAF5_VIUS_range_map_coarse[truck_range]['short name'], aggregated=True)
     
 ## Make distributions of GREET truck class and fuel types for each aggregated vehicle range
-#for truck_range in FAF5_VIUS_range_map:
-#    plot_greet_class_hist(df_agg, commodity='all', truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0, set_range_title = truck_range, set_range_save = FAF5_VIUS_range_map[truck_range]['short name'], aggregated=True)
+#for truck_range in InfoObjects.FAF5_VIUS_range_map:
+#    plot_greet_class_hist(df_agg, commodity='all', truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0, set_range_title = truck_range, set_range_save = InfoObjects.FAF5_VIUS_range_map[truck_range]['short name'], aggregated=True)
 
 #-----------------------------------------------------#
 
@@ -1061,11 +723,11 @@ plot_greet_class_hist(df_vius, commodity='all', truck_range='all', region='US', 
 #plot_age_hist(df_vius, region='US', commodity='all', truck_range='all', range_threshold=0, commodity_threshold=0)
 #
 ## Make distributions of truck age and GREET class for each commodity
-#for commodity in pretty_commodities_dict:
+#for commodity in InfoObjects.pretty_commodities_dict:
 #    plot_age_hist(df_vius, region='US', commodity=commodity, truck_range='all', range_threshold=0, commodity_threshold=0)
 
 ## Make distributions of truck age and GREET class for each range
-#for truck_range in pretty_range_dict:
+#for truck_range in InfoObjects.pretty_range_dict:
 #    plot_age_hist(df_vius, region='US', commodity='all', truck_range=truck_range, range_threshold=0, commodity_threshold=0)
 
 #-----------------------------------------------------#
@@ -1073,16 +735,16 @@ plot_greet_class_hist(df_vius, commodity='all', truck_range='all', region='US', 
 #-------- With aggregated commodities/ranges ---------#
     
 ## Make distributions of truck age and GREET class for each aggregated commodity
-#for commodity in FAF5_VIUS_commodity_map:
-#    plot_age_hist(df_agg, region='US', commodity=commodity, truck_range='all', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True)
+#for commodity in InfoObjects.FAF5_VIUS_commodity_map:
+#    plot_age_hist(df_agg, region='US', commodity=commodity, truck_range='all', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True)
 
 ## Make distributions of truck age and GREET class for each aggregated range
-#for truck_range in FAF5_VIUS_range_map:
-#    plot_age_hist(df_agg, commodity='all', truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0, set_range_title = truck_range, set_range_save = FAF5_VIUS_range_map[truck_range]['short name'], aggregated=True)
+#for truck_range in InfoObjects.FAF5_VIUS_range_map:
+#    plot_age_hist(df_agg, commodity='all', truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0, set_range_title = truck_range, set_range_save = InfoObjects.FAF5_VIUS_range_map[truck_range]['short name'], aggregated=True)
 #
 ## Make distributions of truck age and GREET class for each coarsely aggregated range
-#for truck_range in FAF5_VIUS_range_map_coarse:
-#    plot_age_hist(df_agg_coarse_range, commodity='all', truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0, set_range_title = truck_range, set_range_save = FAF5_VIUS_range_map_coarse[truck_range]['short name'], aggregated=True)
+#for truck_range in InfoObjects.FAF5_VIUS_range_map_coarse:
+#    plot_age_hist(df_agg_coarse_range, commodity='all', truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0, set_range_title = truck_range, set_range_save = InfoObjects.FAF5_VIUS_range_map_coarse[truck_range]['short name'], aggregated=True)
 
 #-----------------------------------------------------#
 
@@ -1098,15 +760,16 @@ plot_greet_class_hist(df_vius, commodity='all', truck_range='all', region='US', 
 
 #------- Without aggregated commodities/ranges -------#
 ## Make distributions of payload for each aggregated commodity
-#for commodity in FAF5_VIUS_commodity_map:
-#    plot_payload_hist(df_agg, region='US', commodity=commodity, truck_range='all', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True)
+#for commodity in InfoObjects.FAF5_VIUS_commodity_map:
+#    plot_payload_hist(df_agg, region='US', commodity=commodity, truck_range='all', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True)
 
 ## Make distributions of payload for each aggregated commodity and truck class
-#for commodity in FAF5_VIUS_commodity_map:
+#for commodity in InfoObjects.FAF5_VIUS_commodity_map:
 #    for greet_class in range(1,5):
-#        plot_payload_hist(df_agg, region='US', commodity=commodity, truck_range='all', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True, greet_class=greet_class)
+#        plot_payload_hist(df_agg, region='US', commodity=commodity, truck_range='all', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True, greet_class=greet_class)
 
-#-----------------------------------------------------#
+#-----------------------------------------------------#ls
+
 
 #######################################################################
 
