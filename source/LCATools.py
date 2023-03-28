@@ -8,11 +8,11 @@ import csv
 import os
 import pandas as pd
 from pathlib import Path
+from InfoObjects import *
 
 TONNES_TO_TONS = 1.10231    # tonnes per ton
 KM_TO_MILES = 0.621371      # km per mile
-PAYLOAD = 19.0402178166526  # Assumed payload for heavy duty truck, in tons (obtained from GREET default for comination long-haul truck)
-
+PAYLOAD = 19.0402178166526  # Assumed payload for heavy duty truck, in tons (obtained from GREET default for combination long-haul truck)
 
 def getDir():
     '''
@@ -35,13 +35,15 @@ def getDir():
     top_dir = os.path.dirname(path)
     return top_dir
     
-def readGreetWtwTruck(csv_path):
+def readGreetWtwTruck(csv_path, commodity='all'):
     '''
     Read in a csv file containing GREET outputs for the trucking well-to-wheels (WTW) module, and reformats to match the rail module
     
     Parameters
     ----------
     csv_path (string): Path to csv file containing GREET outputs
+    
+    commodity (string): Indicates which commodity is being carried (currently just a placeholder, functionality not yet implemented to modify calculated emission rate based on commodity)
 
     Returns
     -------
@@ -60,13 +62,15 @@ def readGreetWtwTruck(csv_path):
     
     return df_lca
     
-def readGreetWtwRail(csv_path):
+def readGreetWtwRail(csv_path, commodity='all'):
     '''
     Read in a csv file containing GREET outputs for the rail well-to-wheels (WTW) module
     
     Parameters
     ----------
     csv_path (string): Path to csv containing GREET outputs
+    
+    commodity (string): Indicates which commodity is being carried (currently just a placeholder, functionality not yet implemented to modify calculated emission rate based on commodity)
 
     Returns
     -------
@@ -79,7 +83,7 @@ def readGreetWtwRail(csv_path):
     #print(df_lca.columns)
     return df_lca
     
-def readGreetWthShip(csv_path_feedstock, csv_path_conversion, csv_path_combustion):
+def readGreetWthShip(csv_path_feedstock, csv_path_conversion, csv_path_combustion, commodity='all'):
     '''
     Read in csv files containing GREET outputs for the ship well-to-hull (WTH) module
     
@@ -90,6 +94,8 @@ def readGreetWthShip(csv_path_feedstock, csv_path_conversion, csv_path_combustio
     csv_path_conversion (string): Path to csv file containing GREET outputs for marine fuel conversion
     
     csv_path_combustion (string): Path to csv file containing GREET outputs for marine fuel combustion
+    
+    commodity (string): Indicates which commodity is being carried (currently just a placeholder, functionality not yet implemented to modify calculated emission rate based on commodity)
 
     Returns
     -------
@@ -116,13 +122,13 @@ def readGreetWthShip(csv_path_feedstock, csv_path_conversion, csv_path_combustio
     #print(df_lca['WTH'])
     return df_lca
     
-def readSesameWtwTruck():
+def readSesameWtwTruck(commodity='all'):
     '''
     Read in heavy duty vehicle fleet data for class 8 trucks from sesame-core submodule, with input parameters specified, and collect the CO2e emission rates
     
     Parameters
     ----------
-    None
+    commodity (string): Indicates which commodity is being carried (currently just a placeholder, functionality not yet implemented to modify calculated emission rate based on commodity)
 
     Returns
     -------
@@ -201,12 +207,40 @@ def readSesameWtwTruck():
     PROD = results['e_class8_2020']['ICED']['car production'] / PAYLOAD  # NOTE: This currently isn't being used, but I plan to once I get vehicle manufacturing emissions outputs from GREET
     
     # Save the emissions of interest to the dataframe
-    df_lca = df_lca.append({'Item': 'CO2e', 'WTP': WTP, 'PTW': PTW, 'WTW': WTW}, ignore_index=True)
+    df_lca = pd.concat([pd.DataFrame({'Item': ['CO2e']}), pd.DataFrame({'WTP': [WTP]}), pd.DataFrame({'PTW': [PTW]}), pd.DataFrame({'WTW': [WTW]})], axis=1)
     
     # cd back out of the sesame-core module now that we're finished with it
     os.chdir(os.getcwd() + '/..')
         
     return df_lca
+    
+def fillLcaDf(df_dict, top_dir, commodity='all'):
+    '''
+    Fills the input dictionary with dataframes containing the calculated emission rates from GREET and SESAME for the given commodity
+    
+    Parameters
+    ----------
+    df_dict (dictionary): Dictionary to contain dataframes of emission rates for each mode and commodity
+    
+    commodity (string): Commodity for which to calculate emission rates and fill the dictionary
+    
+    top_dir (string): Path to the top level of the git repo
+
+    Returns
+    -------
+    None
+        
+    NOTE: None.
+    '''
+    
+    # Emission rates (g / ton-mile) from GREET outputs
+    df_dict['truck'][commodity] = readGreetWtwTruck(f'{top_dir}/data/GREET_LCA/truck_combination_long_haul_diesel_wtw.csv')
+    df_dict['rail'][commodity] = readGreetWtwRail(f'{top_dir}/data/GREET_LCA/rail_freight_diesel_wtw.csv')
+    df_dict['ship'][commodity] = readGreetWthShip(f'{top_dir}/data/GREET_LCA/marine_msd_mdo_05sulfur_wth_feedstock.csv', f'{top_dir}/data/GREET_LCA/marine_msd_mdo_05sulfur_wth_conversion.csv', f'{top_dir}/data/GREET_LCA/marine_msd_mdo_05sulfur_wth_combustion.csv')
+    
+    # From SESAME
+    #df_dict['truck_sesame'][commodity] = readSesameWtwTruck()
+    
     
 def main():
     # Get the path to the top level of the git repo
@@ -215,18 +249,20 @@ def main():
     top_dir = os.path.dirname(source_dir)
 
     # Initialize an empty dictionary to contain the LCA dataframes
-    df_lca_dict = {}
+    df_lca_dict = {'truck': {}, 'rail': {}, 'ship': {}}
     
-    # From GREET outputs
-    df_lca_dict['truck'] = readGreetWtwTruck(f'{top_dir}/data/GREET_LCA/truck_combination_long_haul_diesel_wtw.csv')
-    df_lca_dict['rail'] = readGreetWtwRail(f'{top_dir}/data/GREET_LCA/rail_freight_diesel_wtw.csv')
-    df_lca_dict['ship'] = readGreetWthShip(f'{top_dir}/data/GREET_LCA/marine_msd_mdo_05sulfur_wth_feedstock.csv', f'{top_dir}/data/GREET_LCA/marine_msd_mdo_05sulfur_wth_conversion.csv', f'{top_dir}/data/GREET_LCA/marine_msd_mdo_05sulfur_wth_combustion.csv')
-
-    # From SESAME
-    df_lca_dict['truck_sesame'] = readSesameWtwTruck()
+    fillLcaDf(df_lca_dict, top_dir=top_dir, commodity='all')
     
-    # print(df_lca_dict['truck'])
-    # print(df_lca_dict['truck_sesame'])
+    # Add commodity-specific emissions
+    # **NOTE** For the moment, commodity-specificity isn't yet implemented in the emissions calculation, so currently all the commodity-specific emission rates are identical to the 'all' rates. The 'for' loop below is simply a placeholder to help prepare for commodity-specific evaluation of emission rates.
+    metaPath = f'{top_dir}/data/FAF5_regional_flows_origin_destination/FAF5_metadata.xlsx'
+    meta = pd.ExcelFile(metaPath)
+    commodities = pd.read_excel(meta, 'Commodity (SCTG2)')['Description']
+    
+    for commodity in commodities:
+        fillLcaDf(df_lca_dict, top_dir=top_dir, commodity=commodity)
+    
+    #print(df_lca_dict)
     
 main()
                               
