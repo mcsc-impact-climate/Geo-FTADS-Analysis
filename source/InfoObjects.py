@@ -1,10 +1,16 @@
+#!/usr/bin/env python3
+
 """
 Created on Tue Mar 28 13:27:00 2023
 @author: danikam
 """
 
 # List of weight class names used by GREET, from heaviest to lightest
-GREET_classes = ['Heavy Heavy-duty', 'Medium Heavy-duty', 'Light Heavy-duty', 'Light-duty']
+GREET_classes_dict = {
+    1: 'Heavy GVW',
+    2: 'Medium GVW',
+    3: 'Light GVW',
+    4: 'Light-duty'}
 
 # Dictionary to map fuel integer identifiers in VIUS survey to fuel names
 fuels_dict = {

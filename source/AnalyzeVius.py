@@ -13,6 +13,7 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib
 import InfoObjects
+from ViusTools import get_top_dir, make_aggregated_df, add_GREET_class, get_annual_ton_miles
 matplotlib.rc('xtick', labelsize=20)
 matplotlib.rc('ytick', labelsize=20)
 
@@ -20,142 +21,9 @@ matplotlib.rc('ytick', labelsize=20)
 LB_TO_TONS = 1/2000.
 
 # Get the path to the top level of the git repo
-source_path = Path(__file__).resolve()
-source_dir = source_path.parent
-top_dir = os.path.dirname(source_dir)
+top_dir = get_top_dir()
 
 ######################################### Functions defined here ##########################################
-
-def make_aggregated_df(df, range_map=InfoObjects.FAF5_VIUS_range_map):
-    '''
-    Makes a new dataframe with trip range and commodity columns aggregated according to the rules defined in the FAF5_VIUS_commodity_map and the provided range_map
-        
-    Parameters
-    ----------
-    df (pd.DataFrame): A pandas dataframe containing the VIUS data
-    
-    range_map (dictionary): A python dictionary containing the mapping of FAF5 trip ranges to VIUS trip ranges. This is used to determine how to aggregate the trip range columns in the VIUS dataframe to produce the new trip range colunns in the output dataframe.
-
-    Returns
-    -------
-    df_agg (pd.DataFrame): A pandas dataframe containing the VIUS data, with additional columns to: 1) contain percentages of ton-miles carried over aggregated trip range, and 2) contain percentages of loaded ton-miles spent carrying aggregated commodity categories.
-        
-    NOTE: None.
-    '''
-    
-    # Make a deep copy of the VIUS dataframe
-    df_agg = df.copy(deep=True)
-    
-    # Loop through all commodities in the VIUS dataframe and combine them as needed to produce the aggregated mapping defined in the FAF5_VIUS_commodity_map
-    for commodity in InfoObjects.FAF5_VIUS_commodity_map:
-        vius_commodities = InfoObjects.FAF5_VIUS_commodity_map[commodity]['VIUS']
-        if len(vius_commodities) == 1:
-            df_agg[commodity] = df[vius_commodities[0]]
-        elif len(vius_commodities) > 1:
-            i_comm = 0
-            for vius_commodity in vius_commodities:
-                if i_comm == 0:
-                    df_agg_column = df[vius_commodity].fillna(0)
-                else:
-                    df_agg_column += df[vius_commodity].fillna(0)
-                i_comm += 1
-            df_agg[commodity] = df_agg_column.replace(0, float('NaN'))
-
-            
-    # Loop through all the ranges in the VIUS dataframe and combine them as needed to produce the aggregated mapping defined in the FAF5_VIUS_range_map
-    for truck_range in range_map:
-        vius_ranges = range_map[truck_range]['VIUS']
-        if len(vius_ranges) == 1:
-            df_agg[truck_range] = df[vius_ranges[0]]
-        elif len(vius_ranges) > 1:
-            i_range = 0
-            for vius_range in vius_ranges:
-                if i_range == 0:
-                    df_agg_column = df[vius_range].fillna(0)
-                else:
-                    df_agg_column += df[vius_range].fillna(0)
-                i_range += 1
-            df_agg[truck_range] = df_agg_column.replace(0, float('NaN'))
-                
-    return df_agg
-
-def add_GREET_class(df):
-    '''
-    Adds a column to the dataframe that specifies the GREET truck class, determined by a mapping of averaged loaded gross vehicle weight to weight classes
-        
-    Parameters
-    ----------
-    df (pd.DataFrame): A pandas dataframe containing the VIUS data
-
-    Returns
-    -------
-    df: The pandas dataframe containing the VIUS data, with an additional column containing the GREET class of each truck
-        
-    NOTE: None.
-    '''
-    df['GREET_CLASS'] = df.copy(deep=False)['WEIGHTAVG']
-    
-    df.loc[df['WEIGHTAVG'] >= 33000, 'GREET_CLASS'] = 1
-    df.loc[(df['WEIGHTAVG'] >= 19500)&(df['WEIGHTAVG'] < 33000), 'GREET_CLASS'] = 2
-    df.loc[(df['WEIGHTAVG'] >= 8500)&(df['WEIGHTAVG'] < 19500), 'GREET_CLASS'] = 3
-    df.loc[df['WEIGHTAVG'] < 8500, 'GREET_CLASS'] = 4
-    return df
-    
-def get_annual_ton_miles(df, cSelection, cRange, cCommodity, truck_range, commodity, fuel='all', greet_class='all'):
-    '''
-    Calculates the annual ton-miles that each truck (row) in the VIUS dataframe satisfying requirements defined by cSelection carries the given commodity over the given trip range burning the given fuel
-        
-    Parameters
-    ----------
-    df (pd.DataFrame): A pandas dataframe containing the VIUS data
-    
-    cSelection (pd.Series): Boolean criteria to apply basic selection to rows of the input dataframe
-    
-    cRange (pd.Series): Boolean criterion to select samples that report carrying out some percentage of loaded trips covering a range specifed by parameter truck_range
-    
-    cCommodity (pd.Series): Boolean criterion to select samples that report carrying out some percentage of loaded trips carrying the commodity given by parameter commodity
-    
-    truck_range (string): Name of the column of VIUS data containing the percentage of ton-miles carried over the given trip range
-    
-    commodity (string): Name of the column of VIUS data containing the percentage of ton-miles carrying the given commodity
-    
-    fuel (string): Name of the column of the VIUS data containing an integier identifier of the fuel used by the truck
-    
-    greet_class (string): Name of the column of the VIUS data containing an integer identifier of the GREET truck class
-
-    Returns
-    -------
-    df: The pandas dataframe containing the VIUS data, with an additional column containing the GREET class of each truck
-        
-    NOTE: None.
-    '''
-    # Add the given fuel to the selection
-    if not fuel=='all':
-        cSelection = (df['FUEL'] == fuel) & cSelection
-    
-    if not greet_class=='all':
-        cSelection = (df['GREET_CLASS'] == greet_class) & cSelection
-    
-    greet_class = df[cSelection]['GREET_CLASS']        # Truck class used by GREET
-    annual_miles = df[cSelection]['MILES_ANNL']        # Annual miles traveled by the given truck
-    avg_payload = (df[cSelection]['WEIGHTAVG'] - df[cSelection]['WEIGHTEMPTY']) * LB_TO_TONS    # Average payload (difference between average vehicle weight with payload and empty vehicle weight). Convert from pounds to tons.
-
-    # If we're considering all commodities, no need to consider the average fraction of different commodities carried
-    if type(cRange) == bool and type(cCommodity) ==  bool:
-        annual_ton_miles = annual_miles * avg_payload      # Convert average payload from
-    # If we're considering a particular commodity, we do need to consider the average fraction of the given commodity carried
-    elif type(cRange) == bool and (not type(cCommodity) ==  bool):
-        f_commodity = df[cSelection][commodity] / 100.     # Divide by 100 to convert from percentage to fractional
-        annual_ton_miles = annual_miles * avg_payload * f_commodity
-    elif (not type(cRange) == bool) and (type(cCommodity) ==  bool):
-        f_range = df[cSelection][truck_range] / 100.     # Divide by 100 to convert from percentage to fractional
-        annual_ton_miles = annual_miles * avg_payload * f_range
-    elif (not type(cRange) == bool) and (not type(cCommodity) ==  bool):
-        f_range = df[cSelection][truck_range] / 100.     # Divide by 100 to convert from percentage to fractional
-        f_commodity = df[cSelection][commodity] / 100.
-        annual_ton_miles = annual_miles * avg_payload * f_range * f_commodity
-    
-    return annual_ton_miles
     
 def get_commodity_pretty(commodity='all'):
     '''
@@ -336,7 +204,7 @@ def plot_greet_class_hist(df, commodity='all', truck_range='all', region='US', r
     cSelection = cRange&cRegion&cCommodity&cBaseline
     
     # Get the annual ton miles for all fuels
-    annual_ton_miles_all = get_annual_ton_miles(df, cSelection=cSelection, cRange=cRange, cCommodity=cCommodity, truck_range=truck_range, commodity=commodity, fuel='all', greet_class='all')
+    annual_ton_miles_all = get_annual_ton_miles(df, cSelection=cSelection, truck_range=truck_range, commodity=commodity, fuel='all', greet_class='all')
     
     # Bin the data according to the GREET vehicle class, and calculate the associated statistical uncertainty using root sum of squared weights (see eg. https://www.pp.rhul.ac.uk/~cowan/stat/notes/errors_with_weights.pdf)
     fig = plt.figure(figsize = (10, 7))
@@ -346,17 +214,17 @@ def plot_greet_class_hist(df, commodity='all', truck_range='all', region='US', r
     plt.ylabel('Commodity flow (ton-miles)', fontsize=20)
     
     # Plot the total along with error bars (the bars themselves are invisible since I only want to show the error bars)
-    plt.bar(InfoObjects.GREET_classes, n, yerr=n_err, width = 0.4, ecolor='black', capsize=5, alpha=0, zorder=1000)
+    plt.bar(InfoObjects.GREET_classes_dict.values(), n, yerr=n_err, width = 0.4, ecolor='black', capsize=5, alpha=0, zorder=1000)
     
     # Add in the distribution for each fuel, stacked on top of one another
     bottom = np.zeros(4)
     for i_fuel in [1,2,3,4]:
         cFuel = (df['FUEL'] == i_fuel) & cSelection
         
-        annual_ton_miles_fuel = get_annual_ton_miles(df, cSelection=cSelection, cRange=cRange, cCommodity=cCommodity, truck_range=truck_range, commodity=commodity, fuel=i_fuel, greet_class='all')
+        annual_ton_miles_fuel = get_annual_ton_miles(df, cSelection=cSelection, truck_range=truck_range, commodity=commodity, fuel=i_fuel, greet_class='all')
         n, bins = np.histogram(df[cFuel]['GREET_CLASS'], bins=[0.5,1.5,2.5,3.5,4.5], weights=annual_ton_miles_fuel)
         n_err = np.sqrt(np.histogram(df[cFuel]['GREET_CLASS'], bins=[0.5,1.5,2.5,3.5,4.5], weights=annual_ton_miles_fuel**2)[0])
-        plt.bar(InfoObjects.GREET_classes, n, width = 0.4, alpha=1, zorder=1, label=InfoObjects.fuels_dict[i_fuel], bottom=bottom)
+        plt.bar(InfoObjects.GREET_classes_dict.values(), n, width = 0.4, alpha=1, zorder=1, label=InfoObjects.fuels_dict[i_fuel], bottom=bottom)
         bottom += n
     plt.legend(fontsize=18)
     
@@ -448,7 +316,7 @@ def plot_age_hist(df, commodity='all', truck_range='all', region='US', range_thr
     cSelection = cCommodity&cRange&cRegion&cBaseline
     
     # Get the annual ton miles for all classes
-    annual_ton_miles_all = get_annual_ton_miles(df, cSelection=cSelection, cRange=cRange, cCommodity=cCommodity, truck_range=truck_range, commodity=commodity, fuel='all', greet_class='all')
+    annual_ton_miles_all = get_annual_ton_miles(df, cSelection=cSelection, truck_range=truck_range, commodity=commodity, fuel='all', greet_class='all')
     
     # Bin the data according to the vehicle age, and calculate the associated statistical uncertainty using root sum of squared weights (see eg. https://www.pp.rhul.ac.uk/~cowan/stat/notes/errors_with_weights.pdf)
     fig = plt.figure(figsize = (10, 7))
@@ -471,10 +339,10 @@ def plot_age_hist(df, commodity='all', truck_range='all', region='US', range_thr
     bottom = np.zeros(17)
     for i_class in range(1,5):
         cClass = (df['GREET_CLASS'] == i_class) & cSelection
-        annual_ton_miles_fuel = get_annual_ton_miles(df, cSelection=cSelection, cRange=cRange, cCommodity=cCommodity, truck_range=truck_range, commodity=commodity, fuel='all', greet_class=i_class)
+        annual_ton_miles_fuel = get_annual_ton_miles(df, cSelection=cSelection, truck_range=truck_range, commodity=commodity, fuel='all', greet_class=i_class)
         n, bins = np.histogram(df[cClass]['ACQUIREYEAR']-1, bins=np.arange(18)-0.5, weights=annual_ton_miles_fuel)
         n_err = np.sqrt(np.histogram(df[cClass]['ACQUIREYEAR']-1, bins=np.arange(18)-0.5, weights=annual_ton_miles_fuel**2)[0])
-        plt.bar(range(17), n, width = 0.4, alpha=1, zorder=1, label=InfoObjects.GREET_classes[i_class-1], bottom=bottom)
+        plt.bar(range(17), n, width = 0.4, alpha=1, zorder=1, label=InfoObjects.GREET_classes_dict[i_class], bottom=bottom)
         bottom += n
         
     plt.legend(fontsize=18)
@@ -571,7 +439,7 @@ def plot_payload_hist(df, commodity='all', truck_range='all', region='US', range
         return
     
     # Get the annual ton miles for all classes
-    annual_ton_miles_all = get_annual_ton_miles(df, cSelection=cSelection, cRange=cRange, cCommodity=cCommodity, truck_range=truck_range, commodity=commodity, fuel='all', greet_class='all')
+    annual_ton_miles_all = get_annual_ton_miles(df, cSelection=cSelection, truck_range=truck_range, commodity=commodity, fuel='all', greet_class='all')
     
     # Bin the data according to the vehicle age, and calculate the associated statistical uncertainty using root sum of squared weights (see eg. https://www.pp.rhul.ac.uk/~cowan/stat/notes/errors_with_weights.pdf)
     payload = (df[cSelection]['WEIGHTAVG'] - df[cSelection]['WEIGHTEMPTY']) * LB_TO_TONS
@@ -582,7 +450,7 @@ def plot_payload_hist(df, commodity='all', truck_range='all', region='US', range
     if greet_class == 'all':
         greet_class_title = 'all'
     else:
-        greet_class_title = InfoObjects.GREET_classes[greet_class-1]
+        greet_class_title = InfoObjects.GREET_classes_dict[greet_class]
     plt.title(f'Commodity: {commodity_title}\nGREET Class: {greet_class_title}', fontsize=20)
     plt.ylabel('Commodity flow (ton-miles)', fontsize=20)
     plt.xlabel('Payload (tons)', fontsize=20)
@@ -611,7 +479,7 @@ def plot_payload_hist(df, commodity='all', truck_range='all', region='US', range
     if greet_class == 'all':
         greet_class_str = 'all'
     else:
-        greet_class_str = (InfoObjects.GREET_classes[greet_class-1]).replace(' ', '_').replace('-', '_')
+        greet_class_str = (InfoObjects.GREET_classes_dict[greet_class]).replace(' ', '_').replace('-', '_')
     
     plt.tight_layout()
     print(f'Saving figure to plots/payload_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}_greet_class_{greet_class_str}.png')
@@ -675,10 +543,10 @@ plot_greet_class_hist(df_vius, commodity='all', truck_range='all', region='US', 
 #    for commodity in InfoObjects.pretty_commodities_dict:
 #        plot_greet_class_hist(df_vius, region=state, commodity=commodity)
 
-## Make distributions of GREET truck class with respect to both commodity and range
-#for truck_range in InfoObjects.pretty_range_dict:
-#    for commodity in InfoObjects.pretty_commodities_dict:
-#        plot_greet_class_hist(df_vius, commodity=commodity, truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0)
+# Make distributions of GREET truck class with respect to both commodity and range
+for truck_range in InfoObjects.pretty_range_dict:
+    for commodity in InfoObjects.pretty_commodities_dict:
+        plot_greet_class_hist(df_vius, commodity=commodity, truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0)
 
 ## Make distributions of GREET truck class and fuel types for each vehicle range
 #for truck_range in InfoObjects.pretty_range_dict:
