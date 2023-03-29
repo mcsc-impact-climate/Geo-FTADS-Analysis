@@ -119,10 +119,10 @@ FAF5_VIUS_commodity_map = {
         'FAF5': ['Alcoholic beverages'],
         'short name': 'alcohol'
     },
-    'Nonmetallic mineral products': {
+    'Nonmetallic minerals': {
         'VIUS': ['PNONMETAL'],
-        'FAF5': ['Building stone', 'Natural sands', 'Gravel', 'Nonmetallic minerals'],
-        'short name': 'nonmetal_min_prods'
+        'FAF5': ['Nonmetallic minerals'],
+        'short name': 'nonmetal_mins'
     },
     'Metallic ores': {
         'VIUS': ['PORES'],
@@ -191,12 +191,12 @@ FAF5_VIUS_commodity_map = {
     },
     'Miscellaneous manufactured products': {
         'VIUS': ['PMISCPROD'],
-        'FAF5': ['Textiles/leather', 'Misc. mfg. prods.', 'motorized vehicles'],
+        'FAF5': ['Textiles/leather', 'Misc. mfg. prods.', 'Motorized vehicles'],
         'short name': 'misc_manuf_prods'
     },
     'Nonmetallic mineral products': {
         'VIUS': ['PNONMETAL'],
-        'FAF5': ['Nonmetal min. prods.'],
+        'FAF5': ['Nonmetal min. prods.', 'Building stone', 'Natural sands', 'Gravel'],
         'short name': 'nonmetal_min_prods'
     },
     'Base metal in primary or semifinished forms': {
