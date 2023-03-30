@@ -238,6 +238,24 @@ def make_basic_selections(df, commodity):
     cSelection = cCommodity&cBaseline&cFuel
     
     return cSelection
+    
+def make_commodities_list():
+    '''
+    Makes a list of all aggregated commodities listed and specified in the FAF5_VIUS_commodity_map
+        
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    commodities_list (list): List of strings, where each string represents an aggregated commodity in the FAF5_VIUS_commodity_map
+        
+    NOTE: None.
+    '''
+    commodities_list = list(InfoObjects.FAF5_VIUS_commodity_map)
+    commodities_list.append('all')
+    return commodities_list
 
 def make_class_fuel_dist(commodity='all'):
     '''
@@ -297,12 +315,20 @@ def make_class_fuel_dist(commodity='all'):
     
     return class_fuel_dist
     
-def make_commodities_list():
-    commodities_list = list(InfoObjects.FAF5_VIUS_commodity_map)
-    commodities_list.append('all')
-    return commodities_list
-    
 def make_all_class_fuel_dists():
+    '''
+    Makes a dictionary containing normalized distributions (and uncertainty) of ton-miles with respect to GREET truck class (produced by make_class_fuel_dist()) for each commodity
+        
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    all_class_fuel_dists (dictionary): Dictionary containing the output of make_class_fuel_dist() for each commodity
+        
+    NOTE: None.
+    '''
     commodities_list = make_commodities_list()
     all_class_fuel_dists = {}
     for commodity in commodities_list:
@@ -310,6 +336,22 @@ def make_all_class_fuel_dists():
     return all_class_fuel_dists
     
 def calculate_payload_per_class(commodity='all'):
+    '''
+    Calculates the average payload (and standard deviation) per GREET truck class for the given commodity type
+        
+    Parameters
+    ----------
+    commodity (string): Commodity for which to evaluate the average payload per GREET truck class
+
+    Returns
+    -------
+    payload_per_class (dictionary): Dictionary containing:
+        - 'class' (list): list of GREET truck classes
+        - 'average payload' (1D np.array): Array containing the average payload for each GREET truck class
+        - 'standard deviation' (1D np.array): Array containing the standard deviation of payloads for each GREET truck class
+        
+    NOTE: None
+    '''
 
     # Read in the VIUS data as a pandas dataframe
     df = get_df_vius()
@@ -318,7 +360,7 @@ def calculate_payload_per_class(commodity='all'):
     cSelection = make_basic_selections(df, commodity)
     
     # Dictionary to contain string identifier of each class ('class'), and the associated average payload and standard deviation (weighted by ton-miles) with respect to the class
-    payload_class_dist = {'class': [], 'average payload': np.zeros(0), 'standard deviation': np.zeros(0)}
+    payload_per_class = {'class': [], 'average payload': np.zeros(0), 'standard deviation': np.zeros(0)}
     
     for greet_class in ['Heavy GVW', 'Medium GVW', 'Light GVW']:
         # Get the integer identifier associated with the evaluated GREET class in the VIUS dataframe
@@ -342,13 +384,27 @@ def calculate_payload_per_class(commodity='all'):
         std_payload = np.sqrt(variance_payload)
         
         # Fill in the payload distribution
-        payload_class_dist['class'].append(greet_class)
-        payload_class_dist['average payload'] = np.append(payload_class_dist['average payload'], average_payload)
-        payload_class_dist['standard deviation'] = np.append(payload_class_dist['standard deviation'], std_payload)
+        payload_per_class['class'].append(greet_class)
+        payload_per_class['average payload'] = np.append(payload_per_class['average payload'], average_payload)
+        payload_per_class['standard deviation'] = np.append(payload_per_class['standard deviation'], std_payload)
         
-    return payload_class_dist
+    return payload_per_class
         
 def calculate_all_payloads_per_class():
+    '''
+    Calculates the average payload (and standard deviation) per GREET truck class for each commodity type, using calculate_payload_per_class()
+        
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    all_payloads_per_class (dictionary): Dictionary containing the output of calculate_payload_per_class() for each commodity
+        
+    NOTE: None
+    '''
+
     commodities_list = make_commodities_list()
     all_payloads_per_class = {}
     for commodity in commodities_list:
@@ -357,6 +413,19 @@ def calculate_all_payloads_per_class():
     
     
 def calculate_payload_per_commodity(greet_class='all'):
+    '''
+    Calculates the mean payload (and standard deviation) for each commodity, within the given GREET class, and saves the info as a dictionary
+        
+    Parameters
+    ----------
+    greet_class (string): GREET GVW class within which to calculate the mean payload per commodity
+
+    Returns
+    -------
+    payload_per_commodity (dictionary): Dictionary containing the mean payload and standard deviation for each commodity.
+        
+    NOTE: None.
+    '''
 
     # Read in the VIUS data as a pandas dataframe
     df = get_df_vius()
@@ -365,7 +434,7 @@ def calculate_payload_per_commodity(greet_class='all'):
     cBaseline = make_basic_selections(df, commodity='all')
     
     # Calculate mean payload and standard deviation for each commodity
-    payload_dist = {
+    payload_per_commodity = {
         'commodity': [],
         'average payload': np.zeros(0),
         'standard deviation': np.zeros(0)
@@ -405,11 +474,11 @@ def calculate_payload_per_commodity(greet_class='all'):
         std_payload = np.sqrt(variance_payload)
         
         # Fill in the payload distribution
-        payload_dist['commodity'].append(commodity)
-        payload_dist['average payload'] = np.append(payload_dist['average payload'], average_payload)
-        payload_dist['standard deviation'] = np.append(payload_dist['standard deviation'], std_payload)
+        payload_per_commodity['commodity'].append(commodity)
+        payload_per_commodity['average payload'] = np.append(payload_per_commodity['average payload'], average_payload)
+        payload_per_commodity['standard deviation'] = np.append(payload_per_commodity['standard deviation'], std_payload)
     
-    return payload_dist
+    return payload_per_commodity
         
     
 def plot_bar(bar_heights, uncertainty, bin_names, title, str_save, bin_height_title='', horizontal_bars=False):
@@ -465,11 +534,48 @@ def plot_bar(bar_heights, uncertainty, bin_names, title, str_save, bin_height_ti
     plt.savefig(f'plots/{str_save}.pdf')
     plt.close()
     
-def save_as_csv_per_class(all_class_dists, filename, info_name, unc_name):
+def save_as_csv_per_class(info_per_class_dict, filename, info_name, unc_name):
+    '''
+    Converts a dictionary containing information with respect to GREET glass for each type of commodity to a pandas DataFrame whose:
+        - columns represent the info (or associated uncertainty) for each commodity
+        - rows represent different GREET glasses (currently three: {Heavy GVW, Medium GVW, Light GVW})
+        
+    and saves the DataFrame to a csv file.
+    
+    Parameters
+    ----------
+    info_per_class_dict (dictionary): Dictionary of the following form:
+        
+        info_per_class_dict =
+        {
+            commodity 1 (string):
+            {
+                    class (string): list of GREET class names,
+                    info (string): np.array whose elements contain info corresponding to each GREET class,
+                    uncertainty (string): np.array whose elements contain the uncertainty associated with the elements of the above info array
+            },
+            
+            [...]
+            
+            commodity N (string): { [...] }
+        }
+    
+    filename (string): String to include in the csv filename to identify the info being saved
+    
+    info_name (string): keyname of the 'info (string)' key in each sub-dictionary of info_per_class_dict that contains the info to be saved
+    
+    unc_name (string): keyname of the 'uncertainty (string)' key in each sub-dictionary of info_per_class_dict that contains the unceratinty associated with the info to be saved
+
+    Returns
+    -------
+    None
+        
+    NOTE: None.
+    '''
     df_save = pd.DataFrame()
     
     # Make a column with the class names
-    df_save['class'] = all_class_dists['all']['class']
+    df_save['class'] = info_per_class_dict['all']['class']
     
     # Make a column for each commodity
     for commodity in all_class_dists:
@@ -477,8 +583,8 @@ def save_as_csv_per_class(all_class_dists, filename, info_name, unc_name):
             commodity_save = 'all commodities'
         else:
             commodity_save = commodity
-        df_save[commodity_save] = all_class_dists[commodity][info_name]
-        df_save[f'{commodity_save} (unc)'] = all_class_dists[commodity][unc_name]
+        df_save[commodity_save] = info_per_class_dict[commodity][info_name]
+        df_save[f'{commodity_save} (unc)'] = info_per_class_dict[commodity][unc_name]
     
     savePath = f'{top_dir}/data/VIUS_Results'
     if not os.path.exists(savePath):
@@ -512,15 +618,15 @@ def main():
             str_save = f"average_payload_per_greet_class_commodity_{InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name']}"
             commodity_title=commodity
         payload_class_dist = all_payloads_per_class[commodity]
-        plot_bar(bar_heights=payload_class_dist['average payload'], uncertainty=payload_class_dist['standard deviation'], bin_names=payload_class_dist['class'], title=f'Average payload, weighted by ton-miles carrying {commodity}\nError bars are weighted standard deviation', str_save=str_save)
+        plot_bar(bar_heights=payload_class_dist['average payload'], uncertainty=payload_class_dist['standard deviation'], bin_names=payload_class_dist['class'], title=f'Average payload, weighted by ton-miles carrying {commodity}\nError bars are weighted standard deviation', bin_height_title='Average payload (tons)', str_save=str_save)
 
-#    # Evaluate and plot the distribution of average payload (weighted by ton-miles carried) with respect to commodities
-#    payload_per_commodity = calculate_payload_per_commodity()
-#    plot_bar(bar_heights=payload_per_commodity['average payload'], uncertainty=payload_per_commodity['standard deviation'], bin_names=payload_per_commodity['commodity'], title=f'Average payload for each commodity, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save='payload_per_commodity', bin_height_title='Average payload (tons)', horizontal_bars=True)
+    # Evaluate and plot the distribution of average payload (weighted by ton-miles carried) with respect to commodities
+    payload_per_commodity = calculate_payload_per_commodity()
+    plot_bar(bar_heights=payload_per_commodity['average payload'], uncertainty=payload_per_commodity['standard deviation'], bin_names=payload_per_commodity['commodity'], title=f'Average payload for each commodity, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save='payload_per_commodity', bin_height_title='Average payload (tons)', horizontal_bars=True)
     
-#    # Evaluate and plot the distribution of average payload (weighted by ton-miles carried) with respect to commodities within each class
-#    for greet_class in ['Heavy GVW', 'Medium GVW', 'Light GVW']:
-#        payload_per_commodity = calculate_payload_per_commodity(greet_class)
-#        plot_bar(bar_heights=payload_per_commodity['average payload'], uncertainty=payload_per_commodity['standard deviation'], bin_names=payload_per_commodity['commodity'], title=f'Average payload for each commodity in the {greet_class} class, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save=f"payload_per_commodity_{greet_class.replace(' ', '_')}", bin_height_title='Average payload (tons)', horizontal_bars=True)
+    # Evaluate and plot the distribution of average payload (weighted by ton-miles carried) with respect to commodities within each class
+    for greet_class in ['Heavy GVW', 'Medium GVW', 'Light GVW']:
+        payload_per_commodity = calculate_payload_per_commodity(greet_class)
+        plot_bar(bar_heights=payload_per_commodity['average payload'], uncertainty=payload_per_commodity['standard deviation'], bin_names=payload_per_commodity['commodity'], title=f'Average payload for each commodity in the {greet_class} class, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save=f"payload_per_commodity_{greet_class.replace(' ', '_')}", bin_height_title='Average payload (tons)', horizontal_bars=True)
 
 main()
