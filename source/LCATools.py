@@ -27,6 +27,7 @@ def get_top_dir():
     top_dir (string): Path to the top level of the git repo
         
     NOTE: None
+    
     '''
     source_path = Path(__file__).resolve()
     source_dir = source_path.parent
@@ -39,7 +40,7 @@ top_dir = get_top_dir()
     
 def readGreetWtwTruck(csv_path, commodity='all'):
     '''
-    Read in a csv file containing GREET outputs for the trucking well-to-wheels (WTW) module, and reformats to match the rail module
+    Reads in a csv file containing GREET outputs for the trucking well-to-wheels (WTW) module, and reformats to match the rail module
     
     Parameters
     ----------
@@ -50,6 +51,8 @@ def readGreetWtwTruck(csv_path, commodity='all'):
     Returns
     -------
     df_lca (pandas dataframe): dataframe containing energy use [Btu/ton-mile], fuel use [Gallons/ton-mile], or emissions p[g/ton-mile] for the trucking module
+            
+    NOTE: None
     
     '''
     # Read in the csv as a pandas dataframe
@@ -65,13 +68,47 @@ def readGreetWtwTruck(csv_path, commodity='all'):
     return df_lca
     
 def get_aggregated_commodity(faf5_commodity):
+    '''
+    Gets the aggregated commodity associated with the given FAF5 commodity from the mapping specified in the FAF5_VIUS_commodity_map
+    
+    Parameters
+    ----------
+    faf5_commodity (string): Name of the FAF5 commodity whose associated aggregated commodity name we want to determine
+
+    Returns
+    -------
+    aggregated_commodity (string): Name of the aggregated commodity associated with the input FAF5 commodity
+            
+    NOTE: If the FAF5 commodity isn't found in the FAF5_VIUS_commodity_map, the funtion prints our an error message and return None
+    
+    '''
     for aggregated_commodity in InfoObjects.FAF5_VIUS_commodity_map:
         if faf5_commodity in InfoObjects.FAF5_VIUS_commodity_map[aggregated_commodity]['FAF5']:
             return aggregated_commodity
     print(f'Could not find FAF5 commodity {faf5_commodity} in FAF5_VIUS_commodity_map')
     return None
     
-def calculate_df_lca_weighted_average(df_lcas, weights, normalize_by_payload=False, payload=None):
+def calculate_df_lca_weighted_average(df_lcas, weights, normalize_by_payload=False, payloads=None):
+    '''
+    Calculates the weighted average over a list of dataframes, for each column containing lifecycle stage emission intensities ('WTP', 'PTW' or 'WTW'), using a list of weights associated with each dataframe.
+    
+    Parameters
+    ----------
+    df_lcas (list of pd.DataFrames): List of pandas dataframes. Each list element corresponds to a different GREET truck class. Each dataframe contains lifecycle emissions at different stages (one column per stage) of various pollutants (one row per pollutant)
+    
+    weights (list of floats): List containing the weight associated with each GREET truck class
+    
+    normalize_by_payload (boolean): Flag to indicate whether to divide the emission intensities (in g / mile) by the average payload for each GREET class to obtain intensities in g / ton-mile
+    
+    payloads (listof floats): List containing the payload associated with each GREET truck class
+
+    Returns
+    -------
+    df_lca_weighted_average (pd.DataFrame): Dataframe in the same format as those in the provided df_lcas list, but emission intensities in each column are weighted averages of the associated columns in each dataframe within df_lcas
+            
+    NOTE: None
+    
+    '''
     df_lca_weighted_average = df_lcas[0].copy(deep=True)
     
     sum_of_weights = {}
@@ -81,13 +118,27 @@ def calculate_df_lca_weighted_average(df_lcas, weights, normalize_by_payload=Fal
     for column in ['WTP', 'PTW', 'WTW']:
         for i_class in range(len(df_lcas)):
             if normalize_by_payload:
-                df_lca_weighted_average[column] += df_lcas[i_class][column] * weights[i_class] / payload[i_class]
+                df_lca_weighted_average[column] += df_lcas[i_class][column] * weights[i_class] / payloads[i_class]
             else:
                 df_lca_weighted_average[column] += df_lcas[i_class][column] * weights[i_class]
     
     return df_lca_weighted_average
     
 def evaluateGreetWtwTruck(faf5_commodity='all'):
+    '''
+    Evaluates emission intensities for each commodity, using a weighted sum over emission intensities for each GREET truck class. The weights are given by the relative amount of ton-miles carried by each GREET truck class for the given commodity, based on the VIUS data. Emission intensities can also be normalized by the average payload evaluated for each commodity and GREET class.
+    
+    Parameters
+    ----------
+    faf5_commodity (string): FAF5 commodity for which to evaluate the overall emission intensities
+
+    Returns
+    -------
+    df_lca_weighted_average: Dataframe containing the evaluated emission intensity for each pollutant (rows) and lifecycle stage (columns) for the given commodity
+            
+    NOTE: None
+    
+    '''
     
     # Get the name of the aggregated commodity associated with the given FAF5 commodity
     if faf5_commodity == 'all':
@@ -121,6 +172,20 @@ def evaluateGreetWtwTruck(faf5_commodity='all'):
     
     
 def plot_truck_emissions_per_class():
+    '''
+    Calculates and plots the CO2 emissions evaluated by GREET in each lifecycle stage (well-to-pump, pump-to-wheel and well-to-wheel) for each class of heavy-duty truck
+    
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+            
+    NOTE: None
+    
+    '''
     co2_emission_intensity = {'class': [], 'WTP': [], 'PTW': [], 'WTW': []}
     for greet_class in ['Heavy GVW', 'Medium GVW', 'Light GVW']:
         greet_class_info = greet_class.lower().replace(' ', '_')
@@ -148,6 +213,20 @@ def plot_truck_emissions_per_class():
     plt.savefig('plots/co2_emissions_per_class.pdf')
     
 def plot_truck_emissions_per_commodity(normalize_by_payload = False):
+    '''
+    Calculates and plots the calculated CO2 emissions for each commodity
+    
+    Parameters
+    ----------
+    normalize_by_payload (boolean): Flag to indicate whether to plot emission rates normalized by payload ( to obtain g / ton-mile rather than g / mile)
+
+    Returns
+    -------
+    None
+            
+    NOTE: None
+    
+    '''
     co2_emission_intensity = {'commodity': [], 'WTP': [], 'PTW': [], 'WTW': []}
     
     import matplotlib.pyplot as plt
@@ -212,6 +291,8 @@ def readGreetWtwRail(csv_path, commodity='all'):
     -------
     df_lca (pandas dataframe): dataframe containing energy use [Btu], fuel use [Gallons], or emissions p[g/ton-mile] for the rail module
     
+    NOTE: None
+    
     '''
     
     # Read in the csv as a pandas dataframe
@@ -236,6 +317,8 @@ def readGreetWthShip(csv_path_feedstock, csv_path_conversion, csv_path_combustio
     Returns
     -------
     df_lca (pandas dataframe): dataframe containing energy use [Btu], fuel use [Gallons], or emissions p[g/ton-mile] for the ship module
+            
+    NOTE: None
     
     '''
     
@@ -269,6 +352,8 @@ def readSesameWtwTruck(commodity='all'):
     Returns
     -------
     df_lca (pandas dataframe): dataframe containing CO2e for the sesame HDV module
+            
+    NOTE: None
     
     '''
     import sys
