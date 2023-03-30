@@ -169,7 +169,7 @@ FAF5_VIUS_commodity_map = {
         'FAF5': ['Fertilizers'],
         'short name': 'fertilizer'
     },
-    'Chemical prodsucts': {
+    'Chemical products': {
         'VIUS': ['POTHERCHEM'],
         'FAF5': ['Chemical prods.'],
         'short name': 'chem_prods'

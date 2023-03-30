@@ -578,7 +578,7 @@ def save_as_csv_per_class(info_per_class_dict, filename, info_name, unc_name):
     df_save['class'] = info_per_class_dict['all']['class']
     
     # Make a column for each commodity
-    for commodity in all_class_dists:
+    for commodity in info_per_class_dict:
         if commodity =='all':
             commodity_save = 'all commodities'
         else:
@@ -593,19 +593,19 @@ def save_as_csv_per_class(info_per_class_dict, filename, info_name, unc_name):
     print(f'Saving dataframe to {savePath}/{filename}_per_class.csv')
 
 def main():
-    # Evaluate and plot the distribution of ton-miles with respect to GREET class and fuel type for each commodity
-    all_class_fuel_dists = make_all_class_fuel_dists()
-    save_as_csv_per_class(all_class_fuel_dists, filename='norm_distribution', info_name='normalized distribution', unc_name='statistical uncertainty')
-
-    for commodity in all_class_fuel_dists:
-        if commodity=='all':
-            str_save = f"norm_dist_greet_class_fuel_commodity_all"
-            commodity_title='all commodities'
-        else:
-            str_save = f"norm_dist_greet_class_fuel_commodity_{InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name']}"
-            commodity_title=commodity
-        class_fuel_dist = all_class_fuel_dists[commodity]
-        plot_bar(bar_heights=class_fuel_dist['normalized distribution'], uncertainty=class_fuel_dist['statistical uncertainty'], bin_names=class_fuel_dist['class'], title=f'Distribution of ton-miles carrying {commodity_title}\n(normalized to unit sum)', str_save=str_save)
+#    # Evaluate and plot the distribution of ton-miles with respect to GREET class and fuel type for each commodity
+#    all_class_fuel_dists = make_all_class_fuel_dists()
+#    save_as_csv_per_class(all_class_fuel_dists, filename='norm_distribution', info_name='normalized distribution', unc_name='statistical uncertainty')
+#
+#    for commodity in all_class_fuel_dists:
+#        if commodity=='all':
+#            str_save = f"norm_dist_greet_class_fuel_commodity_all"
+#            commodity_title='all commodities'
+#        else:
+#            str_save = f"norm_dist_greet_class_fuel_commodity_{InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name']}"
+#            commodity_title=commodity
+#        class_fuel_dist = all_class_fuel_dists[commodity]
+#        plot_bar(bar_heights=class_fuel_dist['normalized distribution'], uncertainty=class_fuel_dist['statistical uncertainty'], bin_names=class_fuel_dist['class'], title=f'Distribution of ton-miles carrying {commodity_title}\n(normalized to unit sum)', str_save=str_save)
 
     # Evaluate and plot the distribution of average payload with respect to GREET class for each commodity
     all_payloads_per_class = calculate_all_payloads_per_class()
@@ -618,15 +618,15 @@ def main():
             str_save = f"average_payload_per_greet_class_commodity_{InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name']}"
             commodity_title=commodity
         payload_class_dist = all_payloads_per_class[commodity]
-        plot_bar(bar_heights=payload_class_dist['average payload'], uncertainty=payload_class_dist['standard deviation'], bin_names=payload_class_dist['class'], title=f'Average payload, weighted by ton-miles carrying {commodity}\nError bars are weighted standard deviation', bin_height_title='Average payload (tons)', str_save=str_save)
+        plot_bar(bar_heights=payload_class_dist['average payload'], uncertainty=payload_class_dist['standard deviation'], bin_names=payload_class_dist['class'], title=f'Average payload, weighted by ton-miles carrying {commodity_title}\nError bars are weighted standard deviation', bin_height_title='Average payload (tons)', str_save=str_save)
 
-    # Evaluate and plot the distribution of average payload (weighted by ton-miles carried) with respect to commodities
-    payload_per_commodity = calculate_payload_per_commodity()
-    plot_bar(bar_heights=payload_per_commodity['average payload'], uncertainty=payload_per_commodity['standard deviation'], bin_names=payload_per_commodity['commodity'], title=f'Average payload for each commodity, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save='payload_per_commodity', bin_height_title='Average payload (tons)', horizontal_bars=True)
+#    # Evaluate and plot the distribution of average payload (weighted by ton-miles carried) with respect to commodities
+#    payload_per_commodity = calculate_payload_per_commodity()
+#    plot_bar(bar_heights=payload_per_commodity['average payload'], uncertainty=payload_per_commodity['standard deviation'], bin_names=payload_per_commodity['commodity'], title=f'Average payload for each commodity, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save='payload_per_commodity', bin_height_title='Average payload (tons)', horizontal_bars=True)
     
-    # Evaluate and plot the distribution of average payload (weighted by ton-miles carried) with respect to commodities within each class
-    for greet_class in ['Heavy GVW', 'Medium GVW', 'Light GVW']:
-        payload_per_commodity = calculate_payload_per_commodity(greet_class)
-        plot_bar(bar_heights=payload_per_commodity['average payload'], uncertainty=payload_per_commodity['standard deviation'], bin_names=payload_per_commodity['commodity'], title=f'Average payload for each commodity in the {greet_class} class, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save=f"payload_per_commodity_{greet_class.replace(' ', '_')}", bin_height_title='Average payload (tons)', horizontal_bars=True)
+#    # Evaluate and plot the distribution of average payload (weighted by ton-miles carried) with respect to commodities within each class
+#    for greet_class in ['Heavy GVW', 'Medium GVW', 'Light GVW']:
+#        payload_per_commodity = calculate_payload_per_commodity(greet_class)
+#        plot_bar(bar_heights=payload_per_commodity['average payload'], uncertainty=payload_per_commodity['standard deviation'], bin_names=payload_per_commodity['commodity'], title=f'Average payload for each commodity in the {greet_class} class, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save=f"payload_per_commodity_{greet_class.replace(' ', '_')}", bin_height_title='Average payload (tons)', horizontal_bars=True)
 
 main()
