@@ -510,7 +510,7 @@ def plot_mpg_scatter(df, x_var='gvw', nBins=30):
     '''
     fig = plt.figure(figsize = (10, 7))
     plt.ylabel('Miles per Gallon', fontsize=20)
-    cSelection = make_basic_selections(df) & (~df['MPG'].isna()) & (~df['WEIGHTAVG'].isna()) #& (df['WEIGHTAVG'] > 20000) & (df['WEIGHTAVG'] < 75000) #& (df['WEIGHTAVG'] > 8500)
+    cSelection = make_basic_selections(df) & (~df['MPG'].isna()) & (~df['WEIGHTAVG'].isna()) & (~df['ACQUIREYEAR'].isna()) #& (df['WEIGHTAVG'] > 20000) & (df['WEIGHTAVG'] < 75000) #& (df['WEIGHTAVG'] > 8500)
 
     # Calculate the point density
     if x_var == 'gvw':
@@ -518,11 +518,33 @@ def plot_mpg_scatter(df, x_var='gvw', nBins=30):
         x_nosel = df['WEIGHTAVG']
         plt.title('Vehicle weight dependence of mpg for diesel trucks', fontsize=20)
         plt.xlabel('Average Gross Vehicle Weight (lb)', fontsize=20)
+        bin_title = 'lb'
+        min_bin = min(x)
+        max_gin = max(x)
     elif x_var == 'payload':
         x = (df['WEIGHTAVG'][cSelection] - df['WEIGHTEMPTY'][cSelection]) * LB_TO_TONS
         x_nosel = (df['WEIGHTAVG'] - df['WEIGHTEMPTY']) * LB_TO_TONS
         plt.title('Payload dependence of mpg for diesel trucks', fontsize=20)
         plt.xlabel('Average Payload (tons)', fontsize=20)
+        bin_title = 'ton'
+        min_bin = min(x)
+        max_bin = max(x)
+    elif x_var == 'age':
+        x = df['ACQUIREYEAR'][cSelection] - 1
+        nBins = 16
+        x_nosel = df['ACQUIREYEAR'] - 1
+        plt.title('Age dependence of mpg for diesel trucks', fontsize=20)
+        plt.xlabel('Age Payload (years)', fontsize=20)
+        bin_title = 'year'
+        min_bin=0
+        max_bin=16
+        
+        ticklabels = []
+        for i in range(16):
+            ticklabels.append(str(i))
+        ticklabels.append('>15')
+        plt.xticks(np.arange(17), ticklabels)
+        
     mpg = df['MPG'][cSelection]/10.
     #xy = np.vstack([x, mpg])
     #z = gaussian_kde(xy)(xy)
@@ -531,7 +553,7 @@ def plot_mpg_scatter(df, x_var='gvw', nBins=30):
     plt.plot(x, mpg, 'o', markersize=2)
 
     # Plot the average and standard deviation
-    bins = np.linspace(min(x), max(x), nBins+1)
+    bins = np.linspace(min_bin, max_bin, nBins+1)
     bin_width = bins[1]-bins[0]
     bin_centers = bins[:-1] + 0.5*bin_width
     mpg_avs = np.zeros(0)
@@ -551,8 +573,13 @@ def plot_mpg_scatter(df, x_var='gvw', nBins=30):
         mpg_avs = np.append(mpg_avs, mpg_av)
         mpg_stds = np.append(mpg_stds, mpg_std)
 
-    plt.plot(bin_centers, mpg_avs, color='red', label = f'Average MPG per {int(bin_width)}-lb bin\n(weighted by average annual ton-miles)', linewidth=2)
-    plt.fill_between(bin_centers, mpg_avs+mpg_stds, mpg_avs-mpg_stds, color='orange', alpha=0.5, zorder=10, label='Standard deviation of the average')
+    if x_var == 'age':
+        x_plot = range(16)
+    else:
+        x_plot = bin_centers
+        
+    plt.plot(x_plot, mpg_avs, color='red', label = f'Average MPG per {int(bin_width)}-{bin_title} bin\n(weighted by average annual ton-miles)', linewidth=2)
+    plt.fill_between(x_plot, mpg_avs+mpg_stds, mpg_avs-mpg_stds, color='orange', alpha=0.5, zorder=10, label='Standard deviation of the average')
     plt.legend(fontsize=16)
     
     print(f'Saving figure to plots/mpg_vs_{x_var}.png')
@@ -716,9 +743,12 @@ df_agg_coarse_range = make_aggregated_df(df_vius, range_map=InfoObjects.FAF5_VIU
 
 ######################################### Plot some scatter plots #########################################
 # Fuel efficiency (mpg) vs. gross vehicle weight
-plot_mpg_scatter(df_agg, x_var='gvw')
+#plot_mpg_scatter(df_agg, x_var='gvw')
 
 # Fuel efficiency (mpg) vs. payload
-plot_mpg_scatter(df_agg, x_var='payload')
+#plot_mpg_scatter(df_agg, x_var='payload')
+
+# Fuel efficiency (mpg) vs. payload
+#plot_mpg_scatter(df_agg, x_var='age')
 
 ###########################################################################################################
