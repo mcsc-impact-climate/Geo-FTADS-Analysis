@@ -205,7 +205,7 @@ def get_df_vius():
     df_vius = make_aggregated_df(df_vius)
     return df_vius
     
-def make_basic_selections(df, commodity):
+def make_basic_selections(df, commodity='all'):
     '''
     Makes basic selections to be applied to the VIUS data for all analyses of loads carrying the given commodity
         
@@ -629,4 +629,4 @@ def main():
 #        payload_per_commodity = calculate_payload_per_commodity(greet_class)
 #        plot_bar(bar_heights=payload_per_commodity['average payload'], uncertainty=payload_per_commodity['standard deviation'], bin_names=payload_per_commodity['commodity'], title=f'Average payload for each commodity in the {greet_class} class, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save=f"payload_per_commodity_{greet_class.replace(' ', '_')}", bin_height_title='Average payload (tons)', horizontal_bars=True)
 
-main()
+#main()

@@ -13,9 +13,10 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib
 import InfoObjects
-from ViusTools import get_top_dir, make_aggregated_df, add_GREET_class, get_annual_ton_miles
-matplotlib.rc('xtick', labelsize=20)
-matplotlib.rc('ytick', labelsize=20)
+from ViusTools import get_top_dir, make_aggregated_df, add_GREET_class, get_annual_ton_miles, make_basic_selections
+from scipy.stats import gaussian_kde
+matplotlib.rc('xtick', labelsize=18)
+matplotlib.rc('ytick', labelsize=18)
 
 # Conversion from pounds to tons
 LB_TO_TONS = 1/2000.
@@ -487,9 +488,78 @@ def plot_payload_hist(df, commodity='all', truck_range='all', region='US', range
     plt.savefig(f'plots/payload_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}_greet_class_{greet_class_str}.pdf')
     #plt.show()
     plt.close()
+    
+def plot_mpg_scatter(df, x_var='gvw', nBins=30):
+    '''
+    Plots a scatterplot of miles per gallon (mpg) as a function of the given variable, and also plots the running average and standard deviation.
+        
+    Parameters
+    ----------
+    df (pd.DataFrame): A pandas dataframe containing the VIUS data
+    
+    x_car (string): String identifier of the variable to plot on the x-axis
+
+    nBins (integer): Number of bins in the x-variable within which to evaluate the running average and standard deviation
+    
+    
+    Returns
+    -------
+    None
+        
+    NOTE: None.
+    '''
+    fig = plt.figure(figsize = (10, 7))
+    plt.ylabel('Miles per Gallon', fontsize=20)
+    cSelection = make_basic_selections(df) & (~df['MPG'].isna()) & (~df['WEIGHTAVG'].isna()) #& (df['WEIGHTAVG'] > 20000) & (df['WEIGHTAVG'] < 75000) #& (df['WEIGHTAVG'] > 8500)
+
+    # Calculate the point density
+    if x_var == 'gvw':
+        x = df['WEIGHTAVG'][cSelection]
+        x_nosel = df['WEIGHTAVG']
+        plt.title('Vehicle weight dependence of mpg for diesel trucks', fontsize=20)
+        plt.xlabel('Average Gross Vehicle Weight (lb)', fontsize=20)
+    elif x_var == 'payload':
+        x = (df['WEIGHTAVG'][cSelection] - df['WEIGHTEMPTY'][cSelection]) * LB_TO_TONS
+        x_nosel = (df['WEIGHTAVG'] - df['WEIGHTEMPTY']) * LB_TO_TONS
+        plt.title('Payload dependence of mpg for diesel trucks', fontsize=20)
+        plt.xlabel('Average Payload (tons)', fontsize=20)
+    mpg = df['MPG'][cSelection]/10.
+    #xy = np.vstack([x, mpg])
+    #z = gaussian_kde(xy)(xy)
+
+    #plt.scatter(x, y, c=z, s=10)
+    plt.plot(x, mpg, 'o', markersize=2)
+
+    # Plot the average and standard deviation
+    bins = np.linspace(min(x), max(x), nBins+1)
+    bin_width = bins[1]-bins[0]
+    bin_centers = bins[:-1] + 0.5*bin_width
+    mpg_avs = np.zeros(0)
+    mpg_stds = np.zeros(0)
+
+    for i_bin in np.arange(nBins):
+        mpg_bin = mpg[(x >= bins[i_bin])&(x < bins[i_bin+1])]
+        if len(mpg_bin) < 5:
+            mpg_avs = np.append(mpg_avs, np.nan)
+            mpg_stds = np.append(mpg_stds, np.nan)
+            continue
+        annual_ton_miles = get_annual_ton_miles(df, cSelection=cSelection&(x_nosel >= bins[i_bin])&(x_nosel < bins[i_bin+1]), truck_range='all', commodity='all', fuel='all', greet_class='all')
+        mpg_av = np.average(mpg_bin, weights=annual_ton_miles)
+        mpg_variance = np.average((mpg_bin - mpg_av)**2, weights=annual_ton_miles)
+        mpg_std = np.sqrt(mpg_variance)
+        
+        mpg_avs = np.append(mpg_avs, mpg_av)
+        mpg_stds = np.append(mpg_stds, mpg_std)
+
+    plt.plot(bin_centers, mpg_avs, color='red', label = f'Average MPG per {int(bin_width)}-lb bin\n(weighted by average annual ton-miles)', linewidth=2)
+    plt.fill_between(bin_centers, mpg_avs+mpg_stds, mpg_avs-mpg_stds, color='orange', alpha=0.5, zorder=10, label='Standard deviation of the average')
+    plt.legend(fontsize=16)
+    
+    print(f'Saving figure to plots/mpg_vs_{x_var}.png')
+    plt.savefig(f'plots/mpg_vs_{x_var}.png')
+    plt.savefig(f'plots/mpg_vs_{x_var}.pdf')
 
 ######################################### Plot some distributions #########################################
-
 # Read in the VIUS data (from https://rosap.ntl.bts.gov/view/dot/42632) as a dataframe
 df_vius = pd.read_csv(f'{top_dir}/data/VIUS_2002/bts_vius_2002_data_items.csv')
 df_vius = add_GREET_class(df_vius)
@@ -528,7 +598,7 @@ df_agg_coarse_range = make_aggregated_df(df_vius, range_map=InfoObjects.FAF5_VIU
 #------- Without aggregated commodities/ranges -------#
 
 # Make a distribution of GREET truck class for all regions, commodities, and vehicle range
-plot_greet_class_hist(df_vius, commodity='all', truck_range='all', region='US', range_threshold=0, commodity_threshold=0)
+#plot_greet_class_hist(df_vius, commodity='all', truck_range='all', region='US', range_threshold=0, commodity_threshold=0)
 
 ## Make distributions of GREET truck class and fuel types for each commodity
 #for commodity in InfoObjects.pretty_commodities_dict:
@@ -544,9 +614,9 @@ plot_greet_class_hist(df_vius, commodity='all', truck_range='all', region='US', 
 #        plot_greet_class_hist(df_vius, region=state, commodity=commodity)
 
 # Make distributions of GREET truck class with respect to both commodity and range
-for truck_range in InfoObjects.pretty_range_dict:
-    for commodity in InfoObjects.pretty_commodities_dict:
-        plot_greet_class_hist(df_vius, commodity=commodity, truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0)
+#for truck_range in InfoObjects.pretty_range_dict:
+#    for commodity in InfoObjects.pretty_commodities_dict:
+#        plot_greet_class_hist(df_vius, commodity=commodity, truck_range=truck_range, region='US', range_threshold=0, commodity_threshold=0)
 
 ## Make distributions of GREET truck class and fuel types for each vehicle range
 #for truck_range in InfoObjects.pretty_range_dict:
@@ -636,7 +706,7 @@ for truck_range in InfoObjects.pretty_range_dict:
 #    for greet_class in range(1,5):
 #        plot_payload_hist(df_agg, region='US', commodity=commodity, truck_range='all', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True, greet_class=greet_class)
 
-#-----------------------------------------------------#ls
+#-----------------------------------------------------#
 
 
 #######################################################################
@@ -644,3 +714,11 @@ for truck_range in InfoObjects.pretty_range_dict:
 ###########################################################################################################
 
 
+######################################### Plot some scatter plots #########################################
+# Fuel efficiency (mpg) vs. gross vehicle weight
+plot_mpg_scatter(df_agg, x_var='gvw')
+
+# Fuel efficiency (mpg) vs. payload
+plot_mpg_scatter(df_agg, x_var='payload')
+
+###########################################################################################################
