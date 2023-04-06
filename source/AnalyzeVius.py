@@ -877,25 +877,17 @@ def add_unloaded_vehicle_weight_class(df):
     return df
         
 
-def plot_trip_range_vs_x(df, x_str, x_title):
+def plot_y_vs_trip_range(df, y_str, y_title):
     '''
-    Plots a kde density scatterplot of the given quantities
+    Plots the given value as a function of trip range, and evaluates the mean and std for each trip range
         
     Parameters
     ----------
     df (pd.DataFrame): A pandas dataframe containing the VIUS data
     
-    x (string): String identifier of the variable to plot on the x-axis
+    y_str (string): String identifier of the variable to plot on the y-axis
     
-    y (string): String identifier of the variable to plot on the y-axis
-    
-    x_title (string): x-axis title
-    
-    y_title (string): y-axis title
-
-    x_save (string): string identifier for the x variable to be included in the filename that the plot is saved to
-    
-    y_save (string): string identifier for the y variable to be included in the filename that the plot is saved to
+    t_title (string): Title to describe the variable plotted on the y-axis
     
     Returns
     -------
@@ -906,32 +898,32 @@ def plot_trip_range_vs_x(df, x_str, x_title):
     
     fig = plt.figure(figsize = (10, 7))
     plt.xlabel('Trip range (miles)', fontsize=20)
-    plt.ylabel(x_title, fontsize=20)
+    plt.ylabel(y_title, fontsize=20)
     cBasic = make_basic_selections(df)
     weighted_means = {'range': [], 'weighted mean': [], 'weighted std': [], 'x': []}
     i=0
     
     for trip_range in ['TRIP0_50', 'TRIP051_100', 'TRIP101_200', 'TRIP201_500', 'TRIP500MORE']:
         weighted_means['range'].append(trip_range)
-        cSelection = cBasic & (df[trip_range] > 0) & ~(df[x_str].isna())
-        weighted_mean = np.average(df[x_str][cSelection], weights = df[trip_range][cSelection] / 100.)
-        weighted_variance = np.average((df[x_str][cSelection]-weighted_mean)**2, weights=df[trip_range][cSelection] / 100.)
+        cSelection = cBasic & (df[trip_range] > 0) & ~(df[y_str].isna())
+        weighted_mean = np.average(df[y_str][cSelection], weights = df[trip_range][cSelection] / 100.)
+        weighted_variance = np.average((df[y_str][cSelection]-weighted_mean)**2, weights=df[trip_range][cSelection] / 100.)
         weighted_std = np.sqrt(weighted_variance)
         weighted_means['weighted mean'].append(weighted_mean)
         weighted_means['weighted std'].append(weighted_std)
-        weighted_means['x'].append(df[x_str][cSelection])
+        weighted_means['x'].append(df[y_str][cSelection])
 
         if i==0:
-            plt.plot(i*(np.ones(len(df[x_str][cSelection]))), df[x_str][cSelection], 'o', color='black', label='Samples', markersize=1)
+            plt.plot(i*(np.ones(len(df[y_str][cSelection]))), df[y_str][cSelection], 'o', color='black', label='Samples', markersize=1)
         else:
-            plt.plot(i*(np.ones(len(df[x_str][cSelection]))), df[x_str][cSelection], 'o', color='black', markersize=1)
+            plt.plot(i*(np.ones(len(df[y_str][cSelection]))), df[y_str][cSelection], 'o', color='black', markersize=1)
         i+=1
     plt.plot(np.arange(len(weighted_means['range'])), weighted_means['weighted mean'], 'o', markersize=10, label='Average', color='red')
     plt.errorbar(np.arange(len(weighted_means['range'])), weighted_means['weighted mean'], yerr=weighted_means['weighted std'], fmt='o', color='red', ecolor='blue', linewidth=3, capsize=5, label='Standard Deviation', zorder=100)
     plt.xticks(np.arange(len(weighted_means['range'])), ['0-50', '51-100', '101-200', '201-500', '>500'])
     plt.legend(fontsize=16)
-    print(f'Saving figure to plots/TripRange_vs_{x_str}.png')
-    plt.savefig(f'plots/TripRange_vs_{x_str}.png')
+    print(f'Saving figure to plots/{y_str}_vs_TripRange.png')
+    plt.savefig(f'plots/{y_str}_vs_TripRange.png')
 
 
 ######################################### Plot some distributions #########################################
@@ -1205,5 +1197,5 @@ df_agg_coarse_range = make_aggregated_df(df_vius, range_map=InfoObjects.FAF5_VIU
 #plt.savefig(f'plots/TripRange_vs_MPG.png')
 
 
-plot_trip_range_vs_x(df_agg, x_str='PAYLOADAVG', x_title='Payload (tons)')
-plot_trip_range_vs_x(df_agg, x_str='MPG', x_title='Fuel Efficiency (mpg)')
+plot_y_vs_trip_range(df_agg, y_str='PAYLOADAVG', y_title='Payload (tons)')
+plot_y_vs_trip_range(df_agg, y_str='MPG', y_title='Fuel Efficiency (mpg)')
