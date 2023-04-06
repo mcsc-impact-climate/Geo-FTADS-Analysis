@@ -13,7 +13,7 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib
 import InfoObjects
-from ViusTools import get_top_dir, make_aggregated_df, add_GREET_class, get_annual_ton_miles, make_basic_selections
+from ViusTools import get_top_dir, make_aggregated_df, add_GREET_class, add_payload, get_annual_ton_miles, make_basic_selections, get_key_from_value, divide_mpg_by_10
 from scipy.stats import gaussian_kde
 matplotlib.rc('xtick', labelsize=18)
 matplotlib.rc('ytick', labelsize=18)
@@ -131,7 +131,7 @@ def print_all_states(df):
         n_samples += n_state
     print(f'total number of samples: {n_samples}\n\n')
     
-def plot_greet_class_hist(df, commodity='all', truck_range='all', region='US', range_threshold=0, commodity_threshold=0, set_commodity_title='default', set_commodity_save='default', set_range_title='default', set_range_save='default', aggregated=False):
+def plot_greet_class_hist(df, commodity='all', truck_range='all', region='US', range_threshold=0, commodity_threshold=0, set_commodity_title='default', set_commodity_save='default', set_range_title='default', set_range_save='default', aggregated=False, weight_by_tm=True):
     '''
     Calculates and plots the distributions of GREET class and fuel type for different commodities ('commmodity' parameter), trip range windows ('truck_range' parameter), and administrative states ('region' parameter). Samples used to produce the distributions are weighted by the average annual ton-miles reported carrying the given 'commodity' over the given 'truck_range', for the given administrative 'region'.
         
@@ -158,6 +158,8 @@ def plot_greet_class_hist(df, commodity='all', truck_range='all', region='US', r
     set_range_save (string): Allows the user to set the keyword for the plotted trip range to be included in the filenames of the saved plots
     
     aggregated (boolean): If set to True, adds an additional string '_aggregated' to the filenames of the saved plots to indicate that aggregation has been done to obtain common commodity and/or trip range definitions between FAF5 and VIUS data
+    
+    weight_by_tm (boolean): If set to False, just produces distributions of event numbers, rather than weighting by ton-miles
     
     Returns
     -------
@@ -207,12 +209,21 @@ def plot_greet_class_hist(df, commodity='all', truck_range='all', region='US', r
     # Get the annual ton miles for all fuels
     annual_ton_miles_all = get_annual_ton_miles(df, cSelection=cSelection, truck_range=truck_range, commodity=commodity, fuel='all', greet_class='all')
     
+    if weight_by_tm:
+        weights_all = annual_ton_miles_all
+    else:
+        weights_all = np.ones(len(annual_ton_miles_all))
+    
+    
     # Bin the data according to the GREET vehicle class, and calculate the associated statistical uncertainty using root sum of squared weights (see eg. https://www.pp.rhul.ac.uk/~cowan/stat/notes/errors_with_weights.pdf)
     fig = plt.figure(figsize = (10, 7))
-    n, bins = np.histogram(df[cSelection]['GREET_CLASS'], bins=[0.5,1.5,2.5,3.5,4.5], weights=annual_ton_miles_all)
-    n_err = np.sqrt(np.histogram(df[cSelection]['GREET_CLASS'], bins=[0.5,1.5,2.5,3.5,4.5], weights=annual_ton_miles_all**2)[0])
+    n, bins = np.histogram(df[cSelection]['GREET_CLASS'], bins=[0.5,1.5,2.5,3.5,4.5], weights=weights_all)
+    n_err = np.sqrt(np.histogram(df[cSelection]['GREET_CLASS'], bins=[0.5,1.5,2.5,3.5,4.5], weights=weights_all**2)[0])
     plt.title(f'Commodity: {commodity_title}, Region: {region_pretty}\nRange: {range_title}', fontsize=20)
-    plt.ylabel('Commodity flow (ton-miles)', fontsize=20)
+    if weight_by_tm:
+        plt.ylabel('Commodity flow (ton-miles)', fontsize=20)
+    else:
+        plt.ylabel('Samples per Class', fontsize=20)
     
     # Plot the total along with error bars (the bars themselves are invisible since I only want to show the error bars)
     plt.bar(InfoObjects.GREET_classes_dict.values(), n, yerr=n_err, width = 0.4, ecolor='black', capsize=5, alpha=0, zorder=1000)
@@ -223,8 +234,14 @@ def plot_greet_class_hist(df, commodity='all', truck_range='all', region='US', r
         cFuel = (df['FUEL'] == i_fuel) & cSelection
         
         annual_ton_miles_fuel = get_annual_ton_miles(df, cSelection=cSelection, truck_range=truck_range, commodity=commodity, fuel=i_fuel, greet_class='all')
-        n, bins = np.histogram(df[cFuel]['GREET_CLASS'], bins=[0.5,1.5,2.5,3.5,4.5], weights=annual_ton_miles_fuel)
-        n_err = np.sqrt(np.histogram(df[cFuel]['GREET_CLASS'], bins=[0.5,1.5,2.5,3.5,4.5], weights=annual_ton_miles_fuel**2)[0])
+                
+        if weight_by_tm:
+            weights_fuel = annual_ton_miles_fuel
+        else:
+            weights_fuel = np.ones(len(annual_ton_miles_fuel))
+            
+        n, bins = np.histogram(df[cFuel]['GREET_CLASS'], bins=[0.5,1.5,2.5,3.5,4.5], weights=weights_fuel)
+        n_err = np.sqrt(np.histogram(df[cFuel]['GREET_CLASS'], bins=[0.5,1.5,2.5,3.5,4.5], weights=weights_fuel**2)[0])
         plt.bar(InfoObjects.GREET_classes_dict.values(), n, width = 0.4, alpha=1, zorder=1, label=InfoObjects.fuels_dict[i_fuel], bottom=bottom)
         bottom += n
     plt.legend(fontsize=18)
@@ -237,13 +254,18 @@ def plot_greet_class_hist(df, commodity='all', truck_range='all', region='US', r
     plt.xticks(rotation=15, ha='right')
     
     plt.tight_layout()
-    print(f'Saving figure to plots/greet_truck_class_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}.png')
-    plt.savefig(f'plots/greet_truck_class_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}.png')
-    plt.savefig(f'plots/greet_truck_class_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}.pdf')
+    
+    weight_str = ''
+    if not weight_by_tm:
+        weight_str = '_unweighted'
+        
+    print(f'Saving figure to plots/greet_truck_class_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}{weight_str}.png')
+    plt.savefig(f'plots/greet_truck_class_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}{weight_str}.png')
+    plt.savefig(f'plots/greet_truck_class_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}{weight_str}.pdf')
     #plt.show()
     plt.close()
     
-def plot_age_hist(df, commodity='all', truck_range='all', region='US', range_threshold=0, commodity_threshold=0, set_commodity_title='default', set_commodity_save='default', set_range_title='default', set_range_save='default', aggregated=False):
+def plot_age_hist(df, commodity='all', truck_range='all', region='US', range_threshold=0, commodity_threshold=0, set_commodity_title='default', set_commodity_save='default', set_range_title='default', set_range_save='default', aggregated=False, weight_by_tm=True):
     '''
     Calculates and plots the distributions of truck age and GREET truck class for different commodities ('commmodity' parameter), trip range windows ('truck_range' parameter), and administrative states ('region' parameter). Samples used to produce the distributions are weighted by the average annual ton-miles reported carrying the given 'commodity' over the given 'truck_range', for the given administrative 'region'.
         
@@ -270,6 +292,8 @@ def plot_age_hist(df, commodity='all', truck_range='all', region='US', range_thr
     set_range_save (string): Allows the user to set the keyword for the plotted trip range to be included in the filenames of the saved plots
     
     aggregated (boolean): If set to True, adds an additional string '_aggregated' to the filenames of the saved plots to indicate that aggregation has been done to obtain common commodity and/or trip range definitions between FAF5 and VIUS data
+    
+    weight_by_tm (boolean): If set to False, just produces distributions of event numbers, rather than weighting by ton-miles
     
     Returns
     -------
@@ -319,12 +343,20 @@ def plot_age_hist(df, commodity='all', truck_range='all', region='US', range_thr
     # Get the annual ton miles for all classes
     annual_ton_miles_all = get_annual_ton_miles(df, cSelection=cSelection, truck_range=truck_range, commodity=commodity, fuel='all', greet_class='all')
     
+    if weight_by_tm:
+        weights_all = annual_ton_miles_all
+    else:
+        weights_all = np.ones(len(annual_ton_miles_all))
+    
     # Bin the data according to the vehicle age, and calculate the associated statistical uncertainty using root sum of squared weights (see eg. https://www.pp.rhul.ac.uk/~cowan/stat/notes/errors_with_weights.pdf)
     fig = plt.figure(figsize = (10, 7))
-    n, bins = np.histogram(df[cSelection]['ACQUIREYEAR']-1, bins=np.arange(18)-0.5, weights=annual_ton_miles_all)
-    n_err = np.sqrt(np.histogram(df[cSelection]['ACQUIREYEAR']-1, np.arange(18)-0.5, weights=annual_ton_miles_all**2)[0])
+    n, bins = np.histogram(df[cSelection]['ACQUIREYEAR']-1, bins=np.arange(18)-0.5, weights=weights_all)
+    n_err = np.sqrt(np.histogram(df[cSelection]['ACQUIREYEAR']-1, np.arange(18)-0.5, weights=weights_all**2)[0])
     plt.title(f'Commodity: {commodity_title}, Region: {region_pretty}\nRange: {range_title}', fontsize=20)
-    plt.ylabel('Commodity flow (ton-miles)', fontsize=20)
+    if weight_by_tm:
+        plt.ylabel('Commodity flow (ton-miles)', fontsize=20)
+    else:
+        plt.ylabel('Samples per Age', fontsize=20)
     plt.xlabel('Age (years)', fontsize=20)
     
     ticklabels = []
@@ -341,8 +373,14 @@ def plot_age_hist(df, commodity='all', truck_range='all', region='US', range_thr
     for i_class in range(1,5):
         cClass = (df['GREET_CLASS'] == i_class) & cSelection
         annual_ton_miles_fuel = get_annual_ton_miles(df, cSelection=cSelection, truck_range=truck_range, commodity=commodity, fuel='all', greet_class=i_class)
-        n, bins = np.histogram(df[cClass]['ACQUIREYEAR']-1, bins=np.arange(18)-0.5, weights=annual_ton_miles_fuel)
-        n_err = np.sqrt(np.histogram(df[cClass]['ACQUIREYEAR']-1, bins=np.arange(18)-0.5, weights=annual_ton_miles_fuel**2)[0])
+        
+        if weight_by_tm:
+            weights_fuel = annual_ton_miles_fuel
+        else:
+            weights_fuel = np.ones(len(annual_ton_miles_fuel))
+            
+        n, bins = np.histogram(df[cClass]['ACQUIREYEAR']-1, bins=np.arange(18)-0.5, weights=weights_fuel)
+        n_err = np.sqrt(np.histogram(df[cClass]['ACQUIREYEAR']-1, bins=np.arange(18)-0.5, weights=weights_fuel**2)[0])
         plt.bar(range(17), n, width = 0.4, alpha=1, zorder=1, label=InfoObjects.GREET_classes_dict[i_class], bottom=bottom)
         bottom += n
         
@@ -354,13 +392,149 @@ def plot_age_hist(df, commodity='all', truck_range='all', region='US', range_thr
         aggregated_info = '_aggregated'
         
     plt.tight_layout()
-    print(f'Saving figure to plots/age_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}.png')
-    plt.savefig(f'plots/age_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}.png')
-    plt.savefig(f'plots/age_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}.pdf')
+    
+    weight_str = ''
+    if not weight_by_tm:
+        weight_str = '_unweighted'
+    
+    print(f'Saving figure to plots/age_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}{weight_str}.png')
+    plt.savefig(f'plots/age_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}{weight_str}.png')
+    plt.savefig(f'plots/age_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}{weight_str}.pdf')
     #plt.show()
     plt.close()
     
-def plot_payload_hist(df, commodity='all', truck_range='all', region='US', range_threshold=0, commodity_threshold=0, set_commodity_title='default', set_commodity_save='default', set_range_title='default', set_range_save='default', aggregated=False, greet_class='all'):
+    
+def plot_gvw_hist(df, commodity='all', truck_range='all', region='US', range_threshold=0, commodity_threshold=0, set_commodity_title='default', set_commodity_save='default', set_range_title='default', set_range_save='default', aggregated=False, weight_by_tm=True):
+    '''
+    Calculates and plots the distributions of truck age and GREET truck class for different commodities ('commmodity' parameter), trip range windows ('truck_range' parameter), and administrative states ('region' parameter). Samples used to produce the distributions are weighted by the average annual ton-miles reported carrying the given 'commodity' over the given 'truck_range', for the given administrative 'region'.
+        
+    Parameters
+    ----------
+    df (pd.DataFrame): A pandas dataframe containing the VIUS data
+    
+    commodity (string): Name of the column of VIUS data containing the percentage of ton-miles carrying the given commodity
+
+    truck_range (string): Name of the column of VIUS data containing the percentage of ton-miles carried over the given trip range
+    
+    region (string): Name of the column of VIUS data containing boolean data to indicate the truck's administrative state
+    
+    range_threshold (float): Threshold percentage of ton-miles carried over the given range required to include the a truck in the analysis, in cases where the truck_range is not 'all'
+    
+    commodity_threshold (float): Threshold percentage of ton-miles carried over the given range required to include the a truck in the analysis, in cases where the commodity is not 'all'
+    
+    set_commodity_title (string): Allows the user to set the human-readable name for the plotted commodity to be shown in the plot title
+    
+    set_commodity_save (string): Allows the user to set the keyword for the plotted commodity to be included in the filenames of the saved plots
+    
+    set_commodity_title (string): Allows the user to set the human-readable name for the plotted trip range to be shown in the plot title
+    
+    set_range_save (string): Allows the user to set the keyword for the plotted trip range to be included in the filenames of the saved plots
+    
+    aggregated (boolean): If set to True, adds an additional string '_aggregated' to the filenames of the saved plots to indicate that aggregation has been done to obtain common commodity and/or trip range definitions between FAF5 and VIUS data
+    
+    weight_by_tm (boolean): If set to False, just produces distributions of event numbers, rather than weighting by ton-miles
+    
+    Returns
+    -------
+    None
+        
+    NOTE: None.
+    '''
+
+    region_pretty = get_region_pretty(region)
+    
+    if set_commodity_title == 'default':
+        commodity_pretty = get_commodity_pretty(commodity)
+        commodity_title = commodity_pretty
+    else:
+        commodity_title = set_commodity_title
+    
+    if set_commodity_save == 'default':
+        commodity_save = commodity
+    else:
+        commodity_save = set_commodity_save
+        
+    if set_range_title == 'default':
+        range_pretty = get_range_pretty(truck_range)
+        range_title = range_pretty
+    else:
+        range_title = set_range_title
+    
+    if set_range_save == 'default':
+        range_save = truck_range
+    else:
+        range_save = set_range_save
+    
+    cNoPassenger = (df['PPASSENGERS'].isna()) | (df['PPASSENGERS'] == 0)
+    cBaseline = (~df['WEIGHTAVG'].isna()) & (~df['MILES_ANNL'].isna()) & (~df['WEIGHTEMPTY'].isna()) & (~df['FUEL'].isna()) & cNoPassenger
+    cCommodity = True
+    cRange = True
+    cRegion = True
+    if not commodity == 'all':
+        cCommodity = (~df[commodity].isna())&(df[commodity] > commodity_threshold)
+    if not truck_range == 'all':
+        cRange = (~df[truck_range].isna())&(df[truck_range] > range_threshold)
+    if not region == 'US':
+        cRegion = (~df['ADM_STATE'].isna())&(df['ADM_STATE'] == region)
+        
+    cSelection = cCommodity&cRange&cRegion&cBaseline
+    
+    # Get the annual ton miles for all classes
+    annual_ton_miles_all = get_annual_ton_miles(df, cSelection=cSelection, truck_range=truck_range, commodity=commodity, fuel='all', greet_class='all')
+    
+    if weight_by_tm:
+        weights = annual_ton_miles_all
+    else:
+        weights = np.ones(len(annual_ton_miles_all))
+    
+    # Bin the data according to the vehicle age, and calculate the associated statistical uncertainty using root sum of squared weights (see eg. https://www.pp.rhul.ac.uk/~cowan/stat/notes/errors_with_weights.pdf)
+    fig = plt.figure(figsize = (10, 7))
+    n, bins = np.histogram(df[cSelection]['WEIGHTAVG'], bins=50, weights=weights)
+    n_err = np.sqrt(np.histogram(df[cSelection]['WEIGHTAVG'], bins=bins, weights=weights**2)[0])
+    plt.title(f'Commodity: {commodity_title}, Region: {region_pretty}\nRange: {range_title}', fontsize=20)
+    plt.ylabel('Samples per Bin', fontsize=20)
+    plt.xlabel('Gross Vehicle Weight (lb)', fontsize=20)
+    
+#    ticklabels = []
+#    for i in range(16):
+#        ticklabels.append(str(i))
+#    ticklabels.append('>15')
+#    plt.xticks(np.arange(17), ticklabels)
+
+    bin_centers = bins[:-1] + 0.5*(bins[1]-bins[0])
+    bin_width = bins[1]-bins[0]
+    
+    # Plot the total along with error bars (the bars themselves are invisible since I only want to show the error bars)
+    plt.bar(bin_centers, n, yerr=n_err, ecolor='black', capsize=5, width=bin_width)
+    
+    average = np.average(df[cSelection]['WEIGHTAVG'], weights=weights)
+    variance = np.average((df[cSelection]['WEIGHTAVG']-average)**2, weights=weights)
+    peak_central = bin_centers[n == np.max(n)]
+    std = np.sqrt(variance)
+    plt.axvline(average, label=f'Mean: {int(average)} lb', linewidth=2, color='red', zorder=101)
+    plt.axvline(peak_central, label=f'Peak Central Value: {int(peak_central)} lb', color='green', linewidth=2, zorder=102)
+    plt.axvspan(average-std, average+std, label=f'StDev: {int(std)} lb', alpha=0.3, color='red', zorder=100)
+    
+    region_save = region_pretty.replace(' ', '_')
+    aggregated_info=''
+    if aggregated:
+        aggregated_info = '_aggregated'
+        
+    plt.legend(fontsize=18)
+    plt.tight_layout()
+    
+    weight_str = ''
+    if not weight_by_tm:
+        weight_str = '_unweighted'
+    
+    print(f'Saving figure to plots/gvw_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}{weight_str}.png')
+    plt.savefig(f'plots/gvw_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}{weight_str}.png')
+    plt.savefig(f'plots/gvw_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}{weight_str}.pdf')
+    #plt.show()
+    plt.close()
+    
+    
+def plot_payload_hist(df, commodity='all', truck_range='all', region='US', range_threshold=0, commodity_threshold=0, set_commodity_title='default', set_commodity_save='default', set_range_title='default', set_range_save='default', aggregated=False, greet_class='all', weight_by_tm=True, plot_vw_class = False):
     '''
     Calculates and plots the distributions of truck payload for different commodities ('commmodity' parameter), trip range windows ('truck_range' parameter), and administrative states ('region' parameter). Samples used to produce the distributions are weighted by the average annual ton-miles reported carrying the given 'commodity' over the given 'truck_range', for the given administrative 'region'.
         
@@ -387,6 +561,10 @@ def plot_payload_hist(df, commodity='all', truck_range='all', region='US', range
     set_range_save (string): Allows the user to set the keyword for the plotted trip range to be included in the filenames of the saved plots
     
     aggregated (boolean): If set to True, adds an additional string '_aggregated' to the filenames of the saved plots to indicate that aggregation has been done to obtain common commodity and/or trip range definitions between FAF5 and VIUS data
+    
+    weight_by_tm (boolean): If set to False, just produces distributions of event numbers, rather than weighting by ton-miles
+    
+    plot_vw_class (boolean): If set to True, plots distributions in a given GREET class range instead within the equivalent unloaded vehicle weight range, as evaluated by the function add_unloaded_vehicle_weight_class()
     
     Returns
     -------
@@ -417,6 +595,11 @@ def plot_payload_hist(df, commodity='all', truck_range='all', region='US', range
         range_save = truck_range
     else:
         range_save = set_range_save
+        
+    # If the user has enabled the plot_vw_class flag, plot distributions in equivalent unloaded vehicle weight classes instead
+    class_str = 'GREET_CLASS'
+    if plot_vw_class:
+        class_str = 'UNLOADED_WEIGHT_CLASS'
     
     cNoPassenger = (df['PPASSENGERS'].isna()) | (df['PPASSENGERS'] == 0)
     cBaseline = (~df['WEIGHTAVG'].isna()) & (~df['MILES_ANNL'].isna()) & (~df['WEIGHTEMPTY'].isna()) & (~df['FUEL'].isna()) & (~df['ACQUIREYEAR'].isna()) & cNoPassenger
@@ -433,27 +616,41 @@ def plot_payload_hist(df, commodity='all', truck_range='all', region='US', range
     # Select the given truck class
     cGreetClass = True
     if not greet_class == 'all':
-        cGreetClass = (~df['GREET_CLASS'].isna())&(df['GREET_CLASS'] == greet_class)
+        cGreetClass = (~df[class_str].isna())&(df[class_str] == greet_class)
         
     cSelection = cCommodity&cRange&cRegion&cBaseline&cGreetClass
     if np.sum(cSelection) == 0:
+        print('ERROR No events in selection. Returning without plotting.')
         return
     
     # Get the annual ton miles for all classes
     annual_ton_miles_all = get_annual_ton_miles(df, cSelection=cSelection, truck_range=truck_range, commodity=commodity, fuel='all', greet_class='all')
     
+    if weight_by_tm:
+        weights_all = annual_ton_miles_all
+    else:
+        weights_all = np.ones(len(annual_ton_miles_all))
     # Bin the data according to the vehicle age, and calculate the associated statistical uncertainty using root sum of squared weights (see eg. https://www.pp.rhul.ac.uk/~cowan/stat/notes/errors_with_weights.pdf)
     payload = (df[cSelection]['WEIGHTAVG'] - df[cSelection]['WEIGHTEMPTY']) * LB_TO_TONS
     fig = plt.figure(figsize = (10, 7))
-    n, bins = np.histogram(payload, weights=annual_ton_miles_all, bins=10)
-    n_err = np.sqrt(np.histogram(payload, weights=annual_ton_miles_all**2, bins=10)[0])
+    n, bins = np.histogram(payload, weights=weights_all, bins=10)
+    n_err = np.sqrt(np.histogram(payload, weights=weights_all**2, bins=10)[0])
     
     if greet_class == 'all':
         greet_class_title = 'all'
+    elif plot_vw_class:
+        class_title = InfoObjects.VW_classes_dict[greet_class]
     else:
-        greet_class_title = InfoObjects.GREET_classes_dict[greet_class]
-    plt.title(f'Commodity: {commodity_title}\nGREET Class: {greet_class_title}', fontsize=20)
-    plt.ylabel('Commodity flow (ton-miles)', fontsize=20)
+        class_title = InfoObjects.GREET_classes_dict[greet_class]
+            
+    if plot_vw_class:
+        plt.title(f'Commodity: {commodity_title}\nUnloaded VW Class: {class_title}', fontsize=20)
+    else:
+        plt.title(f'Commodity: {commodity_title}\nGREET Class: {class_title}', fontsize=20)
+    if weight_by_tm:
+        plt.ylabel('Commodity flow (ton-miles)', fontsize=20)
+    else:
+        plt.ylabel('Samples per Bin', fontsize=20)
     plt.xlabel('Payload (tons)', fontsize=20)
     
 #    ticklabels = []
@@ -466,8 +663,8 @@ def plot_payload_hist(df, commodity='all', truck_range='all', region='US', range
     plt.bar(bins[:-1]+0.5*(bins[1]-bins[0]), n, yerr=n_err, width = bins[1]-bins[0], ecolor='black', capsize=5)
         
     # Also calculate the mean (+/- stdev) age and report it on the plot
-    mean_payload = np.average(payload, weights=annual_ton_miles_all)
-    variance_payload = np.average((payload-mean_payload)**2, weights=annual_ton_miles_all)
+    mean_payload = np.average(payload, weights=weights_all)
+    variance_payload = np.average((payload-mean_payload)**2, weights=weights_all)
     std_payload = np.sqrt(variance_payload)
     plt.text(0.5, 0.7, f'mean payload: %.1f±%.1f tons'%(mean_payload, std_payload), transform=fig.axes[0].transAxes, fontsize=18)
 #    plt.legend()
@@ -483,11 +680,21 @@ def plot_payload_hist(df, commodity='all', truck_range='all', region='US', range
         greet_class_str = (InfoObjects.GREET_classes_dict[greet_class]).replace(' ', '_').replace('-', '_')
     
     plt.tight_layout()
-    print(f'Saving figure to plots/payload_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}_greet_class_{greet_class_str}.png')
-    plt.savefig(f'plots/payload_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}_greet_class_{greet_class_str}.png')
-    plt.savefig(f'plots/payload_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}_greet_class_{greet_class_str}.pdf')
+    
+    weight_str = ''
+    if not weight_by_tm:
+        weight_str = '_unweighted'
+        
+    class_info_str = 'greet_class'
+    if plot_vw_class:
+        class_info_str = 'unloaded_weight_class'
+        
+    print(f'Saving figure to plots/payload_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}_{class_info_str}_{greet_class_str}{weight_str}.png')
+    plt.savefig(f'plots/payload_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}_{class_info_str}_{greet_class_str}{weight_str}.png')
+    plt.savefig(f'plots/payload_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}_{class_info_str}_{greet_class_str}{weight_str}.pdf')
     #plt.show()
     plt.close()
+    
     
 def plot_mpg_scatter(df, x_var='gvw', nBins=30):
     '''
@@ -534,7 +741,7 @@ def plot_mpg_scatter(df, x_var='gvw', nBins=30):
         nBins = 16
         x_nosel = df['ACQUIREYEAR'] - 1
         plt.title('Age dependence of mpg for diesel trucks', fontsize=20)
-        plt.xlabel('Age Payload (years)', fontsize=20)
+        plt.xlabel('Age (years)', fontsize=20)
         bin_title = 'year'
         min_bin=0
         max_bin=16
@@ -545,7 +752,7 @@ def plot_mpg_scatter(df, x_var='gvw', nBins=30):
         ticklabels.append('>15')
         plt.xticks(np.arange(17), ticklabels)
         
-    mpg = df['MPG'][cSelection]/10.
+    mpg = df['MPG'][cSelection]
     #xy = np.vstack([x, mpg])
     #z = gaussian_kde(xy)(xy)
 
@@ -586,10 +793,154 @@ def plot_mpg_scatter(df, x_var='gvw', nBins=30):
     plt.savefig(f'plots/mpg_vs_{x_var}.png')
     plt.savefig(f'plots/mpg_vs_{x_var}.pdf')
 
+def plot_x_vs_y(df, x, y, x_title, y_title, x_save, y_save):
+    '''
+    Plots a kde density scatterplot of the given quantities
+        
+    Parameters
+    ----------
+    df (pd.DataFrame): A pandas dataframe containing the VIUS data
+    
+    x (string): String identifier of the variable to plot on the x-axis
+    
+    y (string): String identifier of the variable to plot on the y-axis
+    
+    x_title (string): x-axis title
+    
+    y_title (string): y-axis title
+
+    x_save (string): string identifier for the x variable to be included in the filename that the plot is saved to
+    
+    y_save (string): string identifier for the y variable to be included in the filename that the plot is saved to
+    
+    Returns
+    -------
+    None
+        
+    NOTE: None.
+    '''
+    fig = plt.figure(figsize = (10, 7))
+    cSelection = make_basic_selections(df) & (~df[x].isna()) & (~df[y].isna())
+    plt.xlabel(x_title, fontsize=20)
+    plt.ylabel(y_title, fontsize=20)
+    
+    xy = np.vstack([df[x][cSelection], df[y][cSelection]])
+    z = gaussian_kde(xy)(xy)
+    plt.scatter(df[x][cSelection], df[y][cSelection], c=z, s=10)
+    
+    #plt.plot(df[x][cSelection], df[y][cSelection], 'o', markersize=2)
+    
+    print(f'Saving to plots/{x_save}_vs_{y_save}.png')
+    
+    plt.savefig(f'plots/{x_save}_vs_{y_save}.png')
+    plt.savefig(f'plots/{x_save}_vs_{y_save}.pdf')
+    
+def add_unloaded_vehicle_weight_class(df):
+    '''
+    Adds classes for unloaded vehicle weight, with the weight values used to define each class defined such that the same fraction of events fall into each unloaded vehicle weight class compared with the GREET GVW classes
+        
+    Parameters
+    ----------
+    df (pd.DataFrame): A pandas dataframe containing the VIUS data
+    
+    Returns
+    -------
+    df (pd.DataFrame): A pandas dataframe containing the VIUS data, with the unloaded vehicle weight classes added in
+        
+    NOTE: None.
+    '''
+    cBasic = make_basic_selections(df) & (~df['GREET_CLASS'].isna())
+
+    greet_bins = [0, 8500, 19500, 33000, 1e9]
+    n, bins = np.histogram(df['WEIGHTAVG'][cBasic], bins=greet_bins)
+    event_fractions = n / len(df['WEIGHTAVG'][cBasic])
+    
+#    for i_class in range(1,5):
+#        print(f'GREET class: {InfoObjects.GREET_classes_dict[i_class]}: \nFraction of Events: {event_fractions[4-i_class]*100}%')
+    
+    # Get the quantiles
+    quantiles = np.zeros(1)
+    for i in range(1,5):
+        quantiles = np.append(quantiles, np.sum(event_fractions[0:i]))
+    
+    # Fill the unloaded vehicle weight classes sucha that they have the equivalent quantiles as the GREET classes
+    from scipy import stats
+    bin_edges_equivalent = stats.mstats.mquantiles(df['WEIGHTEMPTY'], quantiles)
+    
+    df['UNLOADED_WEIGHT_CLASS'] = df.copy(deep=False)['WEIGHTAVG']
+    
+    df.loc[df['WEIGHTEMPTY'] >= bin_edges_equivalent[3], 'UNLOADED_WEIGHT_CLASS'] = get_key_from_value(InfoObjects.GREET_classes_dict, 'Heavy GVW')
+    df.loc[(df['WEIGHTEMPTY'] >= bin_edges_equivalent[2])&(df['WEIGHTEMPTY'] < bin_edges_equivalent[3]), 'UNLOADED_WEIGHT_CLASS'] = get_key_from_value(InfoObjects.GREET_classes_dict, 'Medium GVW')
+    df.loc[(df['WEIGHTEMPTY'] >= bin_edges_equivalent[1])&(df['WEIGHTEMPTY'] < bin_edges_equivalent[2]), 'UNLOADED_WEIGHT_CLASS'] = get_key_from_value(InfoObjects.GREET_classes_dict, 'Light GVW')
+    df.loc[df['WEIGHTEMPTY'] < bin_edges_equivalent[1], 'UNLOADED_WEIGHT_CLASS'] = get_key_from_value(InfoObjects.GREET_classes_dict, 'Light-duty')
+    
+    return df
+        
+
+def plot_trip_range_vs_x(df, x_str, x_title):
+    '''
+    Plots a kde density scatterplot of the given quantities
+        
+    Parameters
+    ----------
+    df (pd.DataFrame): A pandas dataframe containing the VIUS data
+    
+    x (string): String identifier of the variable to plot on the x-axis
+    
+    y (string): String identifier of the variable to plot on the y-axis
+    
+    x_title (string): x-axis title
+    
+    y_title (string): y-axis title
+
+    x_save (string): string identifier for the x variable to be included in the filename that the plot is saved to
+    
+    y_save (string): string identifier for the y variable to be included in the filename that the plot is saved to
+    
+    Returns
+    -------
+    None
+        
+    NOTE: None.
+    '''
+    
+    fig = plt.figure(figsize = (10, 7))
+    plt.xlabel('Trip range (miles)', fontsize=20)
+    plt.ylabel(x_title, fontsize=20)
+    cBasic = make_basic_selections(df)
+    weighted_means = {'range': [], 'weighted mean': [], 'weighted std': [], 'x': []}
+    i=0
+    
+    for trip_range in ['TRIP0_50', 'TRIP051_100', 'TRIP101_200', 'TRIP201_500', 'TRIP500MORE']:
+        weighted_means['range'].append(trip_range)
+        cSelection = cBasic & (df[trip_range] > 0) & ~(df[x_str].isna())
+        weighted_mean = np.average(df[x_str][cSelection], weights = df[trip_range][cSelection] / 100.)
+        weighted_variance = np.average((df[x_str][cSelection]-weighted_mean)**2, weights=df[trip_range][cSelection] / 100.)
+        weighted_std = np.sqrt(weighted_variance)
+        weighted_means['weighted mean'].append(weighted_mean)
+        weighted_means['weighted std'].append(weighted_std)
+        weighted_means['x'].append(df[x_str][cSelection])
+
+        if i==0:
+            plt.plot(i*(np.ones(len(df[x_str][cSelection]))), df[x_str][cSelection], 'o', color='black', label='Samples', markersize=1)
+        else:
+            plt.plot(i*(np.ones(len(df[x_str][cSelection]))), df[x_str][cSelection], 'o', color='black', markersize=1)
+        i+=1
+    plt.plot(np.arange(len(weighted_means['range'])), weighted_means['weighted mean'], 'o', markersize=10, label='Average', color='red')
+    plt.errorbar(np.arange(len(weighted_means['range'])), weighted_means['weighted mean'], yerr=weighted_means['weighted std'], fmt='o', color='red', ecolor='blue', linewidth=3, capsize=5, label='Standard Deviation', zorder=100)
+    plt.xticks(np.arange(len(weighted_means['range'])), ['0-50', '51-100', '101-200', '201-500', '>500'])
+    plt.legend(fontsize=16)
+    print(f'Saving figure to plots/TripRange_vs_{x_str}.png')
+    plt.savefig(f'plots/TripRange_vs_{x_str}.png')
+
+
 ######################################### Plot some distributions #########################################
 # Read in the VIUS data (from https://rosap.ntl.bts.gov/view/dot/42632) as a dataframe
 df_vius = pd.read_csv(f'{top_dir}/data/VIUS_2002/bts_vius_2002_data_items.csv')
 df_vius = add_GREET_class(df_vius)
+df_vius = add_payload(df_vius)
+df_vius = divide_mpg_by_10(df_vius)
+df_vius = add_unloaded_vehicle_weight_class(df_vius)
 
 df_agg = make_aggregated_df(df_vius)
 
@@ -626,6 +977,7 @@ df_agg_coarse_range = make_aggregated_df(df_vius, range_map=InfoObjects.FAF5_VIU
 
 # Make a distribution of GREET truck class for all regions, commodities, and vehicle range
 #plot_greet_class_hist(df_vius, commodity='all', truck_range='all', region='US', range_threshold=0, commodity_threshold=0)
+#plot_greet_class_hist(df_vius, commodity='all', truck_range='all', region='US', range_threshold=0, commodity_threshold=0, weight_by_tm = False)
 
 ## Make distributions of GREET truck class and fuel types for each commodity
 #for commodity in InfoObjects.pretty_commodities_dict:
@@ -686,7 +1038,8 @@ df_agg_coarse_range = make_aggregated_df(df_vius, range_map=InfoObjects.FAF5_VIU
 
 ## Make distributions of truck age for all regions, commodities, and vehicle range
 #plot_age_hist(df_vius, region='US', commodity='all', truck_range='all', range_threshold=0, commodity_threshold=0)
-#
+#plot_age_hist(df_vius, region='US', commodity='all', truck_range='all', range_threshold=0, commodity_threshold=0, weight_by_tm=False)
+
 ## Make distributions of truck age and GREET class for each commodity
 #for commodity in InfoObjects.pretty_commodities_dict:
 #    plot_age_hist(df_vius, region='US', commodity=commodity, truck_range='all', range_threshold=0, commodity_threshold=0)
@@ -720,7 +1073,38 @@ df_agg_coarse_range = make_aggregated_df(df_vius, range_map=InfoObjects.FAF5_VIU
 #------- Without aggregated commodities/ranges -------#
 ## Make payload distributions of truck age for all regions, commodities, and vehicle range
 #plot_payload_hist(df_vius, region='US', commodity='all', truck_range='all', range_threshold=0, commodity_threshold=0)
+#plot_payload_hist(df_vius, region='US', commodity='all', truck_range='all', range_threshold=0, commodity_threshold=0, weight_by_tm=False)
 
+# Make distributions of payload for each GREET class
+#for greet_class in range(1,5):
+#    plot_payload_hist(df_agg, region='US', commodity='all', truck_range='all', range_threshold=0, commodity_threshold=0, greet_class=greet_class)
+#
+#for vw_class in range(1,5):
+#    plot_payload_hist(df_agg, region='US', commodity='all', truck_range='all', range_threshold=0, commodity_threshold=0, greet_class=vw_class, plot_vw_class = True)
+
+#-----------------------------------------------------#
+
+#------- Without aggregated commodities/ranges -------#
+## Make distributions of payload for each aggregated commodity
+#for commodity in InfoObjects.FAF5_VIUS_commodity_map:
+#    plot_payload_hist(df_agg, region='US', commodity=commodity, truck_range='all', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True)
+
+## Make distributions of payload for each aggregated commodity and truck class
+#for commodity in InfoObjects.FAF5_VIUS_commodity_map:
+#    for greet_class in range(1,5):
+#        plot_payload_hist(df_agg, region='US', commodity=commodity, truck_range='all', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True, greet_class=greet_class)
+
+#-----------------------------------------------------#
+
+
+#######################################################################
+
+################## Gross Vehicle Weight distributions ########################
+
+#------- Without aggregated commodities/ranges -------#
+## Make payload distributions of truck age for all regions, commodities, and vehicle range
+#plot_gvw_hist(df_vius, region='US', commodity='all', truck_range='all', range_threshold=0, commodity_threshold=0)
+#plot_gvw_hist(df_vius, region='US', commodity='all', truck_range='all', range_threshold=0, commodity_threshold=0, weight_by_tm=False)
 #-----------------------------------------------------#
 
 #------- Without aggregated commodities/ranges -------#
@@ -751,4 +1135,75 @@ df_agg_coarse_range = make_aggregated_df(df_vius, range_map=InfoObjects.FAF5_VIU
 # Fuel efficiency (mpg) vs. payload
 #plot_mpg_scatter(df_agg, x_var='age')
 
+# Payload vs. annual miles driven
+#plot_x_vs_y(df_agg, x='MILES_ANNL', y='PAYLOADAVG', x_title='Annual distance driven (miles)', y_title = 'Average payload', x_save='MILES_ANNL', y_save='PAYLOADAVG')
+
+# Payload vs. average loaded (WEIGHTAVG) and unloaded (WEIGHTEMPTY) vehicle weight
+#plot_x_vs_y(df_agg, x='WEIGHTAVG', y='PAYLOADAVG', x_title='Average gross vehicle weight (lb)', y_title = 'Average payload (tons)', x_save='WEIGHTAVG', y_save='PAYLOADAVG')
+#plot_x_vs_y(df_agg, x='WEIGHTEMPTY', y='PAYLOADAVG', x_title='Average unloaded vehicle weight (lb)', y_title = 'Average payload (tons)', x_save='WEIGHTEMPTY', y_save='PAYLOADAVG')
+
 ###########################################################################################################
+
+
+#fig = plt.figure(figsize = (10, 7))
+#plt.xlabel('Trip range (miles)', fontsize=20)
+#plt.ylabel('Average Payload (tons)', fontsize=20)
+#df = df_agg
+#cBasic = make_basic_selections(df)
+#payload_weighted_means = {'range': [], 'weighted mean': [], 'weighted std': [], 'payloads': []}
+#i=0
+#for trip_range in ['TRIP0_50', 'TRIP051_100', 'TRIP101_200', 'TRIP201_500', 'TRIP500MORE']:
+#    payload_weighted_means['range'].append(trip_range)
+#    cSelection = cBasic & (df[trip_range] > 0)
+#    weighted_mean = np.average(df['PAYLOADAVG'][cSelection], weights = df[trip_range][cSelection] / 100.)
+#    weighted_variance = np.average((df['PAYLOADAVG'][cSelection]-weighted_mean)**2, weights=df[trip_range][cSelection] / 100.)
+#    weighted_std = np.sqrt(weighted_variance)
+#    payload_weighted_means['weighted mean'].append(weighted_mean)
+#    payload_weighted_means['weighted std'].append(weighted_std)
+#    payload_weighted_means['payloads'].append(df['PAYLOADAVG'][cSelection])
+#
+#    if i==0:
+#        plt.plot(i*(np.ones(len(df['PAYLOADAVG'][cSelection]))), df['PAYLOADAVG'][cSelection], 'o', color='black', label='Samples', markersize=1)
+#    else:
+#        plt.plot(i*(np.ones(len(df['PAYLOADAVG'][cSelection]))), df['PAYLOADAVG'][cSelection], 'o', color='black', markersize=1)
+#    i+=1
+#plt.plot(np.arange(len(payload_weighted_means['range'])), payload_weighted_means['weighted mean'], 'o', markersize=10, label='Average', color='red')
+#plt.errorbar(np.arange(len(payload_weighted_means['range'])), payload_weighted_means['weighted mean'], yerr=payload_weighted_means['weighted std'], fmt='o', color='red', ecolor='blue', linewidth=3, capsize=5, label='Standard Deviation', zorder=100)
+#plt.xticks(np.arange(len(payload_weighted_means['range'])), ['0-50', '51-100', '101-200', '201-500', '>500'])
+#plt.legend(fontsize=16)
+#print('Saving figure to plots/TripRange_vs_Payload.png')
+#plt.savefig(f'plots/TripRange_vs_Payload.png')
+
+
+#fig = plt.figure(figsize = (10, 7))
+#plt.xlabel('Trip range (miles)', fontsize=20)
+#plt.ylabel('Fuel Efficency (mpg)', fontsize=20)
+#df = df_agg
+#cBasic = make_basic_selections(df)
+#mpg_weighted_means = {'range': [], 'weighted mean': [], 'weighted std': [], 'mpgs': []}
+#i=0
+#for trip_range in ['TRIP0_50', 'TRIP051_100', 'TRIP101_200', 'TRIP201_500', 'TRIP500MORE']:
+#    mpg_weighted_means['range'].append(trip_range)
+#    cSelection = cBasic & (df[trip_range] > 0) & ~(df['MPG'].isna())
+#    weighted_mean = np.average(df['MPG'][cSelection], weights = df[trip_range][cSelection] / 100.)
+#    weighted_variance = np.average((df['MPG'][cSelection]-weighted_mean)**2, weights=df[trip_range][cSelection] / 100.)
+#    weighted_std = np.sqrt(weighted_variance)
+#    mpg_weighted_means['weighted mean'].append(weighted_mean/10.)
+#    mpg_weighted_means['weighted std'].append(weighted_std/10.)
+#    mpg_weighted_means['mpgs'].append(df['MPG'][cSelection]/10.)
+#
+#    if i==0:
+#        plt.plot(i*(np.ones(len(df['MPG'][cSelection]))), df['MPG'][cSelection]/10., 'o', color='black', label='Samples', markersize=1)
+#    else:
+#        plt.plot(i*(np.ones(len(df['MPG'][cSelection]))), df['MPG'][cSelection]/10., 'o', color='black', markersize=1)
+#    i+=1
+#plt.plot(np.arange(len(mpg_weighted_means['range'])), mpg_weighted_means['weighted mean'], 'o', markersize=10, label='Average', color='red')
+#plt.errorbar(np.arange(len(mpg_weighted_means['range'])), mpg_weighted_means['weighted mean'], yerr=mpg_weighted_means['weighted std'], fmt='o', color='red', ecolor='blue', linewidth=3, capsize=5, label='Standard Deviation', zorder=100)
+#plt.xticks(np.arange(len(mpg_weighted_means['range'])), ['0-50', '51-100', '101-200', '201-500', '>500'])
+#plt.legend(fontsize=16)
+#print('Saving figure to plots/TripRange_vs_MPG.png')
+#plt.savefig(f'plots/TripRange_vs_MPG.png')
+
+
+plot_trip_range_vs_x(df_agg, x_str='PAYLOADAVG', x_title='Payload (tons)')
+plot_trip_range_vs_x(df_agg, x_str='MPG', x_title='Fuel Efficiency (mpg)')

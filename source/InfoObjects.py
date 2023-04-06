@@ -11,6 +11,13 @@ GREET_classes_dict = {
     2: 'Medium GVW',
     3: 'Light GVW',
     4: 'Light-duty'}
+    
+# List of weight class names used by GREET, from heaviest to lightest
+VW_classes_dict = {
+    1: 'Heavy Unloaded VW',
+    2: 'Medium Unloaded VW',
+    3: 'Light Unloaded VW',
+    4: 'Light-duty'}
 
 # Dictionary to map fuel integer identifiers in VIUS survey to fuel names
 fuels_dict = {

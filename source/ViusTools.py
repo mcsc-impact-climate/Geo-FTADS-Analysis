@@ -153,6 +153,24 @@ def add_payload(df):
     
     return df
     
+def divide_mpg_by_10(df):
+    '''
+    Updates the MPG column in the VIUS dataframe with all values divided by 10 (for some reason they seem to all be multiplied by 10 relative to actual MPG in the VIUS data)
+        
+    Parameters
+    ----------
+    df (pd.DataFrame): A pandas dataframe containing the VIUS data
+
+    Returns
+    -------
+    df: The pandas dataframe containing the VIUS data, with the MPG column divided by 10
+        
+    NOTE: None.
+    '''
+    df['MPG'] = df['MPG'] / 10.
+    
+    return df
+    
 def get_annual_ton_miles(df, cSelection, truck_range, commodity, fuel='all', greet_class='all'):
     '''
     Calculates the annual ton-miles that each truck (row) in the VIUS dataframe satisfying requirements defined by cSelection carries the given commodity over the given trip range burning the given fuel
@@ -221,6 +239,7 @@ def get_df_vius():
     df_vius = pd.read_csv(f'{top_dir}/data/VIUS_2002/bts_vius_2002_data_items.csv')
     df_vius = add_GREET_class(df_vius)
     df_vius = add_payload(df_vius)
+    df_vius = divide_mpg_by_10(df_vius)
     df_vius = make_aggregated_df(df_vius)
     return df_vius
     
@@ -404,7 +423,7 @@ def calculate_quantity_per_class(quantity_str='payload', commodity='all'):
         if quantity_str == 'payload':
             quantity = (df[cSelection&cGreetClass]['WEIGHTAVG'] - df[cSelection&cGreetClass]['WEIGHTEMPTY']) * LB_TO_TONS
         elif quantity_str == 'mpg':
-            quantity = df[cSelection&cGreetClass]['MPG'] / 10.
+            quantity = df[cSelection&cGreetClass]['MPG']
         else:
             print(f'ERROR: Provided quantity {quantity_str} not recognized. Returning None.')
             return None
@@ -505,7 +524,7 @@ def calculate_quantity_per_commodity(quantity_str = 'payload', greet_class='all'
         if quantity_str == 'payload':
             quantity = (df[cSelection]['WEIGHTAVG'] - df[cSelection]['WEIGHTEMPTY']) * LB_TO_TONS
         elif quantity_str == 'mpg':
-            quantity = df[cSelection]['MPG'] / 10.
+            quantity = df[cSelection]['MPG']
         else:
             print(f'ERROR: Provided quantity {quantity_str} not recognized. Returning None.')
             return None
