@@ -135,6 +135,24 @@ def add_GREET_class(df):
     df.loc[df['WEIGHTAVG'] < 8500, 'GREET_CLASS'] = get_key_from_value(InfoObjects.GREET_classes_dict, 'Light-duty')
     return df
     
+def add_payload(df):
+    '''
+    Adds a column to the dataframe that specifies the average payload, which is just the difference between the average GVW and the empty vehicle weight
+        
+    Parameters
+    ----------
+    df (pd.DataFrame): A pandas dataframe containing the VIUS data
+
+    Returns
+    -------
+    df: The pandas dataframe containing the VIUS data, with an additional column containing the payload
+        
+    NOTE: None.
+    '''
+    df['PAYLOADAVG'] = (df['WEIGHTAVG'] - df['WEIGHTEMPTY']) * LB_TO_TONS
+    
+    return df
+    
 def get_annual_ton_miles(df, cSelection, truck_range, commodity, fuel='all', greet_class='all'):
     '''
     Calculates the annual ton-miles that each truck (row) in the VIUS dataframe satisfying requirements defined by cSelection carries the given commodity over the given trip range burning the given fuel
@@ -202,6 +220,7 @@ def get_df_vius():
     '''
     df_vius = pd.read_csv(f'{top_dir}/data/VIUS_2002/bts_vius_2002_data_items.csv')
     df_vius = add_GREET_class(df_vius)
+    df_vius = add_payload(df_vius)
     df_vius = make_aggregated_df(df_vius)
     return df_vius
     
@@ -335,22 +354,24 @@ def make_all_class_fuel_dists():
         all_class_fuel_dists[commodity] = make_class_fuel_dist(commodity)
     return all_class_fuel_dists
     
-def calculate_payload_per_class(commodity='all'):
+def calculate_quantity_per_class(quantity_str='payload', commodity='all'):
     '''
-    Calculates the average payload (and standard deviation) per GREET truck class for the given commodity type
+    Calculates the average value (and standard deviation) of a given quantity per GREET truck class for the given commodity type
         
     Parameters
     ----------
-    commodity (string): Commodity for which to evaluate the average payload per GREET truck class
+    commodity (string): Commodity for which to evaluate the average value of the given quantity per GREET truck class
+    
+    quantity_str (string): Identifier to indicate what quantity we want to calculate per class
 
     Returns
     -------
-    payload_per_class (dictionary): Dictionary containing:
+    quantity_per_class (dictionary): Dictionary containing:
         - 'class' (list): list of GREET truck classes
-        - 'average payload' (1D np.array): Array containing the average payload for each GREET truck class
-        - 'standard deviation' (1D np.array): Array containing the standard deviation of payloads for each GREET truck class
+        - 'average [quantity]' (1D np.array): Array containing the average value of the given quantity for each GREET truck class
+        - 'standard deviation' (1D np.array): Array containing the standard deviation of the given quantity for each GREET truck class
         
-    NOTE: None
+    NOTE: Returns None if the provided quantity_str isn't recognized.
     '''
 
     # Read in the VIUS data as a pandas dataframe
@@ -359,8 +380,11 @@ def calculate_payload_per_class(commodity='all'):
     # Make basic selections for the given commodity
     cSelection = make_basic_selections(df, commodity)
     
-    # Dictionary to contain string identifier of each class ('class'), and the associated average payload and standard deviation (weighted by ton-miles) with respect to the class
-    payload_per_class = {'class': [], 'average payload': np.zeros(0), 'standard deviation': np.zeros(0)}
+    if quantity_str == 'mpg':
+        cSelection = cSelection & (~df['MPG'].isna())
+    
+    # Dictionary to contain string identifier of each class ('class'), and the associated average quantity and standard deviation (weighted by ton-miles) with respect to the class
+    quantity_per_class = {'class': [], f'average {quantity_str}': np.zeros(0), 'standard deviation': np.zeros(0)}
     
     for greet_class in ['Heavy GVW', 'Medium GVW', 'Light GVW']:
         # Get the integer identifier associated with the evaluated GREET class in the VIUS dataframe
@@ -372,25 +396,32 @@ def calculate_payload_per_class(commodity='all'):
         # Calculate the annual ton-miles reported carrying the given commodity by the given GREET truck class and fuel type for each truck passing cSelection
         annual_ton_miles = get_annual_ton_miles(df, cSelection=cSelection, truck_range='all', commodity=commodity, fuel='all', greet_class=i_greet_class)
         
-        # Get the payloads for the given GREET class
+        # Get the quantity for the given GREET class
         cGreetClass = True
         if not greet_class == 'all':
             cGreetClass = (~df['GREET_CLASS'].isna())&(df['GREET_CLASS'] == i_greet_class)
-        payload = (df[cSelection&cGreetClass]['WEIGHTAVG'] - df[cSelection&cGreetClass]['WEIGHTEMPTY']) * LB_TO_TONS
         
-        # Calculate the average payload and standard deviation for the given commodity and GREET class
-        average_payload = np.average(payload, weights=annual_ton_miles)
-        variance_payload = np.average((payload-average_payload)**2, weights=annual_ton_miles)
-        std_payload = np.sqrt(variance_payload)
+        if quantity_str == 'payload':
+            quantity = (df[cSelection&cGreetClass]['WEIGHTAVG'] - df[cSelection&cGreetClass]['WEIGHTEMPTY']) * LB_TO_TONS
+        elif quantity_str == 'mpg':
+            quantity = df[cSelection&cGreetClass]['MPG'] / 10.
+        else:
+            print(f'ERROR: Provided quantity {quantity_str} not recognized. Returning None.')
+            return None
         
-        # Fill in the payload distribution
-        payload_per_class['class'].append(greet_class)
-        payload_per_class['average payload'] = np.append(payload_per_class['average payload'], average_payload)
-        payload_per_class['standard deviation'] = np.append(payload_per_class['standard deviation'], std_payload)
+        # Calculate the average quantity and standard deviation for the given commodity and GREET class
+        average_quantity = np.average(quantity, weights=annual_ton_miles)
+        variance_quantity = np.average((quantity-average_quantity)**2, weights=annual_ton_miles)
+        std_quantity = np.sqrt(variance_quantity)
         
-    return payload_per_class
+        # Fill in the quantity distribution
+        quantity_per_class['class'].append(greet_class)
+        quantity_per_class[f'average {quantity_str}'] = np.append(quantity_per_class[f'average {quantity_str}'], average_quantity)
+        quantity_per_class['standard deviation'] = np.append(quantity_per_class['standard deviation'], std_quantity)
         
-def calculate_all_payloads_per_class():
+    return quantity_per_class
+        
+def calculate_all_per_class(quantity_str = 'payload'):
     '''
     Calculates the average payload (and standard deviation) per GREET truck class for each commodity type, using calculate_payload_per_class()
         
@@ -406,25 +437,27 @@ def calculate_all_payloads_per_class():
     '''
 
     commodities_list = make_commodities_list()
-    all_payloads_per_class = {}
+    all_per_class = {}
     for commodity in commodities_list:
-        all_payloads_per_class[commodity] = calculate_payload_per_class(commodity)
-    return all_payloads_per_class
+        all_per_class[commodity] = calculate_quantity_per_class(quantity_str=quantity_str, commodity=commodity)
+    return all_per_class
     
     
-def calculate_payload_per_commodity(greet_class='all'):
+def calculate_quantity_per_commodity(quantity_str = 'payload', greet_class='all'):
     '''
-    Calculates the mean payload (and standard deviation) for each commodity, within the given GREET class, and saves the info as a dictionary
+    Calculates the mean value (and standard deviation) of the given quantity for each commodity, within the given GREET class, and saves the info as a dictionary
         
     Parameters
     ----------
     greet_class (string): GREET GVW class within which to calculate the mean payload per commodity
+    
+    quantity_str (string): Identifier to indicate what quantity we want to calculate per class
 
     Returns
     -------
-    payload_per_commodity (dictionary): Dictionary containing the mean payload and standard deviation for each commodity.
+    quantity_per_commodity (dictionary): Dictionary containing the mean value of the given quantity and standard deviation for each commodity.
         
-    NOTE: None.
+    NOTE: Returns None if the provided quantity_str isn't recognized.
     '''
 
     # Read in the VIUS data as a pandas dataframe
@@ -433,10 +466,13 @@ def calculate_payload_per_commodity(greet_class='all'):
     # Make basic selections for all commodities
     cBaseline = make_basic_selections(df, commodity='all')
     
-    # Calculate mean payload and standard deviation for each commodity
-    payload_per_commodity = {
+    if quantity_str == 'mpg':
+        cBaseline = cBaseline & (~df['MPG'].isna())
+    
+    # Calculate mean value and standard deviation of the quantity for each commodity
+    quantity_per_commodity = {
         'commodity': [],
-        'average payload': np.zeros(0),
+        f'average {quantity_str}': np.zeros(0),
         'standard deviation': np.zeros(0)
     }
     
@@ -466,19 +502,25 @@ def calculate_payload_per_commodity(greet_class='all'):
         # Calculate the annual ton-miles reported carrying the given commodity passing cSelection
         annual_ton_miles = get_annual_ton_miles(df, cSelection=cSelection, truck_range='all', commodity=commodity, fuel='all', greet_class=i_greet_class)
         
-        payload = (df[cSelection]['WEIGHTAVG'] - df[cSelection]['WEIGHTEMPTY']) * LB_TO_TONS
+        if quantity_str == 'payload':
+            quantity = (df[cSelection]['WEIGHTAVG'] - df[cSelection]['WEIGHTEMPTY']) * LB_TO_TONS
+        elif quantity_str == 'mpg':
+            quantity = df[cSelection]['MPG'] / 10.
+        else:
+            print(f'ERROR: Provided quantity {quantity_str} not recognized. Returning None.')
+            return None
         
-        # Calculate the mean payload, weighted by annual ton-miles carrying the given commodity
-        average_payload = np.average(payload, weights=annual_ton_miles)
-        variance_payload = np.average((payload-average_payload)**2, weights=annual_ton_miles)
-        std_payload = np.sqrt(variance_payload)
+        # Calculate the mean value of the quantity, weighted by annual ton-miles carrying the given commodity
+        average_quantity = np.average(quantity, weights=annual_ton_miles)
+        variance_quantity = np.average((quantity-average_quantity)**2, weights=annual_ton_miles)
+        std_quantity = np.sqrt(variance_quantity)
         
-        # Fill in the payload distribution
-        payload_per_commodity['commodity'].append(commodity)
-        payload_per_commodity['average payload'] = np.append(payload_per_commodity['average payload'], average_payload)
-        payload_per_commodity['standard deviation'] = np.append(payload_per_commodity['standard deviation'], std_payload)
+        # Fill in the dictionary with the quantity per commodity
+        quantity_per_commodity['commodity'].append(commodity)
+        quantity_per_commodity[f'average {quantity_str}'] = np.append(quantity_per_commodity[f'average {quantity_str}'], average_quantity)
+        quantity_per_commodity['standard deviation'] = np.append(quantity_per_commodity['standard deviation'], std_quantity)
     
-    return payload_per_commodity
+    return quantity_per_commodity
         
     
 def plot_bar(bar_heights, uncertainty, bin_names, title, str_save, bin_height_title='', horizontal_bars=False):
@@ -593,6 +635,8 @@ def save_as_csv_per_class(info_per_class_dict, filename, info_name, unc_name):
     print(f'Saving dataframe to {savePath}/{filename}_per_class.csv')
 
 def main():
+
+###----------------------------------- Distributions wrt GREET class for each commodity --------------------------------------###
 #    # Evaluate and plot the distribution of ton-miles with respect to GREET class and fuel type for each commodity
 #    all_class_fuel_dists = make_all_class_fuel_dists()
 #    save_as_csv_per_class(all_class_fuel_dists, filename='norm_distribution', info_name='normalized distribution', unc_name='statistical uncertainty')
@@ -606,27 +650,53 @@ def main():
 #            commodity_title=commodity
 #        class_fuel_dist = all_class_fuel_dists[commodity]
 #        plot_bar(bar_heights=class_fuel_dist['normalized distribution'], uncertainty=class_fuel_dist['statistical uncertainty'], bin_names=class_fuel_dist['class'], title=f'Distribution of ton-miles carrying {commodity_title}\n(normalized to unit sum)', str_save=str_save)
+###---------------------------------------------------------------------------------------------------------------------------###
 
-    # Evaluate and plot the distribution of average payload with respect to GREET class for each commodity
-    all_payloads_per_class = calculate_all_payloads_per_class()
-    save_as_csv_per_class(all_payloads_per_class, filename='payload', info_name='average payload', unc_name='standard deviation')
-    for commodity in all_payloads_per_class:
-        if commodity=='all':
-            str_save = f"average_payload_per_greet_class_commodity_all"
-            commodity_title='all commodities'
-        else:
-            str_save = f"average_payload_per_greet_class_commodity_{InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name']}"
-            commodity_title=commodity
-        payload_class_dist = all_payloads_per_class[commodity]
-        plot_bar(bar_heights=payload_class_dist['average payload'], uncertainty=payload_class_dist['standard deviation'], bin_names=payload_class_dist['class'], title=f'Average payload, weighted by ton-miles carrying {commodity_title}\nError bars are weighted standard deviation', bin_height_title='Average payload (tons)', str_save=str_save)
+###---------------------------------- Average payload wrt GREET class for each commodity -------------------------------------###
+#    # Evaluate and plot the average payload with respect to GREET class for each commodity
+#    all_payloads_per_class = calculate_all_per_class(quantity_str='payload')
+#    save_as_csv_per_class(all_payloads_per_class, filename='payload', info_name='average payload', unc_name='standard deviation')
+#    for commodity in all_payloads_per_class:
+#        if commodity=='all':
+#            str_save = f"average_payload_per_greet_class_commodity_all"
+#            commodity_title='all commodities'
+#        else:
+#            str_save = f"average_payload_per_greet_class_commodity_{InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name']}"
+#            commodity_title=commodity
+#        payload_class_dist = all_payloads_per_class[commodity]
+#        plot_bar(bar_heights=payload_class_dist['average payload'], uncertainty=payload_class_dist['standard deviation'], bin_names=payload_class_dist['class'], title=f'Average payload, weighted by ton-miles carrying {commodity_title}\nError bars are weighted standard deviation', bin_height_title='Average payload (tons)', str_save=str_save)
 
 #    # Evaluate and plot the distribution of average payload (weighted by ton-miles carried) with respect to commodities
-#    payload_per_commodity = calculate_payload_per_commodity()
+#    payload_per_commodity = calculate_quantity_per_commodity(quantity_str='payload')
 #    plot_bar(bar_heights=payload_per_commodity['average payload'], uncertainty=payload_per_commodity['standard deviation'], bin_names=payload_per_commodity['commodity'], title=f'Average payload for each commodity, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save='payload_per_commodity', bin_height_title='Average payload (tons)', horizontal_bars=True)
     
 #    # Evaluate and plot the distribution of average payload (weighted by ton-miles carried) with respect to commodities within each class
 #    for greet_class in ['Heavy GVW', 'Medium GVW', 'Light GVW']:
-#        payload_per_commodity = calculate_payload_per_commodity(greet_class)
+#        payload_per_commodity = calculate_quantity_per_commodity(quantity_str='payload', greet_class=greet_class)
 #        plot_bar(bar_heights=payload_per_commodity['average payload'], uncertainty=payload_per_commodity['standard deviation'], bin_names=payload_per_commodity['commodity'], title=f'Average payload for each commodity in the {greet_class} class, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save=f"payload_per_commodity_{greet_class.replace(' ', '_')}", bin_height_title='Average payload (tons)', horizontal_bars=True)
+###---------------------------------------------------------------------------------------------------------------------------###
 
+###------------------------------------ Average mpg wrt GREET class for each commodity ---------------------------------------###
+    # Evaluate and plot the distribution of average mpg with respect to GREET class for each commodity
+    all_mpgs_per_class = calculate_all_per_class(quantity_str='mpg')
+    save_as_csv_per_class(all_mpgs_per_class, filename='mpg', info_name='average mpg', unc_name='standard deviation')
+    for commodity in all_mpgs_per_class:
+        if commodity=='all':
+            str_save = f"average_mpg_per_greet_class_commodity_all"
+            commodity_title='all commodities'
+        else:
+            str_save = f"average_mpg_per_greet_class_commodity_{InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name']}"
+            commodity_title=commodity
+        mpg_class_dist = all_mpgs_per_class[commodity]
+        plot_bar(bar_heights=mpg_class_dist['average mpg'], uncertainty=mpg_class_dist['standard deviation'], bin_names=mpg_class_dist['class'], title=f'Average fuel efficiency, weighted by ton-miles carrying {commodity_title}\nError bars are weighted standard deviation', bin_height_title='Average fuel efficiency (mpg)', str_save=str_save)
+        
+    # Evaluate and plot the distribution of average mpg (weighted by ton-miles carried) with respect to commodities
+    mpg_per_commodity = calculate_quantity_per_commodity(quantity_str='mpg')
+    plot_bar(bar_heights=mpg_per_commodity['average mpg'], uncertainty=mpg_per_commodity['standard deviation'], bin_names=mpg_per_commodity['commodity'], title=f'Average fuel efficiency for each commodity, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save='mpg_per_commodity', bin_height_title='Average fuel efficiency (mpg)', horizontal_bars=True)
+
+    # Evaluate and plot the distribution of average mpg (weighted by ton-miles carried) with respect to commodities within each class
+    for greet_class in ['Heavy GVW', 'Medium GVW', 'Light GVW']:
+        mpg_per_commodity = calculate_quantity_per_commodity(quantity_str='mpg', greet_class=greet_class)
+        plot_bar(bar_heights=mpg_per_commodity['average mpg'], uncertainty=mpg_per_commodity['standard deviation'], bin_names=mpg_per_commodity['commodity'], title=f'Average fuel efficiency for each commodity in the {greet_class} class, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save=f"mpg_per_commodity_{greet_class.replace(' ', '_')}", bin_height_title='Average fuel efficiency (mpg)', horizontal_bars=True)
+###---------------------------------------------------------------------------------------------------------------------------###
 #main()
