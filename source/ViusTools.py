@@ -685,9 +685,9 @@ def main():
 #        payload_class_dist = all_payloads_per_class[commodity]
 #        plot_bar(bar_heights=payload_class_dist['average payload'], uncertainty=payload_class_dist['standard deviation'], bin_names=payload_class_dist['class'], title=f'Average payload, weighted by ton-miles carrying {commodity_title}\nError bars are weighted standard deviation', bin_height_title='Average payload (tons)', str_save=str_save)
 
-#    # Evaluate and plot the distribution of average payload (weighted by ton-miles carried) with respect to commodities
-#    payload_per_commodity = calculate_quantity_per_commodity(quantity_str='payload')
-#    plot_bar(bar_heights=payload_per_commodity['average payload'], uncertainty=payload_per_commodity['standard deviation'], bin_names=payload_per_commodity['commodity'], title=f'Average payload for each commodity, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save='payload_per_commodity', bin_height_title='Average payload (tons)', horizontal_bars=True)
+    # Evaluate and plot the distribution of average payload (weighted by ton-miles carried) with respect to commodities
+    payload_per_commodity = calculate_quantity_per_commodity(quantity_str='payload')
+    plot_bar(bar_heights=payload_per_commodity['average payload'], uncertainty=payload_per_commodity['standard deviation'], bin_names=payload_per_commodity['commodity'], title=f'Average payload for each commodity, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save='payload_per_commodity', bin_height_title='Average payload (tons)', horizontal_bars=True)
     
 #    # Evaluate and plot the distribution of average payload (weighted by ton-miles carried) with respect to commodities within each class
 #    for greet_class in ['Heavy GVW', 'Medium GVW', 'Light GVW']:
@@ -697,25 +697,26 @@ def main():
 
 ###------------------------------------ Average mpg wrt GREET class for each commodity ---------------------------------------###
     # Evaluate and plot the distribution of average mpg with respect to GREET class for each commodity
-    all_mpgs_per_class = calculate_all_per_class(quantity_str='mpg')
-    save_as_csv_per_class(all_mpgs_per_class, filename='mpg', info_name='average mpg', unc_name='standard deviation')
-    for commodity in all_mpgs_per_class:
-        if commodity=='all':
-            str_save = f"average_mpg_per_greet_class_commodity_all"
-            commodity_title='all commodities'
-        else:
-            str_save = f"average_mpg_per_greet_class_commodity_{InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name']}"
-            commodity_title=commodity
-        mpg_class_dist = all_mpgs_per_class[commodity]
-        plot_bar(bar_heights=mpg_class_dist['average mpg'], uncertainty=mpg_class_dist['standard deviation'], bin_names=mpg_class_dist['class'], title=f'Average fuel efficiency, weighted by ton-miles carrying {commodity_title}\nError bars are weighted standard deviation', bin_height_title='Average fuel efficiency (mpg)', str_save=str_save)
-        
-    # Evaluate and plot the distribution of average mpg (weighted by ton-miles carried) with respect to commodities
-    mpg_per_commodity = calculate_quantity_per_commodity(quantity_str='mpg')
-    plot_bar(bar_heights=mpg_per_commodity['average mpg'], uncertainty=mpg_per_commodity['standard deviation'], bin_names=mpg_per_commodity['commodity'], title=f'Average fuel efficiency for each commodity, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save='mpg_per_commodity', bin_height_title='Average fuel efficiency (mpg)', horizontal_bars=True)
-
-    # Evaluate and plot the distribution of average mpg (weighted by ton-miles carried) with respect to commodities within each class
-    for greet_class in ['Heavy GVW', 'Medium GVW', 'Light GVW']:
-        mpg_per_commodity = calculate_quantity_per_commodity(quantity_str='mpg', greet_class=greet_class)
-        plot_bar(bar_heights=mpg_per_commodity['average mpg'], uncertainty=mpg_per_commodity['standard deviation'], bin_names=mpg_per_commodity['commodity'], title=f'Average fuel efficiency for each commodity in the {greet_class} class, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save=f"mpg_per_commodity_{greet_class.replace(' ', '_')}", bin_height_title='Average fuel efficiency (mpg)', horizontal_bars=True)
+#    all_mpgs_per_class = calculate_all_per_class(quantity_str='mpg')
+#    save_as_csv_per_class(all_mpgs_per_class, filename='mpg', info_name='average mpg', unc_name='standard deviation')
+#    for commodity in all_mpgs_per_class:
+#        if commodity=='all':
+#            str_save = f"average_mpg_per_greet_class_commodity_all"
+#            commodity_title='all commodities'
+#        else:
+#            str_save = f"average_mpg_per_greet_class_commodity_{InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name']}"
+#            commodity_title=commodity
+#        mpg_class_dist = all_mpgs_per_class[commodity]
+#        plot_bar(bar_heights=mpg_class_dist['average mpg'], uncertainty=mpg_class_dist['standard deviation'], bin_names=mpg_class_dist['class'], title=f'Average fuel efficiency, weighted by ton-miles carrying {commodity_title}\nError bars are weighted standard deviation', bin_height_title='Average fuel efficiency (mpg)', str_save=str_save)
+#
+#    # Evaluate and plot the distribution of average mpg (weighted by ton-miles carried) with respect to commodities
+#    mpg_per_commodity = calculate_quantity_per_commodity(quantity_str='mpg')
+#    plot_bar(bar_heights=mpg_per_commodity['average mpg'], uncertainty=mpg_per_commodity['standard deviation'], bin_names=mpg_per_commodity['commodity'], title=f'Average fuel efficiency for each commodity, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save='mpg_per_commodity', bin_height_title='Average fuel efficiency (mpg)', horizontal_bars=True)
+#
+#    # Evaluate and plot the distribution of average mpg (weighted by ton-miles carried) with respect to commodities within each class
+#    for greet_class in ['Heavy GVW', 'Medium GVW', 'Light GVW']:
+#        mpg_per_commodity = calculate_quantity_per_commodity(quantity_str='mpg', greet_class=greet_class)
+#        plot_bar(bar_heights=mpg_per_commodity['average mpg'], uncertainty=mpg_per_commodity['standard deviation'], bin_names=mpg_per_commodity['commodity'], title=f'Average fuel efficiency for each commodity in the {greet_class} class, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save=f"mpg_per_commodity_{greet_class.replace(' ', '_')}", bin_height_title='Average fuel efficiency (mpg)', horizontal_bars=True)
 ###---------------------------------------------------------------------------------------------------------------------------###
-#main()
+
+main()

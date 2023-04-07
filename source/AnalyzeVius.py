@@ -1134,68 +1134,9 @@ df_agg_coarse_range = make_aggregated_df(df_vius, range_map=InfoObjects.FAF5_VIU
 #plot_x_vs_y(df_agg, x='WEIGHTAVG', y='PAYLOADAVG', x_title='Average gross vehicle weight (lb)', y_title = 'Average payload (tons)', x_save='WEIGHTAVG', y_save='PAYLOADAVG')
 #plot_x_vs_y(df_agg, x='WEIGHTEMPTY', y='PAYLOADAVG', x_title='Average unloaded vehicle weight (lb)', y_title = 'Average payload (tons)', x_save='WEIGHTEMPTY', y_save='PAYLOADAVG')
 
+# Payload and fuel efficiency vs. trip range
+#plot_y_vs_trip_range(df_agg, y_str='PAYLOADAVG', y_title='Payload (tons)')
+#plot_y_vs_trip_range(df_agg, y_str='MPG', y_title='Fuel Efficiency (mpg)')
+
 ###########################################################################################################
 
-
-#fig = plt.figure(figsize = (10, 7))
-#plt.xlabel('Trip range (miles)', fontsize=20)
-#plt.ylabel('Average Payload (tons)', fontsize=20)
-#df = df_agg
-#cBasic = make_basic_selections(df)
-#payload_weighted_means = {'range': [], 'weighted mean': [], 'weighted std': [], 'payloads': []}
-#i=0
-#for trip_range in ['TRIP0_50', 'TRIP051_100', 'TRIP101_200', 'TRIP201_500', 'TRIP500MORE']:
-#    payload_weighted_means['range'].append(trip_range)
-#    cSelection = cBasic & (df[trip_range] > 0)
-#    weighted_mean = np.average(df['PAYLOADAVG'][cSelection], weights = df[trip_range][cSelection] / 100.)
-#    weighted_variance = np.average((df['PAYLOADAVG'][cSelection]-weighted_mean)**2, weights=df[trip_range][cSelection] / 100.)
-#    weighted_std = np.sqrt(weighted_variance)
-#    payload_weighted_means['weighted mean'].append(weighted_mean)
-#    payload_weighted_means['weighted std'].append(weighted_std)
-#    payload_weighted_means['payloads'].append(df['PAYLOADAVG'][cSelection])
-#
-#    if i==0:
-#        plt.plot(i*(np.ones(len(df['PAYLOADAVG'][cSelection]))), df['PAYLOADAVG'][cSelection], 'o', color='black', label='Samples', markersize=1)
-#    else:
-#        plt.plot(i*(np.ones(len(df['PAYLOADAVG'][cSelection]))), df['PAYLOADAVG'][cSelection], 'o', color='black', markersize=1)
-#    i+=1
-#plt.plot(np.arange(len(payload_weighted_means['range'])), payload_weighted_means['weighted mean'], 'o', markersize=10, label='Average', color='red')
-#plt.errorbar(np.arange(len(payload_weighted_means['range'])), payload_weighted_means['weighted mean'], yerr=payload_weighted_means['weighted std'], fmt='o', color='red', ecolor='blue', linewidth=3, capsize=5, label='Standard Deviation', zorder=100)
-#plt.xticks(np.arange(len(payload_weighted_means['range'])), ['0-50', '51-100', '101-200', '201-500', '>500'])
-#plt.legend(fontsize=16)
-#print('Saving figure to plots/TripRange_vs_Payload.png')
-#plt.savefig(f'plots/TripRange_vs_Payload.png')
-
-
-#fig = plt.figure(figsize = (10, 7))
-#plt.xlabel('Trip range (miles)', fontsize=20)
-#plt.ylabel('Fuel Efficency (mpg)', fontsize=20)
-#df = df_agg
-#cBasic = make_basic_selections(df)
-#mpg_weighted_means = {'range': [], 'weighted mean': [], 'weighted std': [], 'mpgs': []}
-#i=0
-#for trip_range in ['TRIP0_50', 'TRIP051_100', 'TRIP101_200', 'TRIP201_500', 'TRIP500MORE']:
-#    mpg_weighted_means['range'].append(trip_range)
-#    cSelection = cBasic & (df[trip_range] > 0) & ~(df['MPG'].isna())
-#    weighted_mean = np.average(df['MPG'][cSelection], weights = df[trip_range][cSelection] / 100.)
-#    weighted_variance = np.average((df['MPG'][cSelection]-weighted_mean)**2, weights=df[trip_range][cSelection] / 100.)
-#    weighted_std = np.sqrt(weighted_variance)
-#    mpg_weighted_means['weighted mean'].append(weighted_mean/10.)
-#    mpg_weighted_means['weighted std'].append(weighted_std/10.)
-#    mpg_weighted_means['mpgs'].append(df['MPG'][cSelection]/10.)
-#
-#    if i==0:
-#        plt.plot(i*(np.ones(len(df['MPG'][cSelection]))), df['MPG'][cSelection]/10., 'o', color='black', label='Samples', markersize=1)
-#    else:
-#        plt.plot(i*(np.ones(len(df['MPG'][cSelection]))), df['MPG'][cSelection]/10., 'o', color='black', markersize=1)
-#    i+=1
-#plt.plot(np.arange(len(mpg_weighted_means['range'])), mpg_weighted_means['weighted mean'], 'o', markersize=10, label='Average', color='red')
-#plt.errorbar(np.arange(len(mpg_weighted_means['range'])), mpg_weighted_means['weighted mean'], yerr=mpg_weighted_means['weighted std'], fmt='o', color='red', ecolor='blue', linewidth=3, capsize=5, label='Standard Deviation', zorder=100)
-#plt.xticks(np.arange(len(mpg_weighted_means['range'])), ['0-50', '51-100', '101-200', '201-500', '>500'])
-#plt.legend(fontsize=16)
-#print('Saving figure to plots/TripRange_vs_MPG.png')
-#plt.savefig(f'plots/TripRange_vs_MPG.png')
-
-
-plot_y_vs_trip_range(df_agg, y_str='PAYLOADAVG', y_title='Payload (tons)')
-plot_y_vs_trip_range(df_agg, y_str='MPG', y_title='Fuel Efficiency (mpg)')

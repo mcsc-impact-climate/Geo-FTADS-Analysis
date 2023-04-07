@@ -88,7 +88,7 @@ def get_aggregated_commodity(faf5_commodity):
     print(f'Could not find FAF5 commodity {faf5_commodity} in FAF5_VIUS_commodity_map')
     return None
     
-def calculate_df_lca_weighted_average(df_lcas, weights, normalize_by_payload=False, payloads=None):
+def calculate_df_lca_weighted_average(df_lcas_greet_mpg, df_lcas_1mpg, weights, normalize_by_payload=False, payloads=None, use_vius_mpg=False, mpgs=None):
     '''
     Calculates the weighted average over a list of dataframes, for each column containing lifecycle stage emission intensities ('WTP', 'PTW' or 'WTW'), using a list of weights associated with each dataframe.
     
@@ -100,7 +100,11 @@ def calculate_df_lca_weighted_average(df_lcas, weights, normalize_by_payload=Fal
     
     normalize_by_payload (boolean): Flag to indicate whether to divide the emission intensities (in g / mile) by the average payload for each GREET class to obtain intensities in g / ton-mile
     
-    payloads (listof floats): List containing the payload associated with each GREET truck class
+    payloads (list of floats): List containing the payload associated with each GREET truck class
+    
+    use_vius_mpg (boolean): Flag to indicate whether we're using emission intensities calculated with 1 mpg, in which case we need to divide by the custom mpg from the VIUS data
+    
+    mpgs (list of floats): List containing the mpg assocoiated with each GREET truck class
 
     Returns
     -------
@@ -109,18 +113,25 @@ def calculate_df_lca_weighted_average(df_lcas, weights, normalize_by_payload=Fal
     NOTE: None
     
     '''
-    df_lca_weighted_average = df_lcas[0].copy(deep=True)
+    df_lca_weighted_average = df_lcas_greet_mpg[0].copy(deep=True)
     
     sum_of_weights = {}
     for column in ['WTP', 'PTW', 'WTW']:
         df_lca_weighted_average[column].values[:] = 0.
     
     for column in ['WTP', 'PTW', 'WTW']:
-        for i_class in range(len(df_lcas)):
-            if normalize_by_payload:
-                df_lca_weighted_average[column] += df_lcas[i_class][column] * weights[i_class] / payloads[i_class]
+        for i_class in range(len(df_lcas_greet_mpg)):
+            
+            if normalize_by_payload and not use_vius_mpg:
+                df_lca_weighted_average[column] += df_lcas_greet_mpg[i_class][column] * weights[i_class] / payloads[i_class]
+                
+            elif use_vius_mpg and not normalize_by_payload:
+                df_lca_weighted_average[column] += df_lcas_1mpg[i_class][column] * weights[i_class] / mpgs[i_class]
+                
+            elif use_vius_mpg and normalize_by_payload:
+                df_lca_weighted_average[column] += df_lcas_1mpg[i_class][column] * weights[i_class] / ( payloads[i_class] * mpgs[i_class] )
             else:
-                df_lca_weighted_average[column] += df_lcas[i_class][column] * weights[i_class]
+                df_lca_weighted_average[column] += df_lcas_greet_mpg[i_class][column] * weights[i_class]
     
     return df_lca_weighted_average
     
@@ -152,23 +163,32 @@ def evaluateGreetWtwTruck(faf5_commodity='all'):
     # Read in payload per vehicle class for the given commodity
     df_payload = pd.read_csv(f'{top_dir}/data/VIUS_Results/payload_per_class.csv')
     
+    # Read in fuel efficiency (in mpg) per vehicle class for the given commodity
+    df_mpg = pd.read_csv(f'{top_dir}/data/VIUS_Results/mpg_per_class.csv')
+    
     # Evaluate overall emission intensities (g / mile)
-    df_lcas_dict = {'GREET class': ['Heavy GVW', 'Medium GVW', 'Light GVW'], 'df': [], 'weight': [], 'payload': []}
+    df_lcas_dict = {'GREET class': ['Heavy GVW', 'Medium GVW', 'Light GVW'], 'df_mpg_from_greet': [], 'df_mpg_1mpg': [], 'weight': [], 'payload': [], 'mpg': []}
     for greet_class in df_lcas_dict['GREET class']:
         greet_class_info = greet_class.lower().replace(' ', '_')
-        df_lca = readGreetWtwTruck(f'{top_dir}/data/GREET_LCA/truck_{greet_class_info}_diesel_wtw.csv')
+        df_lca_from_greet = readGreetWtwTruck(f'{top_dir}/data/GREET_LCA/truck_{greet_class_info}_diesel_wtw.csv')
+        df_lca_1mpg = readGreetWtwTruck(f'{top_dir}/data/GREET_LCA/truck_{greet_class_info}_diesel_1mpg_wtw.csv')
         
-        df_lcas_dict['df'].append(df_lca)
+        df_lcas_dict['df_mpg_from_greet'].append(df_lca_from_greet)
+        df_lcas_dict['df_mpg_1mpg'].append(df_lca_1mpg)
         df_lcas_dict['weight'].append(float(df_norm_distribution[aggregated_commodity][df_norm_distribution['class'] == greet_class]))
         df_lcas_dict['payload'].append(float(df_payload[aggregated_commodity][df_payload['class'] == greet_class]))
+        df_lcas_dict['mpg'].append(float(df_mpg[aggregated_commodity][df_payload['class'] == greet_class]))
     
     # Evaluate the weighted average of LCAs with respect to the GREET class
-    df_lca_weighted_average = calculate_df_lca_weighted_average(df_lcas_dict['df'], df_lcas_dict['weight'])
+    df_lca_weighted_average = calculate_df_lca_weighted_average(df_lcas_dict['df_mpg_from_greet'], df_lcas_dict['df_mpg_1mpg'], df_lcas_dict['weight'])
     
     # Evaluate overall payload-normalized emission intensities (g / ton-mile)
-    df_lca_weighted_average_payload_normalized = calculate_df_lca_weighted_average(df_lcas_dict['df'], df_lcas_dict['weight'], normalize_by_payload=True, payload=df_lcas_dict['payload'])
+    df_lca_weighted_average_payload_normalized = calculate_df_lca_weighted_average(df_lcas_dict['df_mpg_from_greet'], df_lcas_dict['df_mpg_1mpg'], df_lcas_dict['weight'], normalize_by_payload=True, payloads=df_lcas_dict['payload'])
     
-    return df_lca_weighted_average, df_lca_weighted_average_payload_normalized
+    # Evaluate payload-normalized emission intensities (g / ton-mile) calculated using fuel efficiency from the VIUS
+    df_lca_weighted_average_payload_normalized_vius_mpg = calculate_df_lca_weighted_average(df_lcas_dict['df_mpg_from_greet'], df_lcas_dict['df_mpg_1mpg'], df_lcas_dict['weight'], normalize_by_payload=True, payloads=df_lcas_dict['payload'], use_vius_mpg=True, mpgs=df_lcas_dict['mpg'])
+    
+    return df_lca_weighted_average, df_lca_weighted_average_payload_normalized, df_lca_weighted_average_payload_normalized_vius_mpg
     
     
 def plot_truck_emissions_per_class():
@@ -212,13 +232,15 @@ def plot_truck_emissions_per_class():
     plt.savefig('plots/co2_emissions_per_class.png')
     plt.savefig('plots/co2_emissions_per_class.pdf')
     
-def plot_truck_emissions_per_commodity(normalize_by_payload = False):
+def plot_truck_emissions_per_commodity(normalize_by_payload = False, use_vius_mpg = False):
     '''
     Calculates and plots the calculated CO2 emissions for each commodity
     
     Parameters
     ----------
     normalize_by_payload (boolean): Flag to indicate whether to plot emission rates normalized by payload ( to obtain g / ton-mile rather than g / mile)
+    
+    use_vius_mpg (boolean): Flag to indicate whether we're using emission intensities calculated with 1 mpg, in which case we need to divide by the custom mpg from the VIUS data
 
     Returns
     -------
@@ -249,10 +271,15 @@ def plot_truck_emissions_per_commodity(normalize_by_payload = False):
     co2_emission_intensity = {'commodity': [], 'WTP': [], 'PTW': [], 'WTW': []}
     
     for commodity in commodities:
-        df_lca, df_lca_payload_normalized = evaluateGreetWtwTruck(commodity)
+        df_lca, df_lca_payload_normalized, df_lca_payload_normalized_vius_mpg = evaluateGreetWtwTruck(commodity)
         co2_emission_intensity['commodity'].append(commodity)
         
-        if normalize_by_payload:
+        if normalize_by_payload and use_vius_mpg:
+            co2_emission_intensity['WTP'].append(float(df_lca_payload_normalized_vius_mpg['WTP'][df_lca['Item'] == 'CO2 (w/ C in VOC & CO)']))
+            co2_emission_intensity['PTW'].append(float(df_lca_payload_normalized_vius_mpg['PTW'][df_lca['Item'] == 'CO2 (w/ C in VOC & CO)']))
+            co2_emission_intensity['WTW'].append(float(df_lca_payload_normalized_vius_mpg['WTW'][df_lca['Item'] == 'CO2 (w/ C in VOC & CO)']))
+        
+        elif normalize_by_payload:
             co2_emission_intensity['WTP'].append(float(df_lca_payload_normalized['WTP'][df_lca['Item'] == 'CO2 (w/ C in VOC & CO)']))
             co2_emission_intensity['PTW'].append(float(df_lca_payload_normalized['PTW'][df_lca['Item'] == 'CO2 (w/ C in VOC & CO)']))
             co2_emission_intensity['WTW'].append(float(df_lca_payload_normalized['WTW'][df_lca['Item'] == 'CO2 (w/ C in VOC & CO)']))
@@ -272,10 +299,14 @@ def plot_truck_emissions_per_commodity(normalize_by_payload = False):
     normalize_by_payload_str = ''
     if normalize_by_payload:
         normalize_by_payload_str = '_norm_by_payload'
+        
+    use_vius_mpg_str = ''
+    if use_vius_mpg:
+        use_vius_mpg_str = '_use_vius_mpg'
     
-    print(f'Saving figure to plots/co2_emissions_per_commodity{normalize_by_payload_str}.png')
-    plt.savefig(f'plots/co2_emissions_per_commodity{normalize_by_payload_str}.png')
-    plt.savefig(f'plots/co2_emissions_per_commodity{normalize_by_payload_str}.pdf')
+    print(f'Saving figure to plots/co2_emissions_per_commodity{normalize_by_payload_str}{use_vius_mpg_str}.png')
+    plt.savefig(f'plots/co2_emissions_per_commodity{normalize_by_payload_str}{use_vius_mpg_str}.png')
+    plt.savefig(f'plots/co2_emissions_per_commodity{normalize_by_payload_str}{use_vius_mpg_str}.pdf')
     
 def readGreetWtwRail(csv_path, commodity='all'):
     '''
@@ -455,7 +486,7 @@ def fillLcaDf(df_dict, top_dir, commodity='all'):
     '''
     
     # Emission rates (g / ton-mile) from GREET outputs
-    df_lca_truck, df_lca_truck_payload_normalized = evaluateGreetWtwTruck(faf5_commodity=commodity)
+    df_lca_truck, df_lca_truck_payload_normalized, df_lca_truck_payload_normalized_vius_mpg = evaluateGreetWtwTruck(faf5_commodity=commodity)
     df_dict['truck'][commodity] = df_lca_truck_payload_normalized
     df_dict['rail'][commodity] = readGreetWtwRail(f'{top_dir}/data/GREET_LCA/rail_freight_diesel_wtw.csv', commodity=commodity)
     df_dict['ship'][commodity] = readGreetWthShip(f'{top_dir}/data/GREET_LCA/marine_msd_mdo_05sulfur_wth_feedstock.csv', f'{top_dir}/data/GREET_LCA/marine_msd_mdo_05sulfur_wth_conversion.csv', f'{top_dir}/data/GREET_LCA/marine_msd_mdo_05sulfur_wth_combustion.csv', commodity=commodity)
@@ -467,10 +498,11 @@ def fillLcaDf(df_dict, top_dir, commodity='all'):
 def main():
     
     #plot_truck_emissions_per_class()
-    df_lca, df_lca_payload_normalized = evaluateGreetWtwTruck(faf5_commodity='all')
+    df_lca, df_lca_payload_normalized, df_lca_truck_payload_normalized_vius_mpg = evaluateGreetWtwTruck(faf5_commodity='all')
     
     plot_truck_emissions_per_commodity(normalize_by_payload = False)
     plot_truck_emissions_per_commodity(normalize_by_payload = True)
+    plot_truck_emissions_per_commodity(normalize_by_payload = True, use_vius_mpg = True)
 
     # Initialize an empty dictionary to contain the LCA dataframes
     df_lca_dict = {'truck': {}, 'rail': {}, 'ship': {}}
@@ -478,7 +510,6 @@ def main():
     fillLcaDf(df_lca_dict, top_dir=top_dir, commodity='all')
 
     # Add commodity-specific emissions
-    # **NOTE** For the moment, commodity-specificity isn't yet implemented in the emissions calculation, so currently all the commodity-specific emission rates are identical to the 'all' rates. The 'for' loop below is simply a placeholder to help prepare for commodity-specific evaluation of emission rates.
     metaPath = f'{top_dir}/data/FAF5_regional_flows_origin_destination/FAF5_metadata.xlsx'
     meta = pd.ExcelFile(metaPath)
     commodities = pd.read_excel(meta, 'Commodity (SCTG2)')['Description']
