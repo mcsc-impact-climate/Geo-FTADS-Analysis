@@ -38,7 +38,7 @@ def mergeShapefile(dest, shapefile_path):
     merged_dataframe = shapefile.merge(dest, on='ID', how='left')
     
     # Filter for links where the total tons transported (TOT Tons_22 All) isn't NULL
-    merged_dataframe = merged_dataframe[(~(merged_dataframe['TOT Tons_22 All'].isna())) & (merged_dataframe['TOT Tons_22 All'] > 2000)]
+    merged_dataframe = merged_dataframe[(~(merged_dataframe['TOT Tons_22 All'].isna())) & (merged_dataframe['TOT Tons_22 All'] > 10000)]
     
     #print(merged_dataframe)
     
