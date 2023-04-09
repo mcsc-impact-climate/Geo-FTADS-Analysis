@@ -73,14 +73,14 @@ def load_highway_links(links_path, st=None):
     '''
 
     # Load in the FAF5 network links shapefile
-    links = QgsVectorLayer(links_path, 'FAF5 Links', 'ogr')
+    links = QgsVectorLayer(links_path, 'Highway Flux (tons/link)', 'ogr')
     
     # Confirm that the netowrk links got loaded in correctly
     if not links.isValid():
         print('Highway links failed to load!')
         
     # Add the links to the map if they aren't already there
-    if not QgsProject.instance().mapLayersByName('Total Tons Transported by Highway'):
+    if not QgsProject.instance().mapLayersByName('Highway Flux (tons/link)'):
         QgsProject.instance().addMapLayer(links)
     
     # Apply a filter to only show links in the given state
@@ -102,7 +102,7 @@ def style_highway_links(links):
     '''
     # Target field is by default the total tons transported as weighting factor for network link widths
     #myTargetField = 'Refactored_TOT Tons_22 All'
-    myTargetField = 'TOT Tons_2'
+    myTargetField = 'Tot Tons'
 
     # Specify the range of possible weighting factors as the max and min range of the target field
     ramp_max = links.maximumValue(links.fields().indexFromName(myTargetField))
@@ -240,13 +240,13 @@ def main():
 
 
     # Plot and save total domestic imports
-    regions_import = readRegions(f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp', 'FAF5 Regions Imports')
-    applyGradient(regions_import, 'Total Impo')
+    regions_import = readRegions(f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp', 'Imports (ton / sq mile)')
+    applyGradient(regions_import, 'Tot Imp De')
     #saveMap([regions], 'Total Domestic Imports', 'Imports [tons/year]', 'total_domestic_imports', f'{top_dir}/layouts/total_domestic_imports.pdf')
 
     # Plot and save total domestic exports
-    regions_export = readRegions(f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp', 'FAF5 Regions Exports')
-    applyGradient(regions_export, 'Total Expo')
+    regions_export = readRegions(f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp', 'Exports (ton / sq mile)')
+    applyGradient(regions_export, 'Tot Exp De')
     #saveMap([regions], 'Total Domestic Exports', 'Exports [tons/year]', 'total_domestic_exports', f'{top_dir}/layouts/total_domestic_exports.pdf')
     
     # Add the highway assignments

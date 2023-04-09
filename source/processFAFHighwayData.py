@@ -37,10 +37,15 @@ def mergeShapefile(dest, shapefile_path):
     shapefile = gpd.read_file(shapefile_path, include_fields=['ID', 'LENGTH', 'DATA', 'VERSION', 'ShapeSTLen', 'geometry'])
     merged_dataframe = shapefile.merge(dest, on='ID', how='left')
     
+#    # Convert to tons per mile
+#    merged_dataframe['TOT Tons_22 All'] = merged_dataframe['TOT Tons_22 All'] / merged_dataframe['ShapeSTLen']
+    merged_dataframe = merged_dataframe.rename(columns={'TOT Tons_22 All': 'Tot Tons'})
+    
     # Filter for links where the total tons transported (TOT Tons_22 All) isn't NULL
-    merged_dataframe = merged_dataframe[(~(merged_dataframe['TOT Tons_22 All'].isna())) & (merged_dataframe['TOT Tons_22 All'] > 10000)]
+    merged_dataframe = merged_dataframe[(~(merged_dataframe['Tot Tons'].isna())) & (merged_dataframe['Tot Tons'] > 10000)]
     
     #print(merged_dataframe)
+    
     
     return merged_dataframe
     
