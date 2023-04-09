@@ -28,6 +28,7 @@ def getTopDir():
     else:
         print("ERROR: Expect current directory to end with 'source'. Cannot use relative directories as-is. Exiting...")
     return top_dir
+    
 
 def readRegions(path, name):
     '''
@@ -58,7 +59,7 @@ def readRegions(path, name):
 
     return regions
     
-def load_highway_links(st=None):
+def load_highway_links(links_path, st=None):
     '''
     Loads in the highway network links produced by HighwayAssignmentTools.py with the FAF5 flux data included.
 
@@ -72,7 +73,7 @@ def load_highway_links(st=None):
     '''
 
     # Load in the FAF5 network links shapefile
-    links = QgsVectorLayer(f'{top_dir}/data/highway_assignment_links/highway_assignment_links.shp', 'FAF5 Links', 'ogr')
+    links = QgsVectorLayer(links_path, 'FAF5 Links', 'ogr')
     
     # Confirm that the netowrk links got loaded in correctly
     if not links.isValid():
@@ -249,7 +250,7 @@ def main():
     #saveMap([regions], 'Total Domestic Exports', 'Exports [tons/year]', 'total_domestic_exports', f'{top_dir}/layouts/total_domestic_exports.pdf')
     
     # Add the highway assignments
-    links = load_highway_links()
+    links = load_highway_links(f'{top_dir}/data/highway_assignment_links/highway_assignment_links.shp')
     
     # Style highway links
     style_highway_links(links)
