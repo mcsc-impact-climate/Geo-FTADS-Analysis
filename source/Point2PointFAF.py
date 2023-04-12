@@ -169,7 +169,18 @@ def mergeShapefile(dest, shapefile_path):
     merged_Dataframe (pd.DataFrame): Joined dataframe
     '''
     shapefile = gpd.read_file(shapefile_path)
-    merged_dataframe = shapefile.merge(dest, on='FAF_Zone', how='left')
+    
+    # Select columns of interest
+    shapefile_filtered = shapefile.filter(['Short Description', 'FAF_Zone', 'FAF_Zone_D', 'ShapeSTAre', 'ShapeSTLen', 'geometry'], axis=1)
+    dest_filtered = dest.filter(['FAF_Zone', 'Total Import', 'Total Export'], axis=1)
+    
+    merged_dataframe = shapefile_filtered.merge(dest_filtered, on='FAF_Zone', how='left')
+    
+    # Add columns with imports and exports per unit area (km^2)
+    meters_per_mile = 1609.34
+    merged_dataframe['Tot Imp Dens'] = merged_dataframe['Total Import'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
+    merged_dataframe['Tot Exp Dens'] = merged_dataframe['Total Export'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
+        
     return merged_dataframe
 
 

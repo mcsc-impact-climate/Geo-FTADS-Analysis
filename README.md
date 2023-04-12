@@ -11,8 +11,15 @@ Users can interact with QGIS either through the user interface ([link to user ma
 ## Pre-requisites
 * An installation of QGIS: [link to downloads for Mac, Windows and Linux](https://qgis.org/en/site/forusers/download.html)
 * python3
+* Access to the [sesame-core](https://github.mit.edu/sesame/sesame-core) repository
 
 ## Setup
+
+Clone this repo, including submodules. **Note:** You will need access to the [sesame-core](https://github.mit.edu/sesame/sesame-core) repository in order to clone it as a submodule. 
+
+```bash
+git clone --recurse-submodules git@github.com:cubicalknight/FAF5-Analysis.git
+```
 
 Install python requirements
 ```bash
@@ -20,6 +27,11 @@ pip install -r requirements.txt
 ```
 
 ## Downloading the data
+
+Cd into the data directory
+```bash
+cd data
+```
 
 ### FAF5 Regions
 
@@ -55,6 +67,19 @@ unzip FAF5_regional_od.zip -d FAF5_regional_flows_origin_destination
 rm FAF5_regional_od.zip
 ```
 
+### Vehicle Inventory and Use Survey (VIUS) data
+```bash
+# 2002 Vehicle Inventory and Use Survey (from https://www.bts.gov/faf)
+wget "https://rosap.ntl.bts.gov/view/dot/42632/dot_42632_DS2.zip" -O VIUS_2002.zip
+unzip VIUS_2002.zip -d VIUS_2002
+rm VIUS_2002.zip
+```
+
+You can now cd back out of the data directory
+```bash
+cd ..
+```
+
 ## How to run python scripts
 
 Python scripts to encode analysis steps are stored in the [source](./source) directory. 
@@ -83,13 +108,19 @@ cd source
 python Point2PointFAF.py
 ```
 
-## Analyzing highway assignments
+## Processing highway assignments
 
-The script [AnalyzeFAFData.py](./source/AnalyzeFAFData.py) encodes an initial geospatial analysis of the FAF5 highway network assignment data. Follow the [instructions above](#how-to-run-python-scripts) to execute the script in an empty project. Currently, the result should look something like this:
+The script [AnalyzeFAFData.py](./source/processFAFHighwayData.py) reads in FAF5 network links for the entire US, reads in the highway network assignments for total trucking flows, and joins the total flows for 2022 (all commodities combined) with the FAF5 network links via their common link IDs.
 
-![Highway network assigmments in Texas](./images/texas_highway_Assignments.png "Texas Highway Network Assignments")
+the FAF5 highway networks and their associated freight flow assignments (in tons), and merges them together to produce a combined shapefile. To run:
 
-Currently, the script reads in shapefiles for the FAF5 network links and FAF5 regions for the entire US, and applies a filter to visualize only the state of Texas (mainly for tractability). It then reads in the highway network assignments for total trucking flows, joins the total flows for 2022 (all commodities combined) with the FAF5 network links via their common link IDs, and visualizes the network links as lines on the map, with the line width of each link weighted by its total annual freight flow (in tons). 
+```bash
+python processFAFHighwayData.py 
+```
+
+This should produce the following shapefile:
+
+and visualizes the network links as lines on the map, with the line width of each link weighted by its total annual freight flow (in tons). 
 
 ## Creating and plotting total domestic imports and exports
 
@@ -100,6 +131,16 @@ cd source
 python Point2PointFAF.py
 ```
 
-The script [PlotWithQGIS.py](./PlotWithQGIS.py) then plots the total imports and exports for all of the FAF5 regions (excluding Alaska and Hawaii) as colormaps, and saves them as PDF files. Executing [PlotWithQGIS.py](./PlotWithQGIS.py) in the QGIS GUI (after first running [Point2PointFAF.py](./source/Point2PointFAF.py)) should produce output PDF files in the [layouts](./layouts) directory, which look something like:
+The script [PlotWithQGIS.py](./PlotWithQGIS.py) then plots the total imports and exports for all of the FAF5 regions (excluding Alaska and Hawaii) as colormaps in QGIS, and visualizes the network links as lines on the map, with the line width of each link weighted by its total annual freight flow (in tons). This should look something like:
 
-![Total domestic exports](./images/total_domestic_exports.png "Total Domestic Exports")
+<!-- Executing [PlotWithQGIS.py](./PlotWithQGIS.py) in the QGIS GUI (after first running [Point2PointFAF.py](./source/Point2PointFAF.py)) should produce output PDF files in the [layouts](./layouts) directory, which look something like: -->
+
+![Total domestic exports](./images/highway_and_total_flows.png "Total Domestic Exports")
+
+## Analyzing VIUS data
+
+The script [AnalyzeVius.py] produces distributions of GREET vehicle class, fuel type, age, and payload from the VIUS data. To run:
+
+```bash
+python source/AnalyzeVius.py
+```
