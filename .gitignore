@@ -3,3 +3,4 @@ data/*
 .DS_Store
 *~
 plots/*
+interactive_map
