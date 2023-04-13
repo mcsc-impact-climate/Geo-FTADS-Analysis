@@ -55,7 +55,8 @@ def readRegions(path, name):
         QgsProject.instance().addMapLayer(regions)
 
     # Apply a filter for the moment to remove Hawaii and Alaska
-    regions.setSubsetString('NOT FAF_Zone_D LIKE \'%Alaska%\' AND NOT FAF_Zone_D LIKE \'%HI%\'')
+#    if 'FAF5' in path:
+#        regions.setSubsetString('NOT FAF_Zone_D LIKE \'%Alaska%\' AND NOT FAF_Zone_D LIKE \'%HI%\'')
 
     return regions
     
@@ -129,7 +130,7 @@ def style_highway_links(links):
     # Apply the graduated symbol renderer defined above to the network links
     links.setRenderer(renderer)
 
-def applyGradient(regions, target_field):
+def applyGradient(regions, target_field, colormap='Blues'):
     '''
     Applies a color gradient to the FAF5 regions according to the specified target field
 
@@ -148,7 +149,7 @@ def applyGradient(regions, target_field):
     format.setFormat("%1 - %2")
     format.setPrecision(2)
     format.setTrimTrailingZeroes(True)
-    color_ramp = QgsStyle().defaultStyle().colorRamp('Reds')
+    color_ramp = QgsStyle().defaultStyle().colorRamp(colormap)
     ramp_num_steps = 10  # Number of bins to use for the color gradient
 
     renderer = QgsGraduatedSymbolRenderer(target_field)
@@ -236,18 +237,20 @@ def main():
     top_dir = getTopDir()
     if top_dir is None:
         exit()
-        
-
 
     # Plot and save total domestic imports
-    regions_import = readRegions(f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp', 'Imports (ton / sq mile)')
-    applyGradient(regions_import, 'Tot Imp De')
+    faf5_regions_import = readRegions(f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp', 'Imports (ton / sq mile)')
+    applyGradient(faf5_regions_import, 'Tot Imp De')
     #saveMap([regions], 'Total Domestic Imports', 'Imports [tons/year]', 'total_domestic_imports', f'{top_dir}/layouts/total_domestic_imports.pdf')
 
     # Plot and save total domestic exports
-    regions_export = readRegions(f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp', 'Exports (ton / sq mile)')
-    applyGradient(regions_export, 'Tot Exp De')
+    faf5_regions_export = readRegions(f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp', 'Exports (ton / sq mile)')
+    applyGradient(faf5_regions_export, 'Tot Exp De')
     #saveMap([regions], 'Total Domestic Exports', 'Exports [tons/year]', 'total_domestic_exports', f'{top_dir}/layouts/total_domestic_exports.pdf')
+    
+    # Add grid emission intensity
+    egrids_regions = readRegions(f'{top_dir}/data/egrid2020_subregions_merged/egrid2020_subregions_merged.shp', 'CO2e intensity of power grid (lb/MWh)')
+    applyGradient(egrids_regions, 'SRC2ERTA', colormap='Reds')
     
     # Add the highway assignments
     links = load_highway_links(f'{top_dir}/data/highway_assignment_links/highway_assignment_links.shp')

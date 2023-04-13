@@ -92,9 +92,7 @@ def get_top_dir():
     top_dir = os.path.dirname(source_dir)
     return top_dir
     
-top_dir = get_top_dir()
-    
-def read_highway_assignments():
+def read_highway_assignments(top_dir):
     '''
     Reads in the FAF5 highway assignments as a dataframe, and gets the columns of interest
 
@@ -115,8 +113,11 @@ def read_highway_assignments():
     return highway_assignments_filtered_df
     
 def main():
+    # Get the path to the top level of the Git repo
+    top_dir = get_top_dir()
+
     # Read in the highway flow assignments for each link
-    df_highway_assignments = read_highway_assignments()
+    df_highway_assignments = read_highway_assignments(top_dir)
     #start_time = time.time()
     
     # Merge the highway flow assignments in with the shapefile containing the highway links
