@@ -34,7 +34,6 @@ cd data
 ```
 
 ### FAF5 Regions
-
 ```bash
 # FAF5 regions (from https://geodata.bts.gov/datasets/usdot::freight-analysis-framework-faf5-regions)
 wget "https://opendata.arcgis.com/api/v3/datasets/e3bcc5d26e5e42709e2bacd6fc37ab43_0/downloads/data?format=shp&spatialRefId=3857&where=1%3D1" -O FAF5_regions.zip
@@ -43,7 +42,6 @@ rm FAF5_regions.zip
 ```
 
 ### FAF5 Network Links
-
 ```bash
 # FAF5 network links (from https://geodata.bts.gov/datasets/usdot::freight-analysis-framework-faf5-network-links)
 wget "https://opendata.arcgis.com/api/v3/datasets/cbfd7a1457d749ae865f9212c978c645_0/downloads/data?format=shp&spatialRefId=3857&where=1%3D1" -O FAF5_network_links.zip
@@ -73,6 +71,20 @@ rm FAF5_regional_od.zip
 wget "https://rosap.ntl.bts.gov/view/dot/42632/dot_42632_DS2.zip" -O VIUS_2002.zip
 unzip VIUS_2002.zip -d VIUS_2002
 rm VIUS_2002.zip
+```
+
+### Subregions for eGRID grid intensity data
+```bash
+# eGRID subregions (from https://hub.arcgis.com/datasets/fedmaps::subregions-of-the-emissions-generation-resource-integrated-database-egrid)
+wget "https://opendata.arcgis.com/api/v3/datasets/23e16f24702948ac9e2032bfa0526a8f_1/downloads/data?format=shp&spatialRefId=4326&where=1%3D1" -O egrid2020_subregions.zip
+unzip egrid2020_subregions.zip -d egrid2020_subregions
+rm egrid2020_subregions.zip
+```
+
+### eGRID grid intensity data
+```bash
+# eGRID emission rate data (from https://www.epa.gov/egrid/download-data)
+wget "https://www.epa.gov/system/files/documents/2023-01/eGRID2021_data.xlsx"
 ```
 
 You can now cd back out of the data directory
@@ -110,19 +122,29 @@ python Point2PointFAF.py
 
 ## Processing highway assignments
 
-The script [AnalyzeFAFData.py](./source/processFAFHighwayData.py) reads in FAF5 network links for the entire US, reads in the highway network assignments for total trucking flows, and joins the total flows for 2022 (all commodities combined) with the FAF5 network links via their common link IDs.
+The script [ProcessFAFHighwayData.py](./source/ProcessFAFHighwayData.py) reads in both the FAF5 network links for the entire US and the associated highway network assignments for total trucking flows, and joins the total flows for 2022 (all commodities combined) with the FAF5 network links via their common link IDs to produce a combined shapefile.
 
-the FAF5 highway networks and their associated freight flow assignments (in tons), and merges them together to produce a combined shapefile. To run:
+To run:
 
 ```bash
 python processFAFHighwayData.py 
 ```
 
-This should produce the following shapefile:
+This should produce a shapefile in `data/highway_assignment_links`.
 
-and visualizes the network links as lines on the map, with the line width of each link weighted by its total annual freight flow (in tons). 
+## Processing eGRID emission intensity data
 
-## Creating and plotting total domestic imports and exports
+The script [ProcessGridData.py](./source/ProcessGridData.py) reads in the shapefile containing the borders of subregions within which eGRIDs reports grid emissions data, along with the associated eGRIDs data, and joins the shapefile with the eGRIDs data via the subregion ID to produce a combined shapefile.
+
+To run:
+
+```bash
+python processFAFHighwayData.py 
+```
+
+This should produce a shapefile in `data/egrid2020_subregions_merged`.
+
+## Creating total domestic imports and exports
 
 The script [Point2PointFAF.py](./source/Point2PointFAF.py) uses the csv data in the FAF5 regional database to calculate the total domestic imports and exports of all commodities to and from all FAF5 regions, and merged this data with the FAF5 shapefiles. To run:
 
@@ -131,7 +153,14 @@ cd source
 python Point2PointFAF.py
 ```
 
-The script [PlotWithQGIS.py](./PlotWithQGIS.py) then plots the total imports and exports for all of the FAF5 regions (excluding Alaska and Hawaii) as colormaps in QGIS, and visualizes the network links as lines on the map, with the line width of each link weighted by its total annual freight flow (in tons). This should look something like:
+
+## Visualizing layers with QGIS
+
+The script [PlotWithQGIS.py](./PlotWithQGIS.py) reads in processed shapefiles containing:
+* total imports and exports for all of the FAF5 regions 
+* CO2e intensity (in lb/MWh) of the US powergrid
+
+and plots them as colormaps in QGIS. It also visualizes the network links as lines on the map, with the line width of each link weighted by its total annual freight flow (in tons). This should look something like:
 
 <!-- Executing [PlotWithQGIS.py](./PlotWithQGIS.py) in the QGIS GUI (after first running [Point2PointFAF.py](./source/Point2PointFAF.py)) should produce output PDF files in the [layouts](./layouts) directory, which look something like: -->
 
