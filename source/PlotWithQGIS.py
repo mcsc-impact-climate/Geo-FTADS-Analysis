@@ -30,9 +30,9 @@ def getTopDir():
     return top_dir
     
 
-def readRegions(path, name):
+def readShapefile(path, name, color='white'):
     '''
-    Reads in the shapefiles containing FAF5 regions augmented with total imports and exports (in tons/year)
+    Reads in a shapefile
 
     Parameters
     ----------
@@ -44,21 +44,23 @@ def readRegions(path, name):
     -------
     regions (class 'qgis._core.QgsVectorLayer'): QGIS vector layer produced from the shapefile read in
     '''
-    regions = QgsVectorLayer(path, name, 'ogr')
+    layer = QgsVectorLayer(path, name, 'ogr')
 
-    # Confirm that the regions got loaded in correctly
-    if not regions.isValid():
+    # Confirm that the layer got loaded in correctly
+    if not layer.isValid():
       print('Layer failed to load!')
 
-    # Add the regions to the map if they aren't already there
+    # Add the layer to the map if it isn't already there
     if not QgsProject.instance().mapLayersByName(name):
-        QgsProject.instance().addMapLayer(regions)
+        QgsProject.instance().addMapLayer(layer)
+        
+    layer.renderer().symbol().setColor(QColor(color))
 
     # Apply a filter for the moment to remove Hawaii and Alaska
 #    if 'FAF5' in path:
 #        regions.setSubsetString('NOT FAF_Zone_D LIKE \'%Alaska%\' AND NOT FAF_Zone_D LIKE \'%HI%\'')
 
-    return regions
+    return layer
     
 def load_highway_links(links_path, st=None):
     '''
@@ -239,18 +241,21 @@ def main():
         exit()
 
     # Plot and save total domestic imports
-    faf5_regions_import = readRegions(f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp', 'Imports (ton / sq mile)')
+    faf5_regions_import = readShapefile(f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp', 'Imports (ton / sq mile)')
     applyGradient(faf5_regions_import, 'Tot Imp De')
     #saveMap([regions], 'Total Domestic Imports', 'Imports [tons/year]', 'total_domestic_imports', f'{top_dir}/layouts/total_domestic_imports.pdf')
 
     # Plot and save total domestic exports
-    faf5_regions_export = readRegions(f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp', 'Exports (ton / sq mile)')
+    faf5_regions_export = readShapefile(f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp', 'Exports (ton / sq mile)')
     applyGradient(faf5_regions_export, 'Tot Exp De')
     #saveMap([regions], 'Total Domestic Exports', 'Exports [tons/year]', 'total_domestic_exports', f'{top_dir}/layouts/total_domestic_exports.pdf')
     
     # Add grid emission intensity
-    egrids_regions = readRegions(f'{top_dir}/data/egrid2020_subregions_merged/egrid2020_subregions_merged.shp', 'CO2e intensity of power grid (lb/MWh)')
+    egrids_regions = readShapefile(f'{top_dir}/data/egrid2020_subregions_merged/egrid2020_subregions_merged.shp', 'CO2e intensity of power grid (lb/MWh)')
     applyGradient(egrids_regions, 'SRC2ERTA', colormap='Reds')
+    
+    # Add alternative fueling stations for highway corridors
+    
     
     # Add the highway assignments
     links = load_highway_links(f'{top_dir}/data/highway_assignment_links/highway_assignment_links.shp')
@@ -258,7 +263,11 @@ def main():
     # Style highway links
     style_highway_links(links)
     
-    
-    
+    # Add alternative fueling stations
+    dcfc_stations = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_elec/US_elec.shp', 'DCFC Corridor Stations', color='orange')
+    hydrogen_stations = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_hy/US_hy.shp', 'Hydrogen Corridor Stations', color='purple')
+    hydrogen_lng = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_lng/US_lng.shp', 'LNG Corridor Stations', color='green')
+    hydrogen_cng = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_cng/US_cng.shp', 'CNG Corridor Stations', color='pink')
+    hydrogen_lpg = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_lpg/US_lpg.shp', 'LPG Corridor Stations', color='cyan')
 
 main()

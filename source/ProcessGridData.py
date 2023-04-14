@@ -5,44 +5,17 @@ Created on Mon Apr 10 09:24:00 2023
 
 @author: danikam
 """
-# Import needed modules
 
-import os
+# Import needed modules
 import sys
 
 import numpy as np
 import pandas as pd
 
-# Random efficiency modules
-# from dask import delayed
-# import multiprocessing
-# from numba import jit, cuda
-# import dask.dataframe as dd
-
-
 import geopandas as gpd
 import geopy
 from tqdm import tqdm, trange
-from pathlib import Path
-
-def get_top_dir():
-    '''
-    Gets the path to the top level of the git repo (one level up from the source directory)
-        
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    top_dir (string): Path to the top level of the git repo
-        
-    NOTE: None
-    '''
-    source_path = Path(__file__).resolve()
-    source_dir = source_path.parent
-    top_dir = os.path.dirname(source_dir)
-    return top_dir
+from CommonTools import get_top_dir
 
 
 def readData(top_dir):
@@ -136,7 +109,5 @@ def main():
     
     # Save the merged shapefile
     saveShapefile(merged_dataframe, f'{top_dir}/data/egrid2020_subregions_merged/egrid2020_subregions_merged.shp')
-    
-    
     
 main()
