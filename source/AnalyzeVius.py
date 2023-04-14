@@ -13,7 +13,8 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib
 import InfoObjects
-from ViusTools import get_top_dir, make_aggregated_df, add_GREET_class, add_payload, get_annual_ton_miles, make_basic_selections, get_key_from_value, divide_mpg_by_10
+from ViusTools import make_aggregated_df, add_GREET_class, add_payload, get_annual_ton_miles, make_basic_selections, get_key_from_value, divide_mpg_by_10
+from CommonTools import get_top_dir
 from scipy.stats import gaussian_kde
 matplotlib.rc('xtick', labelsize=18)
 matplotlib.rc('ytick', labelsize=18)

@@ -17,6 +17,7 @@ import geopandas as gpd
 import geopy
 from tqdm import tqdm, trange
 from pathlib import Path
+from CommonTools import get_top_dir
 
 import time
 
@@ -72,25 +73,6 @@ def saveShapefile(file, name):
     if not os.path.exists(dir):
         os.makedirs(dir)
     file.to_file(name)
-
-def get_top_dir():
-    '''
-    Gets the path to the top level of the git repo (one level up from the source directory)
-        
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    top_dir (string): Path to the top level of the git repo
-        
-    NOTE: None
-    '''
-    source_path = Path(__file__).resolve()
-    source_dir = source_path.parent
-    top_dir = os.path.dirname(source_dir)
-    return top_dir
     
 def read_highway_assignments(top_dir):
     '''

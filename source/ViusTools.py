@@ -11,28 +11,10 @@ import os
 from pathlib import Path
 import numpy as np
 import pickle
+from CommonTools import get_top_dir
 
 # Conversion from pounds to tons
 LB_TO_TONS = 1/2000.
-
-def get_top_dir():
-    '''
-    Gets the path to the top level of the git repo (one level up from the source directory)
-        
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    top_dir (string): Path to the top level of the git repo
-        
-    NOTE: None
-    '''
-    source_path = Path(__file__).resolve()
-    source_dir = source_path.parent
-    top_dir = os.path.dirname(source_dir)
-    return top_dir
 
 top_dir = get_top_dir()
 

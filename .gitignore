@@ -1,5 +1,6 @@
 data/*
 !data/GREET_LCA
+!data/Fuel_Corridors
 .DS_Store
 *~
 plots/*
