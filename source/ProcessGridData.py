@@ -15,7 +15,7 @@ import pandas as pd
 import geopandas as gpd
 import geopy
 from tqdm import tqdm, trange
-from CommonTools import get_top_dir
+from CommonTools import get_top_dir, mergeShapefile, saveShapefile
 
 
 def readData(top_dir):
@@ -34,7 +34,6 @@ def readData(top_dir):
 
     '''
     
-
     # Read in the data associated with each eGrids subregion
     dataPath = f'{top_dir}/data/eGRID2021_data.xlsx'
     data = pd.ExcelFile(dataPath)
@@ -50,51 +49,6 @@ def readData(top_dir):
     data_df = data_df.rename(columns={'SUBRGN': 'ZipSubregi'})
 
     return data_df
-    
-def mergeShapefile(data_df, shapefile_path):
-    '''
-    Merges the shapefile containing eGrid region borders with the dataframe containing the eGrids data
-
-    Parameters
-    ----------
-    data_df (pd.DataFrame): A pandas dataframe containing the subregion names and emissions data for each subregion
-
-    shapefile_path (string): Path to the shapefile to be joined with the dataframe
-
-    Returns
-    -------
-    merged_Dataframe (pd.DataFrame): Joined dataframe
-    '''
-    shapefile = gpd.read_file(shapefile_path)
-    
-    # Merge the dataframes based on the subregion name
-    merged_dataframe = shapefile.merge(data_df, on='ZipSubregi', how='left')
-            
-    return merged_dataframe
-    
-def saveShapefile(file, name):
-    '''
-    Saves a pandas dataframe as a shapefile
-
-    Parameters
-    ----------
-    file (pd.DataFrame): Dataframe to be saved as a shapefile
-
-    name (string): Filename to the shapefile save to (must end in .shp)
-
-    Returns
-    -------
-    None
-    '''
-    # Make sure the filename ends in .shp
-    if not name.endswith('.shp'):
-        print("ERROR: Filename for shapefile must end in '.shp'. File will not be saved.")
-        exit()
-    # Make sure the full directory path to save to exists, otherwise create it
-    dir = os.path.dirname(name)
-    if not os.path.exists(dir):
-        os.makedirs(dir)
-    file.to_file(name)
 
 def main():
 
@@ -105,7 +59,7 @@ def main():
     egrid_data = readData(top_dir)
     
     # Merge the eGrids data in with the shapefile with subregion borders
-    merged_dataframe = mergeShapefile(egrid_data, f'{top_dir}/data/egrid2020_subregions/eGRID2020_subregions.shp')
+    merged_dataframe = mergeShapefile(egrid_data, f'{top_dir}/data/egrid2020_subregions/eGRID2020_subregions.shp', 'ZipSubregi')
     
     # Save the merged shapefile
     saveShapefile(merged_dataframe, f'{top_dir}/data/egrid2020_subregions_merged/egrid2020_subregions_merged.shp')

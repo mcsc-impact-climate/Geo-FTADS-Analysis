@@ -234,11 +234,31 @@ def saveMap(layers, layout_title, legend_title, layout_name, file_name):
 
     # exporter.exportToImage(fn, QgsLayoutExporter.ImageExportSettings())
     exporter.exportToPdf(file_name, QgsLayoutExporter.PdfExportSettings())
+    
+def add_basemap(path, name):
+    '''
+    Adds a basemap with political boundaries
+
+    Parameters
+    ----------
+    path (string): Path of the basemap source
+    
+    name (string): Name of the basemap layer in QGIS
+
+    Returns
+    -------
+    None
+    '''
+    basemap_layer=QgsRasterLayer(path, name, 'wms')
+    QgsProject.instance().addMapLayer(basemap_layer)
 
 def main():
     top_dir = getTopDir()
     if top_dir is None:
         exit()
+        
+    # Add a basic basemap with political boundaries
+    add_basemap('type=xyz&zmin=0&zmax=20&url=https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', 'ESRI Gray')
 
     # Plot and save total domestic imports
     faf5_regions_import = readShapefile(f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp', 'Imports (ton / sq mile)')
@@ -254,8 +274,17 @@ def main():
     egrids_regions = readShapefile(f'{top_dir}/data/egrid2020_subregions_merged/egrid2020_subregions_merged.shp', 'CO2e intensity of power grid (lb/MWh)')
     applyGradient(egrids_regions, 'SRC2ERTA', colormap='Reds')
     
-    # Add alternative fueling stations for highway corridors
+    # Add commercial electricity prices by state
+    elec_prices_by_state = readShapefile(f'{top_dir}/data/electricity_rates_merged/electricity_rates_by_state_merged.shp', 'Commercial Elec Price by State (cents / kWh)')
+    applyGradient(elec_prices_by_state, 'Cents/kWh.', colormap='Reds')
     
+    # Add commercial electricity prices by zip code
+    elec_prices_by_zipcode = readShapefile(f'{top_dir}/data/electricity_rates_merged/electricity_rates_by_zipcode_merged.shp', 'Commercial Elec Price by Zipcode (cents / kWh)')
+    applyGradient(elec_prices_by_zipcode, 'comm_rate', colormap='Reds')
+    
+    # Add maximum demand charges
+    demand_charges_by_utility = readShapefile(f'{top_dir}/data/electricity_rates_merged/demand_charges_merged.shp', 'Maximum Demand Charge by Utility ($/kW)')
+    applyGradient(demand_charges_by_utility, 'MaxDemCh', colormap='Reds')
     
     # Add the highway assignments
     links = load_highway_links(f'{top_dir}/data/highway_assignment_links/highway_assignment_links.shp')
@@ -263,7 +292,7 @@ def main():
     # Style highway links
     style_highway_links(links)
     
-    # Add alternative fueling stations
+    # Add alternative fueling stations for highway corridors
     dcfc_stations = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_elec/US_elec.shp', 'DCFC Corridor Stations', color='orange')
     hydrogen_stations = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_hy/US_hy.shp', 'Hydrogen Corridor Stations', color='purple')
     hydrogen_lng = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_lng/US_lng.shp', 'LNG Corridor Stations', color='green')
