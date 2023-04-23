@@ -222,7 +222,7 @@ def get_df_vius():
     df_vius = add_GREET_class(df_vius)
     df_vius = add_payload(df_vius)
     df_vius = divide_mpg_by_10(df_vius)
-    df_vius = make_aggregated_df(df_vius)
+    df_vius = make_aggregated_df(df_vius, range_map=InfoObjects.FAF5_VIUS_range_map)
     return df_vius
     
 def make_basic_selections(df, commodity='all'):
@@ -421,6 +421,40 @@ def calculate_quantity_per_class(quantity_str='payload', commodity='all'):
         quantity_per_class['standard deviation'] = np.append(quantity_per_class['standard deviation'], std_quantity)
         
     return quantity_per_class
+    
+def calculate_mpg_times_payload(commodity='all'):
+    '''
+    Calculates the average value (and standard deviation) of mpg times payload for the given commodity type
+        
+    Parameters
+    ----------
+    commodity (string): Commodity for which to evaluate the average value of the given quantity per GREET truck class
+    
+
+    Returns
+    -------
+    mpg_times_payload_average (float): Average value of mpg times payload
+    mpg_times_payload_std (float): Standard deviation of mpg times payload
+        
+    '''
+
+    # Read in the VIUS data as a pandas dataframe
+    df = get_df_vius()
+    
+    # Make basic selections for the given commodity
+    cSelection = make_basic_selections(df, commodity) & (df['WEIGHTAVG'] > 8500) & (~df['MPG'].isna())
+    
+    # Calculate the annual ton-miles reported carrying the given commodity for each truck passing cSelection
+    annual_ton_miles = get_annual_ton_miles(df, cSelection=cSelection, truck_range='all', commodity=commodity, fuel='all', greet_class='all')
+        
+    mpg_times_payload = df[cSelection]['MPG'] * (df[cSelection]['WEIGHTAVG'] - df[cSelection]['WEIGHTEMPTY']) * LB_TO_TONS
+        
+    # Calculate the average quantity and standard deviation for the given commodity and GREET class
+    mpg_times_payload_average = np.average(mpg_times_payload, weights=annual_ton_miles)
+    mpg_times_payload_variance = np.average((mpg_times_payload-mpg_times_payload_average)**2, weights=annual_ton_miles)
+    mpg_times_payload_std = np.sqrt(mpg_times_payload_variance)
+        
+    return mpg_times_payload_average, mpg_times_payload_std
         
 def calculate_all_per_class(quantity_str = 'payload'):
     '''
@@ -443,6 +477,30 @@ def calculate_all_per_class(quantity_str = 'payload'):
         all_per_class[commodity] = calculate_quantity_per_class(quantity_str=quantity_str, commodity=commodity)
     return all_per_class
     
+def calculate_all_mpg_times_payload():
+    '''
+    Calculates the average mpg times payload (and standard deviation) for each commodity type, using
+        
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    df_all_mpg_times_payload (pd.DataFrame): Dataframe containing the average mpg times payload for each commodity
+        
+    NOTE: None
+    '''
+
+    commodities_list = make_commodities_list()
+    mpgs_times_payloads = {'Data': ['mpg times payload', 'standard deviation']}
+    for commodity in commodities_list:
+        mpg_times_payload, std = calculate_mpg_times_payload(commodity=commodity)
+        
+        mpgs_times_payloads[commodity] = [mpg_times_payload, std]
+        
+    df_all_payloads = pd.DataFrame(mpgs_times_payloads)
+    return df_all_payloads
     
 def calculate_quantity_per_commodity(quantity_str = 'payload', greet_class='all'):
     '''
@@ -465,9 +523,9 @@ def calculate_quantity_per_commodity(quantity_str = 'payload', greet_class='all'
     df = get_df_vius()
     
     # Make basic selections for all commodities
-    cBaseline = make_basic_selections(df, commodity='all')
+    cBaseline = make_basic_selections(df, commodity='all') & (df['WEIGHTAVG'] > 8500)
     
-    if quantity_str == 'mpg':
+    if quantity_str == 'mpg' or quantity_str == 'mpg times payload':
         cBaseline = cBaseline & (~df['MPG'].isna())
     
     # Calculate mean value and standard deviation of the quantity for each commodity
@@ -507,6 +565,8 @@ def calculate_quantity_per_commodity(quantity_str = 'payload', greet_class='all'
             quantity = (df[cSelection]['WEIGHTAVG'] - df[cSelection]['WEIGHTEMPTY']) * LB_TO_TONS
         elif quantity_str == 'mpg':
             quantity = df[cSelection]['MPG']
+        elif quantity_str == 'mpg times payload':
+            quantity = df[cSelection]['MPG'] * (df[cSelection]['WEIGHTAVG'] - df[cSelection]['WEIGHTEMPTY']) * LB_TO_TONS
         else:
             print(f'ERROR: Provided quantity {quantity_str} not recognized. Returning None.')
             return None
@@ -522,7 +582,196 @@ def calculate_quantity_per_commodity(quantity_str = 'payload', greet_class='all'
         quantity_per_commodity['standard deviation'] = np.append(quantity_per_commodity['standard deviation'], std_quantity)
     
     return quantity_per_commodity
+    
+def calculate_quantity_per_range(quantity_str = 'payload', greet_class='all'):
+    '''
+    Calculates the mean value (and standard deviation) of the given quantity for each trip range, within the given GREET class, and saves the info as a dictionary
         
+    Parameters
+    ----------
+    greet_class (string): GREET GVW class within which to calculate the mean payload per commodity
+    
+    quantity_str (string): Identifier to indicate what quantity we want to calculate per class
+
+    Returns
+    -------
+    quantity_per_commodity (dictionary): Dictionary containing the mean value of the given quantity and standard deviation for each commodity.
+        
+    NOTE: Returns None if the provided quantity_str isn't recognized.
+    '''
+
+    # Read in the VIUS data as a pandas dataframe
+    df = get_df_vius()
+    
+    # Make basic selections for all commodities
+    cBaseline = make_basic_selections(df, commodity='all') & (df['WEIGHTAVG'] > 8500)
+    
+    if quantity_str == 'mpg' or quantity_str == 'mpg times payload':
+        cBaseline = cBaseline & (~df['MPG'].isna())
+    
+    # Calculate mean value and standard deviation of the quantity for each commodity
+    quantity_per_range = {
+        'range': [],
+        f'average {quantity_str}': np.zeros(0),
+        'standard deviation': np.zeros(0)
+    }
+    
+    if greet_class == 'all':
+        i_greet_class = 'all'
+    else:
+        i_greet_class = get_key_from_value(InfoObjects.GREET_classes_dict, greet_class)
+    
+    range_list = list(InfoObjects.FAF5_VIUS_range_map)
+    range_list.append('all')
+    
+    for truck_range in range_list:
+        cRange = True
+    
+        if not truck_range == 'all':
+            range_threshold=0
+            cRange = (~df[truck_range].isna())&(df[truck_range] > range_threshold)
+        
+        cSelection = cRange&cBaseline
+        
+        cGreetClass = True
+        if not greet_class == 'all':
+            cGreetClass = (~df['GREET_CLASS'].isna())&(df['GREET_CLASS'] == i_greet_class)
+        
+        cSelection = cSelection&cGreetClass
+        
+        # Calculate the annual ton-miles reported carrying the given range passing cSelection
+        annual_ton_miles = get_annual_ton_miles(df, cSelection=cSelection, truck_range=truck_range, commodity='all', fuel='all', greet_class=i_greet_class)
+        
+        if quantity_str == 'payload':
+            quantity = (df[cSelection]['WEIGHTAVG'] - df[cSelection]['WEIGHTEMPTY']) * LB_TO_TONS
+        elif quantity_str == 'mpg':
+            quantity = df[cSelection]['MPG']
+        elif quantity_str == 'mpg times payload':
+            quantity = df[cSelection]['MPG'] * (df[cSelection]['WEIGHTAVG'] - df[cSelection]['WEIGHTEMPTY']) * LB_TO_TONS
+        else:
+            print(f'ERROR: Provided quantity {quantity_str} not recognized. Returning None.')
+            return None
+        
+        # Calculate the mean value of the quantity, weighted by annual ton-miles carrying the given range
+        average_quantity = np.average(quantity, weights=annual_ton_miles)
+        variance_quantity = np.average((quantity-average_quantity)**2, weights=annual_ton_miles)
+        std_quantity = np.sqrt(variance_quantity)
+        
+        # Fill in the dictionary with the quantity per range
+        quantity_per_range['range'].append(truck_range)
+        quantity_per_range[f'average {quantity_str}'] = np.append(quantity_per_range[f'average {quantity_str}'], average_quantity)
+        quantity_per_range['standard deviation'] = np.append(quantity_per_range['standard deviation'], std_quantity)
+    
+    return quantity_per_range
+    
+def get_bin_centroids(data, weights, bins):
+    '''
+    Calculates the centroid of each bin, accounting for event weights
+        
+    Parameters
+    ----------
+    data (numpy.array): data to be binned
+    
+    weights (numpy.array): weight of each event in the data
+    
+    bins (np.array): bin edges
+
+    Returns
+    -------
+    centroids (numpy.array): weighted centroid in each bin
+        
+    NOTE: None.
+    '''
+    centroids = np.zeros(0)
+    for i in range(len(bins)-1):
+        data_in_bin = data[(data >= bins[i])&(data < bins[i+1])]
+        weights_in_bin = weights[(data >= bins[i])&(data < bins[i+1])]
+        
+        # If there's no data in the bin, set the centroid to the bin center
+        if len(data_in_bin) == 0:
+            centroid = 0.5 * (bins[i] + bins[i+1])
+            centroids = np.append(centroids, centroid)
+        
+        else:
+            centroid = np.average(data_in_bin, weights=weights_in_bin)
+            centroids = np.append(centroids, centroid)
+        
+    return centroids
+    
+def calculate_mpg_times_payload_distribution(commodity='all', truck_range='all', binning=np.asarray([0,50,100,125,150,200,600])):
+    '''
+    Calculates the distributions of miles per gallon times payload for different commodities ('commmodity' parameter), trip range windows ('truck_range' parameter)). Samples used to produce the distributions are weighted by the average annual ton-miles reported carrying the given 'commodity' over the given 'truck_range'.
+        
+    Parameters
+    ----------
+    df (pd.DataFrame): A pandas dataframe containing the VIUS data
+    
+    commodity (string): Name of the column of VIUS data containing the percentage of ton-miles carrying the given commodity
+
+    truck_range (string): Name of the column of VIUS data containing the percentage of ton-miles carried over the given trip range
+    
+   
+    Returns
+    -------
+    mpg_times_payload (pd.DataFrame): a pandas dataframe whose columns contain the probability density, uncertainty, and centroid of each bin in mpg times payload.
+        
+    NOTE: None.
+    '''
+    
+    # Read in the VIUS data as a pandas dataframe
+    df = get_df_vius()
+    
+    # Make the basic selections
+    cNoPassenger = (df['PPASSENGERS'].isna()) | (df['PPASSENGERS'] == 0)
+    cBaseline = (df['WEIGHTAVG'] > 8500) & (~df['MILES_ANNL'].isna()) & (~df['WEIGHTEMPTY'].isna()) & cNoPassenger
+    
+    # Make the selection for commodity and trip range
+    cCommodity = True
+    cRange = True
+    if not commodity == 'all':
+        cCommodity = (~df[commodity].isna())#&(df[commodity] > commodity_threshold)
+    if not truck_range == 'all':
+        cRange = (~df[truck_range].isna())#&(df[truck_range] > range_threshold)
+        
+    cSelection = cCommodity&cRange&cBaseline
+    if np.sum(cSelection) == 0:
+        print('ERROR No events in selection')
+        return
+    
+    # Get the annual ton miles for all classes
+    annual_ton_miles_all = get_annual_ton_miles(df, cSelection=cSelection, truck_range=truck_range, commodity=commodity, fuel='all', greet_class='all')
+    
+    weights_all = annual_ton_miles_all
+        
+    # Bin the data according to the vehicle age, and calculate the associated statistical uncertainty using root sum of squared weights (see eg. https://www.pp.rhul.ac.uk/~cowan/stat/notes/errors_with_weights.pdf)]]
+    payload = (df[cSelection]['WEIGHTAVG'] - df[cSelection]['WEIGHTEMPTY']) * LB_TO_TONS
+    mpg_times_payload = df[cSelection]['MPG'] * payload
+    
+    # Remove any zeros or infs
+    weights_all = weights_all[(mpg_times_payload > 0)&(mpg_times_payload < 600)]
+    mpg_times_payload = mpg_times_payload[(mpg_times_payload > 0)&(mpg_times_payload < 600)]
+    
+    n, bins = np.histogram(mpg_times_payload, weights=weights_all, bins=binning)
+    n_err = np.sqrt(np.histogram(mpg_times_payload, weights=weights_all**2, bins=binning)[0])
+    
+    # Calculate the probability density for each bin
+    bin_widths = binning[:-1] - binning[1:]
+    n_density = n / bin_widths
+    n_density = n_density / np.sum(n_density)
+    n_err_density = n_err * n_density / n
+    n_err_density[(np.isinf(n_err_density))|(np.isnan(n_err_density))] = 0
+    
+    # Get the centroid of each bin, which will be the value of mpg / payload assigned to the associated probability density
+    centroids = get_bin_centroids(mpg_times_payload, weights_all, binning)
+    
+    # Calculate the relative statistical uncertainty of the entire sample
+    rel_stat_err = np.sqrt(np.sum(weights_all**2)) / np.sum(weights_all)
+    rel_stat_err_array = np.ones(len(centroids))*rel_stat_err
+        
+    # Save the probability density as a dataframe
+    df_save = pd.DataFrame(data={'fuel eff x payload (ton-mpg)': centroids, 'prob dens': n_density, 'prob dens unc': n_err_density, 'rel stat err': rel_stat_err_array})
+    
+    return df_save
     
 def plot_bar(bar_heights, uncertainty, bin_names, title, str_save, bin_height_title='', horizontal_bars=False):
     '''
@@ -634,6 +883,27 @@ def save_as_csv_per_class(info_per_class_dict, filename, info_name, unc_name):
         os.makedirs(savePath)
     df_save.to_csv(f'{savePath}/{filename}_per_class.csv', index=False)
     print(f'Saving dataframe to {savePath}/{filename}_per_class.csv')
+    
+def save_mpg_times_payload(mpg_times_payload_df):
+    '''
+    Saves the dataframe containing average mpg * payload (and associated standard deviation) a csv:
+    
+    Parameters
+    ----------
+    mpg_times_payload_df (pd.DataFrame): dataframe containing average mpg * payload (and associated standard deviation)
+
+    Returns
+    -------
+    None
+        
+    NOTE: None.
+    '''
+    savePath = f'{top_dir}/data/VIUS_Results'
+    if not os.path.exists(savePath):
+        os.makedirs(savePath)
+    
+    mpg_times_payload_df.to_csv(f'{savePath}/mpg_times_payload.csv', index=False)
+    print(f'Saving dataframe to {savePath}/mpg_times_payload.csv')
 
 def main():
 
@@ -667,9 +937,9 @@ def main():
 #        payload_class_dist = all_payloads_per_class[commodity]
 #        plot_bar(bar_heights=payload_class_dist['average payload'], uncertainty=payload_class_dist['standard deviation'], bin_names=payload_class_dist['class'], title=f'Average payload, weighted by ton-miles carrying {commodity_title}\nError bars are weighted standard deviation', bin_height_title='Average payload (tons)', str_save=str_save)
 
-    # Evaluate and plot the distribution of average payload (weighted by ton-miles carried) with respect to commodities
-    payload_per_commodity = calculate_quantity_per_commodity(quantity_str='payload')
-    plot_bar(bar_heights=payload_per_commodity['average payload'], uncertainty=payload_per_commodity['standard deviation'], bin_names=payload_per_commodity['commodity'], title=f'Average payload for each commodity, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save='payload_per_commodity', bin_height_title='Average payload (tons)', horizontal_bars=True)
+#    # Evaluate and plot the distribution of average payload (weighted by ton-miles carried) with respect to commodities
+#    payload_per_commodity = calculate_quantity_per_commodity(quantity_str='payload')
+#    plot_bar(bar_heights=payload_per_commodity['average payload'], uncertainty=payload_per_commodity['standard deviation'], bin_names=payload_per_commodity['commodity'], title=f'Average payload for each commodity, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save='payload_per_commodity', bin_height_title='Average payload (tons)', horizontal_bars=True)
     
 #    # Evaluate and plot the distribution of average payload (weighted by ton-miles carried) with respect to commodities within each class
 #    for greet_class in ['Heavy GVW', 'Medium GVW', 'Light GVW']:
@@ -701,4 +971,47 @@ def main():
 #        plot_bar(bar_heights=mpg_per_commodity['average mpg'], uncertainty=mpg_per_commodity['standard deviation'], bin_names=mpg_per_commodity['commodity'], title=f'Average fuel efficiency for each commodity in the {greet_class} class, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save=f"mpg_per_commodity_{greet_class.replace(' ', '_')}", bin_height_title='Average fuel efficiency (mpg)', horizontal_bars=True)
 ###---------------------------------------------------------------------------------------------------------------------------###
 
-main()
+####------------------------------------- Average mpg*payload for each commodity  ---------------------------------------------###
+#    savePath = f'{top_dir}/data/VIUS_Results'
+#    if not os.path.exists(savePath):
+#        os.makedirs(savePath)
+#
+#    # Process for all commodities and trip ranges
+#    mpg_times_payload_df = calculate_mpg_times_payload_distribution(commodity='all', truck_range='all')
+#    print(f'Saving mpg times payload to {savePath}/mpg_times_payload_commodity_all_range_all.csv')
+#    mpg_times_payload_df.to_csv(f'{savePath}/mpg_times_payload_commodity_all_range_all.csv', index=False)
+#
+#    # Process for each commodity (all trip ranges)
+#    for commodity in InfoObjects.FAF5_VIUS_commodity_map:
+#        mpg_times_payload_df = calculate_mpg_times_payload_distribution(commodity=commodity, truck_range='all')
+#        commodity_save = InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name']
+#        print(f'Saving mpg times payload to {savePath}/mpg_times_payload_commodity_{commodity_save}_range_all.csv')
+#        mpg_times_payload_df.to_csv(f'{savePath}/mpg_times_payload_commodity_{commodity_save}_range_all.csv', index=False)
+#
+#    # Process for each commodity and coarse trip range
+#    for commodity in InfoObjects.FAF5_VIUS_commodity_map:
+#        for truck_range in InfoObjects.FAF5_VIUS_range_map_coarse:
+#            mpg_times_payload_df = calculate_mpg_times_payload_distribution(commodity=commodity, truck_range=truck_range)
+#            commodity_save = InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name']
+#            truck_range_save = InfoObjects.FAF5_VIUS_range_map_coarse[truck_range]['short name']
+#            print(f'Saving mpg times payload to {savePath}/mpg_times_payload_commodity_{commodity_save}_range_{truck_range_save}.csv')
+#            mpg_times_payload_df.to_csv(f'{savePath}/mpg_times_payload_commodity_{commodity_save}_range_{truck_range_save}.csv', index=False)
+#
+####---------------------------------------------------------------------------------------------------------------------------###
+
+####----------------------------------------------- Average mpg*payload  ------------------------------------------------------###
+    mpg_times_payload_df = calculate_all_mpg_times_payload()
+    save_mpg_times_payload(mpg_times_payload_df)
+
+#    # Evaluate and plot the distribution of average mpg (weighted by ton-miles carried) with respect to commodities
+#    mpg_times_payload_per_commodity = calculate_quantity_per_commodity(quantity_str='mpg times payload')
+#    plot_bar(bar_heights=mpg_times_payload_per_commodity['average mpg times payload'], uncertainty=mpg_times_payload_per_commodity['standard deviation'], bin_names=mpg_times_payload_per_commodity['commodity'], title=f'Average fuel efficiency for each commodity, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save='mpg_times_payload_per_commodity', bin_height_title='Average fuel efficiency $\\times$ payload (ton-mpg)', horizontal_bars=True)
+#
+#    # Evaluate and plot the distribution of average mpg (weighted by ton-miles carried) with respect to ranges
+#    mpg_times_payload_per_range = calculate_quantity_per_range(quantity_str='mpg times payload')
+#    plot_bar(bar_heights=mpg_times_payload_per_range['average mpg times payload'], uncertainty=mpg_times_payload_per_range['standard deviation'], bin_names=mpg_times_payload_per_range['range'], title=f'Average fuel efficiency for each trip range, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save='mpg_times_payload_per_range', bin_height_title='Average fuel efficiency $\\times$ payload (ton-mpg)', horizontal_bars=True)
+####---------------------------------------------------------------------------------------------------------------------------###
+
+
+
+#main()
