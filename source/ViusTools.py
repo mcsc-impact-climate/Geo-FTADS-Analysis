@@ -11,28 +11,10 @@ import os
 from pathlib import Path
 import numpy as np
 import pickle
+from CommonTools import get_top_dir
 
 # Conversion from pounds to tons
 LB_TO_TONS = 1/2000.
-
-def get_top_dir():
-    '''
-    Gets the path to the top level of the git repo (one level up from the source directory)
-        
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    top_dir (string): Path to the top level of the git repo
-        
-    NOTE: None
-    '''
-    source_path = Path(__file__).resolve()
-    source_dir = source_path.parent
-    top_dir = os.path.dirname(source_dir)
-    return top_dir
 
 top_dir = get_top_dir()
 
@@ -657,8 +639,8 @@ def main():
 
 ###----------------------------------- Distributions wrt GREET class for each commodity --------------------------------------###
 #    # Evaluate and plot the distribution of ton-miles with respect to GREET class and fuel type for each commodity
-#    all_class_fuel_dists = make_all_class_fuel_dists()
-#    save_as_csv_per_class(all_class_fuel_dists, filename='norm_distribution', info_name='normalized distribution', unc_name='statistical uncertainty')
+    all_class_fuel_dists = make_all_class_fuel_dists()
+    save_as_csv_per_class(all_class_fuel_dists, filename='norm_distribution', info_name='normalized distribution', unc_name='statistical uncertainty')
 #
 #    for commodity in all_class_fuel_dists:
 #        if commodity=='all':
@@ -673,8 +655,8 @@ def main():
 
 ###---------------------------------- Average payload wrt GREET class for each commodity -------------------------------------###
 #    # Evaluate and plot the average payload with respect to GREET class for each commodity
-#    all_payloads_per_class = calculate_all_per_class(quantity_str='payload')
-#    save_as_csv_per_class(all_payloads_per_class, filename='payload', info_name='average payload', unc_name='standard deviation')
+    all_payloads_per_class = calculate_all_per_class(quantity_str='payload')
+    save_as_csv_per_class(all_payloads_per_class, filename='payload', info_name='average payload', unc_name='standard deviation')
 #    for commodity in all_payloads_per_class:
 #        if commodity=='all':
 #            str_save = f"average_payload_per_greet_class_commodity_all"
@@ -685,9 +667,9 @@ def main():
 #        payload_class_dist = all_payloads_per_class[commodity]
 #        plot_bar(bar_heights=payload_class_dist['average payload'], uncertainty=payload_class_dist['standard deviation'], bin_names=payload_class_dist['class'], title=f'Average payload, weighted by ton-miles carrying {commodity_title}\nError bars are weighted standard deviation', bin_height_title='Average payload (tons)', str_save=str_save)
 
-    # Evaluate and plot the distribution of average payload (weighted by ton-miles carried) with respect to commodities
-    payload_per_commodity = calculate_quantity_per_commodity(quantity_str='payload')
-    plot_bar(bar_heights=payload_per_commodity['average payload'], uncertainty=payload_per_commodity['standard deviation'], bin_names=payload_per_commodity['commodity'], title=f'Average payload for each commodity, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save='payload_per_commodity', bin_height_title='Average payload (tons)', horizontal_bars=True)
+#    # Evaluate and plot the distribution of average payload (weighted by ton-miles carried) with respect to commodities
+#    payload_per_commodity = calculate_quantity_per_commodity(quantity_str='payload')
+#    plot_bar(bar_heights=payload_per_commodity['average payload'], uncertainty=payload_per_commodity['standard deviation'], bin_names=payload_per_commodity['commodity'], title=f'Average payload for each commodity, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save='payload_per_commodity', bin_height_title='Average payload (tons)', horizontal_bars=True)
     
 #    # Evaluate and plot the distribution of average payload (weighted by ton-miles carried) with respect to commodities within each class
 #    for greet_class in ['Heavy GVW', 'Medium GVW', 'Light GVW']:
@@ -697,8 +679,8 @@ def main():
 
 ###------------------------------------ Average mpg wrt GREET class for each commodity ---------------------------------------###
     # Evaluate and plot the distribution of average mpg with respect to GREET class for each commodity
-#    all_mpgs_per_class = calculate_all_per_class(quantity_str='mpg')
-#    save_as_csv_per_class(all_mpgs_per_class, filename='mpg', info_name='average mpg', unc_name='standard deviation')
+    all_mpgs_per_class = calculate_all_per_class(quantity_str='mpg')
+    save_as_csv_per_class(all_mpgs_per_class, filename='mpg', info_name='average mpg', unc_name='standard deviation')
 #    for commodity in all_mpgs_per_class:
 #        if commodity=='all':
 #            str_save = f"average_mpg_per_greet_class_commodity_all"

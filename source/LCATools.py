@@ -37,6 +37,9 @@ def get_top_dir():
     
 # Get the path to the top level of the git repo
 top_dir = get_top_dir()
+
+# Initialize an empty dictionary to contain the LCA dataframes
+df_lca_dict = {'truck': {}, 'rail': {}, 'ship': {}}
     
 def readGreetWtwTruck(csv_path, commodity='all'):
     '''
@@ -500,12 +503,10 @@ def main():
     #plot_truck_emissions_per_class()
     df_lca, df_lca_payload_normalized, df_lca_truck_payload_normalized_vius_mpg = evaluateGreetWtwTruck(faf5_commodity='all')
     
-    plot_truck_emissions_per_commodity(normalize_by_payload = False)
-    plot_truck_emissions_per_commodity(normalize_by_payload = True)
-    plot_truck_emissions_per_commodity(normalize_by_payload = True, use_vius_mpg = True)
+    # plot_truck_emissions_per_commodity(normalize_by_payload = False)
+    # plot_truck_emissions_per_commodity(normalize_by_payload = True)
+    # plot_truck_emissions_per_commodity(normalize_by_payload = True, use_vius_mpg = True)
 
-    # Initialize an empty dictionary to contain the LCA dataframes
-    df_lca_dict = {'truck': {}, 'rail': {}, 'ship': {}}
 
     fillLcaDf(df_lca_dict, top_dir=top_dir, commodity='all')
 
@@ -517,7 +518,7 @@ def main():
     for commodity in commodities:
         fillLcaDf(df_lca_dict, top_dir=top_dir, commodity=commodity)
     
-    #print(df_lca_dict)
+    print(df_lca_dict)
     
     
 main()
