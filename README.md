@@ -75,7 +75,7 @@ rm VIUS_2002.zip
 
 ### Subregions for eGRID grid intensity data
 ```bash
-# from https://hub.arcgis.com/datasets/fedmaps::subregions-of-the-emissions-generation-resource-integrated-database-egrid
+# from ls
 wget "https://opendata.arcgis.com/api/v3/datasets/23e16f24702948ac9e2032bfa0526a8f_1/downloads/data?format=shp&spatialRefId=4326&where=1%3D1" -O egrid2020_subregions.zip
 unzip egrid2020_subregions.zip -d egrid2020_subregions
 rm egrid2020_subregions.zip
@@ -83,11 +83,53 @@ rm egrid2020_subregions.zip
 
 ### eGRID grid intensity data
 ```bash
-# eGRID emission rate data (from https://www.epa.gov/egrid/download-data)
+# from https://www.epa.gov/egrid/download-data
 wget "https://www.epa.gov/system/files/documents/2023-01/eGRID2021_data.xlsx"
 ```
 
+### US zip code boundaries
+```bash
+# from https://hub.arcgis.com/datasets/d6f7ee6129e241cc9b6f75978e47128b
+wget "https://opendata.arcgis.com/api/v3/datasets/d6f7ee6129e241cc9b6f75978e47128b_0/downloads/data?format=shp&spatialRefId=4326&where=1%3D1" -O zip_code_regions.zip
+unzip zip_code_regions.zip -d zip_code_regions
+rm zip_code_regions.zip
+```
 
+### US state boundaries
+```bash
+# from https://www.sciencebase.gov/catalog
+wget "https://www.sciencebase.gov/catalog/file/get/52c78623e4b060b9ebca5be5?facet=tl_2012_us_state" -O state_boundaries.zip
+unzip state_boundaries.zip -d state_boundaries
+rm state_boundaries.zip
+```
+
+### Electricity rate data per state
+```bash
+# from https://www.eia.gov/electricity/data.php
+mkdir -p electricity_rates
+wget "https://www.eia.gov/electricity/data/state/sales_annual_a.xlsx" -O electricity_rates/sales_annual_a.xlsx
+```
+
+### Electricity rate data per zip code
+```bash
+# from https://catalog.data.gov/dataset/u-s-electric-utility-companies-and-rates-look-up-by-zipcode-2020
+mkdir -p electricity_rates
+wget "https://data.openei.org/files/5650/iou_zipcodes_2020.csv" -O electricity_rates/iou_zipcodes_2020.csv
+```
+
+### Maximum demand charge data (compiled by NREL in 2017)
+```bash
+# from https://data.nrel.gov/submissions/74
+wget "https://data.nrel.gov/system/files/74/Demand%20charge%20rate%20data.xlsm" -O Demand_charge_rate_data.xlsm
+```
+
+### Electricity utility boundaries
+```bash
+# from https://atlas.eia.gov/datasets/f4cd55044b924fed9bc8b64022966097_0
+wget "https://opendata.arcgis.com/api/v3/datasets/f4cd55044b924fed9bc8b64022966097_0/downloads/data?format=shp&spatialRefId=4326&where=1%3D1" -O utility_boundaries.zip
+unzip utility_boundaries.zip -d utility_boundaries
+rm utility_boundaries.zip
+```
 
 You can now cd back out of the data directory
 ```bash
