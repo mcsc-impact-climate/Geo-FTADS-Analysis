@@ -29,7 +29,6 @@ import geopandas as gpd
 import geopy
 from tqdm import tqdm, trange
 from CommonTools import get_top_dir
-
 import LCATools as LCAT
 
 
@@ -168,7 +167,9 @@ def processData(dest, mode):
     
 def processDataByRegion(dest):
     '''
-    Assigns a net ton (either import or export) to each FAF5 region for imports to or exports from the specified region
+    Assigns a net ton (either import or export) to each FAF5 region for imports to or exports from the specified region.
+    
+    NOTE: This function will be updated or replaced to incorporate Micah's update to evaluate emissions
     
     Parameters
     ----------
@@ -225,6 +226,7 @@ def processDataByRegion(dest):
         dest_dict[region] = dest_dict[region].rename(columns={'Numeric Label': 'FAF_Zone'})  # DMM: Renaming for consistency with shapefile
         
     return dest_dict
+
 
 def filterLCA(item='CO2 (w/ C in VOC & CO)', comm='all'):
     emit = LCAT.df_lca_dict
@@ -444,8 +446,8 @@ def filterDataOD(data, mode, commodity):
     data_filtered['Emissions'] = emissions()
     
     return data_filtered
-
-
+    
+    
 def mergeShapefile(dest, shapefile_path, by_region = False):
     '''
     Merges the shapefile containing FAF5 region borders with the csv file containing total tonnage
@@ -535,9 +537,6 @@ def main ():
     #dest['Total Import'] = dest['Total Import'].astype('float')
     #dest['Total Export'] = dest['Total Export'].astype('float')
 
-    # merged_dataframe = mergeShapefile(dest_with_tonnage, f'{top_dir}/data/FAF5_regions/Freight_Analysis_Framework_(FAF5)_Regions.shp')
-    # saveShapefile(merged_dataframe, f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp')
-    
 #    merged_dataframe = mergeShapefile(dest_with_tonnage, f'{top_dir}/data/FAF5_regions/Freight_Analysis_Framework_(FAF5)_Regions.shp')
 #    saveShapefile(merged_dataframe, f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp')
 

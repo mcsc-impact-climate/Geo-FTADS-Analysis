@@ -663,6 +663,7 @@ def calculate_quantity_per_range(quantity_str = 'payload', greet_class='all'):
         quantity_per_range['standard deviation'] = np.append(quantity_per_range['standard deviation'], std_quantity)
     
     return quantity_per_range
+
     
 def plot_bar(bar_heights, uncertainty, bin_names, title, str_save, bin_height_title='', horizontal_bars=False):
     '''
@@ -862,7 +863,6 @@ def main():
 #        plot_bar(bar_heights=mpg_per_commodity['average mpg'], uncertainty=mpg_per_commodity['standard deviation'], bin_names=mpg_per_commodity['commodity'], title=f'Average fuel efficiency for each commodity in the {greet_class} class, weighted by ton-miles carried\nError bars are weighted standard deviation', str_save=f"mpg_per_commodity_{greet_class.replace(' ', '_')}", bin_height_title='Average fuel efficiency (mpg)', horizontal_bars=True)
 ###---------------------------------------------------------------------------------------------------------------------------###
 
-
 ####----------------------------------------------- Average mpg*payload  ------------------------------------------------------###
     mpg_times_payload_df = calculate_all_mpg_times_payload()
     save_mpg_times_payload(mpg_times_payload_df)
@@ -878,4 +878,4 @@ def main():
 
 
 
-#main()
+main()

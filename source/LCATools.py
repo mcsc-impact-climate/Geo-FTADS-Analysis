@@ -634,8 +634,7 @@ def main():
     # Uncomment this if evaluating emission intensities using distribution of fuel efficiency / payload
     df_mpg_times_payload = pd.read_csv(f'{top_dir}/data/VIUS_Results/mpg_times_payload.csv')
     df_lca, df_lca_unc = evaluateGreetWtwTruck_by_mpg_times_payload(df_mpg_times_payload, faf5_commodity='all')
-    #plot_truck_emissions_per_commodity(plot_unc = True)
-
+    plot_truck_emissions_per_commodity(plot_unc = True)
 
     fillLcaDf(df_lca_dict, top_dir=top_dir, commodity='all')
 
