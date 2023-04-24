@@ -113,8 +113,8 @@ def readData(cols=None):
 
     '''
     dataPath = f'{top_dir}/data/FAF5_regional_flows_origin_destination/FAF5.4.1_2018-2020.csv'
-    #data = pd.read_csv(dataPath)
-    data = pd.read_csv(dataPath, nrows=10000)  # DMM: This line is just for testing/development, to reduce processing time
+    data = pd.read_csv(dataPath)
+    #data = pd.read_csv(dataPath, nrows=100)  # DMM: This line is just for testing/development, to reduce processing time
     
     if cols is not None: data = data[cols]
     
@@ -181,50 +181,50 @@ def processDataByRegion(dest):
     NOTE: dms_dest -> index 2; dms_orig -> index 1; tons_2020 -> index 12
 
     '''
-    tons_into_region_dict = {}
-    tons_out_of_region_dict = {}
+    tons_exported_to_dict = {}
+    tons_imported_from_dict = {}
     
     dest_dict = {}
     
     for region in dest.values:
         region_code = region[0]
-        region_name = region[1].replace(' ', '_')
-        region_info = f'{region_code}_{region_name}'
-        print(region_code, region_name)
-        tons_into_region_dict[region_info] = {'imports into region': np.zeros(len(dest))}
-        tons_out_of_region_dict[region_info] = {'exports out of region': np.zeros(len(dest))}
+        region_info = region_code
+        tons_exported_to_dict[region_info] = np.zeros(len(dest))
+        tons_imported_from_dict[region_info] = np.zeros(len(dest))
         dest_dict[region_info] = dest.copy(deep=True)
     
     data = readData(["dms_orig", "dms_dest", "tons_2020"])
 
-#    # Currently the algorithm works by iterating through the values in the meta data
-#    #   follows by iterating over the entirety of the data
+    # Currently the algorithm works by iterating through the values in the meta data
+    #   follows by iterating over the entirety of the data
     i = 0
     for row in tqdm(dest.values):
+        # i: row (faf5 region)
         for line in data.values:
             # if tons_in[i] == 0: print(line[0], line[1])
+            
+            # If the cargo is going to the region associated with the given row (i), add it to the exports from the origin (line[0]) to the given row (i)
             if line[1] == row[0]:
-                region_into_info = f"{row[0]}_{row[1].replace(' ', '_')}"
-                tons_into_region_dict[region_into_info]['imports into region'][i] += line[2]
+                origin_region = line[0]
+                tons_exported_to_dict[origin_region][i] += line[2]
 
+            # If the cargo is originating from the region associated with the given row (i), add it to the imports from the given row (i) to the destination (line[1])
             if line[0] == row[0]:
-                region_out_of_info = f"{row[0]}_{row[1].replace(' ', '_')}"
-                tons_out_of_region_dict[region_out_of_info]['exports out of region'][i] += line[2]
+                dest_region = line[1]
+                tons_imported_from_dict[dest_region][i] += line[2]
         i+=1
         # if i==2: break
 
     # Fill in the imports and exports to/from each region
     for region in dest_dict:
-        print(tons_into_region_dict[region_info])
-        dest_dict[region]['Total Import'] = tons_into_region_dict[region_info]
-        dest_dict[region]['Total Export'] = tons_into_region_dict[region_info]
+        dest_dict[region]['Total Imported From'] = tons_imported_from_dict[region_info]
+        dest_dict[region]['Total Exported To'] = tons_exported_to_dict[region_info]
         
         # Incorec -> should be zfilling 'Numeric Label" instead
         dest_dict[region]['Numeric Label'] = dest['Numeric Label'].apply(str).apply(lambda x: x.zfill(3))
         dest_dict[region] = dest_dict[region].rename(columns={'Numeric Label': 'FAF_Zone'})  # DMM: Renaming for consistency with shapefile
         
     return dest_dict
-
 
 def filterLCA(item='CO2 (w/ C in VOC & CO)', comm='all'):
     emit = LCAT.df_lca_dict
@@ -446,7 +446,7 @@ def filterDataOD(data, mode, commodity):
     return data_filtered
 
 
-def mergeShapefile(dest, shapefile_path):
+def mergeShapefile(dest, shapefile_path, by_region = False):
     '''
     Merges the shapefile containing FAF5 region borders with the csv file containing total tonnage
     calculated in processData()
@@ -466,14 +466,23 @@ def mergeShapefile(dest, shapefile_path):
     
     # Select columns of interest
     shapefile_filtered = shapefile.filter(['Short Description', 'FAF_Zone', 'FAF_Zone_D', 'ShapeSTAre', 'ShapeSTLen', 'geometry'], axis=1)
-    dest_filtered = dest.filter(['FAF_Zone', 'Total Import', 'Total Export'], axis=1)
+    
+    if by_region:
+        dest_filtered = dest.filter(['FAF_Zone', 'Total Imported From', 'Total Exported To'], axis=1)
+    else:
+        dest_filtered = dest.filter(['FAF_Zone', 'Total Import', 'Total Export'], axis=1)
     
     merged_dataframe = shapefile_filtered.merge(dest_filtered, on='FAF_Zone', how='left')
     
     # Add columns with imports and exports per unit area (km^2)
     meters_per_mile = 1609.34
-    merged_dataframe['Tot Imp Dens'] = merged_dataframe['Total Import'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
-    merged_dataframe['Tot Exp Dens'] = merged_dataframe['Total Export'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
+    
+    if by_region:
+        merged_dataframe['Tot Imp Dens'] = merged_dataframe['Total Imported From'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
+        merged_dataframe['Tot Exp Dens'] = merged_dataframe['Total Exported To'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
+    else:
+        merged_dataframe['Tot Imp Dens'] = merged_dataframe['Total Import'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
+        merged_dataframe['Tot Exp Dens'] = merged_dataframe['Total Export'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
         
     return merged_dataframe
 
@@ -536,8 +545,7 @@ def main ():
 #    dest_with_tonnage_by_region_dict = processDataByRegion(dest)
 #
 #    for region in dest_with_tonnage_by_region_dict:
-#        print(dest_with_tonnage_by_region_dict[region])
-#        merged_dataframe = mergeShapefile(dest_with_tonnage_by_region_dict[region], f'{top_dir}/data/FAF5_regions/Freight_Analysis_Framework_(FAF5)_Regions.shp')
+#        merged_dataframe = mergeShapefile(dest_with_tonnage_by_region_dict[region], f'{top_dir}/data/FAF5_regions/Freight_Analysis_Framework_(FAF5)_Regions.shp', by_region=True)
 #        saveShapefile(merged_dataframe, f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage_{region}.shp')
         
 main()
