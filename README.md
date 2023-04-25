@@ -131,6 +131,22 @@ unzip utility_boundaries.zip -d utility_boundaries
 rm utility_boundaries.zip
 ```
 
+### Electricity balancing authority boundaries
+```bash
+# from https://hifld-geoplatform.opendata.arcgis.com/datasets/geoplatform::electric-planning-areas/about
+wget "https://opendata.arcgis.com/api/v3/datasets/7d35521e3b2c48ab8048330e14a4d2d1_0/downloads/data?format=shp&spatialRefId=3857&where=1%3D1" -O balancing_authority_boundaries.zip
+unzip balancing_authority_boundaries.zip -d balancing_authority_boundaries
+rm balancing_authority_boundaries.zip
+```
+
+### Power demand by balancing authority
+```bash
+# from https://www.eia.gov/electricity/gridmonitor/dashboard/electric_overview/US48/US48
+mkdir -p power_demand_by_balancing_authority
+wget "https://www.eia.gov/electricity/gridmonitor/sixMonthFiles/EIA930_BALANCE_2022_Jul_Dec.csv" -O power_demand_by_balancing_authority/EIA930_BALANCE_2022_Jul_Dec.csv
+wget "https://www.eia.gov/electricity/gridmonitor/sixMonthFiles/EIA930_BALANCE_2022_Jan_Jun.csv" -O power_demand_by_balancing_authority/EIA930_BALANCE_2022_Jan_Jun.csv
+```
+
 You can now cd back out of the data directory
 ```bash
 cd ..
