@@ -30,9 +30,9 @@ def getTopDir():
     return top_dir
     
 
-def readRegions(path, name):
+def readShapefile(path, name, color='white'):
     '''
-    Reads in the shapefiles containing FAF5 regions augmented with total imports and exports (in tons/year)
+    Reads in a shapefile
 
     Parameters
     ----------
@@ -44,20 +44,23 @@ def readRegions(path, name):
     -------
     regions (class 'qgis._core.QgsVectorLayer'): QGIS vector layer produced from the shapefile read in
     '''
-    regions = QgsVectorLayer(path, name, 'ogr')
+    layer = QgsVectorLayer(path, name, 'ogr')
 
-    # Confirm that the regions got loaded in correctly
-    if not regions.isValid():
+    # Confirm that the layer got loaded in correctly
+    if not layer.isValid():
       print('Layer failed to load!')
 
-    # Add the regions to the map if they aren't already there
+    # Add the layer to the map if it isn't already there
     if not QgsProject.instance().mapLayersByName(name):
-        QgsProject.instance().addMapLayer(regions)
+        QgsProject.instance().addMapLayer(layer)
+        
+    layer.renderer().symbol().setColor(QColor(color))
 
     # Apply a filter for the moment to remove Hawaii and Alaska
-    regions.setSubsetString('NOT FAF_Zone_D LIKE \'%Alaska%\' AND NOT FAF_Zone_D LIKE \'%HI%\'')
+#    if 'FAF5' in path:
+#        regions.setSubsetString('NOT FAF_Zone_D LIKE \'%Alaska%\' AND NOT FAF_Zone_D LIKE \'%HI%\'')
 
-    return regions
+    return layer
     
 def load_highway_links(links_path, st=None):
     '''
@@ -129,7 +132,7 @@ def style_highway_links(links):
     # Apply the graduated symbol renderer defined above to the network links
     links.setRenderer(renderer)
 
-def applyGradient(regions, target_field):
+def applyGradient(regions, target_field, colormap='Blues'):
     '''
     Applies a color gradient to the FAF5 regions according to the specified target field
 
@@ -148,7 +151,7 @@ def applyGradient(regions, target_field):
     format.setFormat("%1 - %2")
     format.setPrecision(2)
     format.setTrimTrailingZeroes(True)
-    color_ramp = QgsStyle().defaultStyle().colorRamp('Reds')
+    color_ramp = QgsStyle().defaultStyle().colorRamp(colormap)
     ramp_num_steps = 10  # Number of bins to use for the color gradient
 
     renderer = QgsGraduatedSymbolRenderer(target_field)
@@ -231,23 +234,57 @@ def saveMap(layers, layout_title, legend_title, layout_name, file_name):
 
     # exporter.exportToImage(fn, QgsLayoutExporter.ImageExportSettings())
     exporter.exportToPdf(file_name, QgsLayoutExporter.PdfExportSettings())
+    
+def add_basemap(path, name):
+    '''
+    Adds a basemap with political boundaries
+
+    Parameters
+    ----------
+    path (string): Path of the basemap source
+    
+    name (string): Name of the basemap layer in QGIS
+
+    Returns
+    -------
+    None
+    '''
+    basemap_layer=QgsRasterLayer(path, name, 'wms')
+    QgsProject.instance().addMapLayer(basemap_layer)
 
 def main():
     top_dir = getTopDir()
     if top_dir is None:
         exit()
         
-
+    # Add a basic basemap with political boundaries
+    add_basemap('type=xyz&zmin=0&zmax=20&url=https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', 'ESRI Gray')
 
     # Plot and save total domestic imports
-    regions_import = readRegions(f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp', 'Imports (ton / sq mile)')
-    applyGradient(regions_import, 'Tot Imp De')
+    faf5_regions_import = readShapefile(f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp', 'Imports (ton / sq mile)')
+    applyGradient(faf5_regions_import, 'Tot Imp De')
     #saveMap([regions], 'Total Domestic Imports', 'Imports [tons/year]', 'total_domestic_imports', f'{top_dir}/layouts/total_domestic_imports.pdf')
 
     # Plot and save total domestic exports
-    regions_export = readRegions(f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp', 'Exports (ton / sq mile)')
-    applyGradient(regions_export, 'Tot Exp De')
+    faf5_regions_export = readShapefile(f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp', 'Exports (ton / sq mile)')
+    applyGradient(faf5_regions_export, 'Tot Exp De')
     #saveMap([regions], 'Total Domestic Exports', 'Exports [tons/year]', 'total_domestic_exports', f'{top_dir}/layouts/total_domestic_exports.pdf')
+    
+    # Add grid emission intensity
+    egrids_regions = readShapefile(f'{top_dir}/data/egrid2020_subregions_merged/egrid2020_subregions_merged.shp', 'CO2e intensity of power grid (lb/MWh)')
+    applyGradient(egrids_regions, 'SRC2ERTA', colormap='Reds')
+    
+    # Add commercial electricity prices by state
+    elec_prices_by_state = readShapefile(f'{top_dir}/data/electricity_rates_merged/electricity_rates_by_state_merged.shp', 'Commercial Elec Price by State (cents / kWh)')
+    applyGradient(elec_prices_by_state, 'Cents/kWh.', colormap='Reds')
+    
+    # Add commercial electricity prices by zip code
+    elec_prices_by_zipcode = readShapefile(f'{top_dir}/data/electricity_rates_merged/electricity_rates_by_zipcode_merged.shp', 'Commercial Elec Price by Zipcode (cents / kWh)')
+    applyGradient(elec_prices_by_zipcode, 'comm_rate', colormap='Reds')
+    
+    # Add maximum demand charges
+    demand_charges_by_utility = readShapefile(f'{top_dir}/data/electricity_rates_merged/demand_charges_merged.shp', 'Maximum Demand Charge by Utility ($/kW)')
+    applyGradient(demand_charges_by_utility, 'MaxDemCh', colormap='Reds')
     
     # Add the highway assignments
     links = load_highway_links(f'{top_dir}/data/highway_assignment_links/highway_assignment_links.shp')
@@ -255,7 +292,11 @@ def main():
     # Style highway links
     style_highway_links(links)
     
-    
-    
+    # Add alternative fueling stations for highway corridors
+    dcfc_stations = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_elec/US_elec.shp', 'DCFC Corridor Stations', color='orange')
+    hydrogen_stations = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_hy/US_hy.shp', 'Hydrogen Corridor Stations', color='purple')
+    hydrogen_lng = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_lng/US_lng.shp', 'LNG Corridor Stations', color='green')
+    hydrogen_cng = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_cng/US_cng.shp', 'CNG Corridor Stations', color='pink')
+    hydrogen_lpg = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_lpg/US_lpg.shp', 'LPG Corridor Stations', color='cyan')
 
 main()

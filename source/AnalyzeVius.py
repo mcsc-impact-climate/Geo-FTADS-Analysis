@@ -13,7 +13,8 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib
 import InfoObjects
-from ViusTools import get_top_dir, make_aggregated_df, add_GREET_class, add_payload, get_annual_ton_miles, make_basic_selections, get_key_from_value, divide_mpg_by_10
+from ViusTools import make_aggregated_df, add_GREET_class, add_payload, get_annual_ton_miles, make_basic_selections, get_key_from_value, divide_mpg_by_10
+from CommonTools import get_top_dir
 from scipy.stats import gaussian_kde
 matplotlib.rc('xtick', labelsize=18)
 matplotlib.rc('ytick', labelsize=18)
@@ -695,6 +696,207 @@ def plot_payload_hist(df, commodity='all', truck_range='all', region='US', range
     #plt.show()
     plt.close()
     
+def get_bin_centroids(data, weights, bins):
+    '''
+    Calculates the centroid of each bin, accounting for event weights
+        
+    Parameters
+    ----------
+    data (numpy.array): data to be binned
+    
+    weights (numpy.array): weight of each event in the data
+    
+    bins (np.array): bin edges
+
+    Returns
+    -------
+    centroids (numpy.array): weighted centroid in each bin
+        
+    NOTE: None.
+    '''
+    centroids = np.zeros(0)
+    for i in range(len(bins)-1):
+        data_in_bin = data[(data >= bins[i])&(data < bins[i+1])]
+        weights_in_bin = weights[(data >= bins[i])&(data < bins[i+1])]
+        
+        # If there's no data in the bin, set the centroid to the bin center
+        if len(data_in_bin) == 0:
+            centroid = 0.5 * (bins[i] + bins[i+1])
+            centroids = np.append(centroids, centroid)
+        
+        else:
+            centroid = np.average(data_in_bin, weights=weights_in_bin)
+            centroids = np.append(centroids, centroid)
+        
+    return centroids
+    
+def plot_mpg_times_payload_hist(df, commodity='all', truck_range='all', region='US', range_threshold=0, commodity_threshold=0, set_commodity_title='default', set_commodity_save='default', set_range_title='default', set_range_save='default', aggregated=False, weight_by_tm=True, binning=10, binning_info='', density=False):
+    '''
+    Calculates and plots the distributions of miles per gallon times payload for different commodities ('commmodity' parameter), trip range windows ('truck_range' parameter), and administrative states ('region' parameter). Samples used to produce the distributions are weighted by the average annual ton-miles reported carrying the given 'commodity' over the given 'truck_range', for the given administrative 'region'.
+        
+    Parameters
+    ----------
+    df (pd.DataFrame): A pandas dataframe containing the VIUS data
+    
+    commodity (string): Name of the column of VIUS data containing the percentage of ton-miles carrying the given commodity
+
+    truck_range (string): Name of the column of VIUS data containing the percentage of ton-miles carried over the given trip range
+    
+    region (string): Name of the column of VIUS data containing boolean data to indicate the truck's administrative state
+    
+    range_threshold (float): Threshold percentage of ton-miles carried over the given range required to include the a truck in the analysis, in cases where the truck_range is not 'all'
+    
+    commodity_threshold (float): Threshold percentage of ton-miles carried over the given range required to include the a truck in the analysis, in cases where the commodity is not 'all'
+    
+    set_commodity_title (string): Allows the user to set the human-readable name for the plotted commodity to be shown in the plot title
+    
+    set_commodity_save (string): Allows the user to set the keyword for the plotted commodity to be included in the filenames of the saved plots
+    
+    set_commodity_title (string): Allows the user to set the human-readable name for the plotted trip range to be shown in the plot title
+    
+    set_range_save (string): Allows the user to set the keyword for the plotted trip range to be included in the filenames of the saved plots
+    
+    aggregated (boolean): If set to True, adds an additional string '_aggregated' to the filenames of the saved plots to indicate that aggregation has been done to obtain common commodity and/or trip range definitions between FAF5 and VIUS data
+    
+    weight_by_tm (boolean): If set to False, just produces distributions of event numbers, rather than weighting by ton-miles
+    
+    binning (int or Numpy.array): Either the number of bins in the histogram (if an int), or the bin edges (if an array)
+    
+    binning_info (string): Optionally, specify an informational string to include in the filename of the plotted histogram to describe the binning that took place
+    
+    density (boolean): Specifies whether or not to normalize the bin heights to represent probability density.
+        
+    Returns
+    -------
+    None
+        
+    NOTE: None.
+    '''
+    region_pretty = get_region_pretty(region)
+    
+    if set_commodity_title == 'default':
+        commodity_pretty = get_commodity_pretty(commodity)
+        commodity_title = commodity_pretty
+    else:
+        commodity_title = set_commodity_title
+    
+    if set_commodity_save == 'default':
+        commodity_save = commodity
+    else:
+        commodity_save = set_commodity_save
+        
+    if set_range_title == 'default':
+        range_pretty = get_range_pretty(truck_range)
+        range_title = range_pretty
+    else:
+        range_title = set_range_title
+    
+    if set_range_save == 'default':
+        range_save = truck_range
+    else:
+        range_save = set_range_save
+    
+    cNoPassenger = (df['PPASSENGERS'].isna()) | (df['PPASSENGERS'] == 0)
+    cBaseline = (df['WEIGHTAVG'] > 8500) & (~df['MILES_ANNL'].isna()) & (~df['WEIGHTEMPTY'].isna()) & (~df['FUEL'].isna()) & (~df['ACQUIREYEAR'].isna()) & cNoPassenger
+    cCommodity = True
+    cRange = True
+    cRegion = True
+    if not commodity == 'all':
+        cCommodity = (~df[commodity].isna())&(df[commodity] > commodity_threshold)
+    if not truck_range == 'all':
+        cRange = (~df[truck_range].isna())&(df[truck_range] > range_threshold)
+    if not region == 'US':
+        cRegion = (~df['ADM_STATE'].isna())&(df['ADM_STATE'] == region)
+        
+    cSelection = cCommodity&cRange&cRegion&cBaseline
+    if np.sum(cSelection) == 0:
+        print('ERROR No events in selection. Returning without plotting.')
+        return
+    
+    # Get the annual ton miles for all classes
+    annual_ton_miles_all = get_annual_ton_miles(df, cSelection=cSelection, truck_range=truck_range, commodity=commodity, fuel='all', greet_class='all')
+    
+    if weight_by_tm:
+        weights_all = annual_ton_miles_all
+    else:
+        weights_all = np.ones(len(annual_ton_miles_all))
+        
+    # Bin the data according to the vehicle age, and calculate the associated statistical uncertainty using root sum of squared weights (see eg. https://www.pp.rhul.ac.uk/~cowan/stat/notes/errors_with_weights.pdf)]]
+    payload = (df[cSelection]['WEIGHTAVG'] - df[cSelection]['WEIGHTEMPTY']) * LB_TO_TONS
+    mpg_times_payload = df[cSelection]['MPG'] * payload
+    
+    # Remove any zeros or infs
+    weights_all = weights_all[(mpg_times_payload > 0)]#&(mpg_times_payload < 2)
+    mpg_times_payload = mpg_times_payload[(mpg_times_payload > 0)]#&(mpg_times_payload < 2)
+    
+    fig = plt.figure(figsize = (10, 7))
+    n, bins = np.histogram(mpg_times_payload, weights=weights_all, bins=binning)
+    n_err = np.sqrt(np.histogram(mpg_times_payload, weights=weights_all**2, bins=binning)[0])
+    
+    # If density argument is supplied, calculate the probability density for each bin
+    if density:
+        bin_widths = binning[:-1] - binning[1:]
+        n_density = n / bin_widths
+        n_density = n_density / np.sum(n_density)
+        n_err_density = n_err * n_density / n
+        n_err_density[np.isinf(n_err_density)] = 0
+            
+    plt.title(f'Commodity: {commodity_title}, Range: {truck_range}', fontsize=20)
+    if weight_by_tm:
+        if density:
+            plt.ylabel('Probability Density per Bin', fontsize=20)
+        else:
+            plt.ylabel('Commodity flow (ton-miles)', fontsize=20)
+    else:
+        plt.ylabel('Samples per Bin', fontsize=20)
+    plt.xlabel('Fuel Efficiency $\\times$ Payload (ton-mpg)', fontsize=20)
+    
+    # Plot the total along with error bars (the bars themselves are invisible since I only want to show the error bars)
+    bin_centers = bins[:-1]+0.5*(bins[1:]-bins[:-1])
+    centroids = get_bin_centroids(mpg_times_payload, weights_all, binning)
+    if density:
+        plt.bar(bin_centers, n_density, yerr=n_err_density, width = bins[1:]-bins[:-1], ecolor='black', capsize=5)
+    else:
+        plt.bar(bin_centers, n, yerr=n_err, width = bins[1:]-bins[:-1], ecolor='black', capsize=5)
+        
+    i_centroid = 0
+    for centroid in centroids:
+        if i_centroid == 0:
+            plt.plot(centroid, 0, 'o', color='red', label = 'bin centroids')
+        else:
+            plt.plot(centroid, 0, 'o', color='red')
+        
+        i_centroid += 1
+        
+    # Also calculate the mean (+/- stdev) and report it on the plot
+    mean_mpg_times_payload = np.average(mpg_times_payload, weights=weights_all)
+    variance_mpg_times_payload = np.average((mpg_times_payload-mean_mpg_times_payload)**2, weights=weights_all)
+    std_mpg_times_payload = np.sqrt(variance_mpg_times_payload)
+    plt.text(0.5, 0.7, f'mean: %.1f±%.1f ton-mpg'%(mean_mpg_times_payload, std_mpg_times_payload), transform=fig.axes[0].transAxes, fontsize=18)
+#    plt.legend()
+    
+    region_save = region_pretty.replace(' ', '_')
+    aggregated_info=''
+    if aggregated:
+        aggregated_info = '_aggregated'
+    
+    plt.legend(fontsize=18)
+    plt.tight_layout()
+    
+    weight_str = ''
+    if not weight_by_tm:
+        weight_str = '_unweighted'
+    
+    density_str = ''
+    if density:
+        density_str='_density'
+        
+    print(f'Saving figure to plots/mpg_times_payload_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}{weight_str}{binning_info}{density_str}.png')
+    plt.savefig(f'plots/mpg_times_payload_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}{weight_str}{binning_info}{density_str}.png')
+    plt.savefig(f'plots/mpg_times_payload_distribution{aggregated_info}_range_{range_save}_commodity_{commodity_save}_region_{region_save}{weight_str}{binning_info}{density_str}.pdf')
+    #plt.show()
+    plt.close()
+    
     
 def plot_mpg_scatter(df, x_var='gvw', nBins=30):
     '''
@@ -1085,6 +1287,36 @@ df_agg_coarse_range = make_aggregated_df(df_vius, range_map=InfoObjects.FAF5_VIU
 #for commodity in InfoObjects.FAF5_VIUS_commodity_map:
 #    for greet_class in range(1,5):
 #        plot_payload_hist(df_agg, region='US', commodity=commodity, truck_range='all', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name'], aggregated=True, greet_class=greet_class)
+
+#-----------------------------------------------------#
+
+
+#######################################################################
+
+################## MPG over payload distributions ########################
+
+## Make payload distributions of truck age for all regions, commodities, and vehicle range
+#plot_mpg_times_payload_hist(df_vius, region='US', commodity='all', truck_range='all', range_threshold=0, commodity_threshold=0, binning=np.linspace(0,500, 10), binning_info='', density=False)
+#plot_mpg_times_payload_hist(df_vius, region='US', commodity='all', truck_range='all', range_threshold=0, commodity_threshold=0, binning=np.asarray([0,50,100,125,150,200,600]), binning_info='nonequi', density=False)
+#plot_mpg_times_payload_hist(df_vius, region='US', commodity='all', truck_range='all', range_threshold=0, commodity_threshold=0, binning=np.asarray([0,50,100,125,150,200,600]), binning_info='nonequi', density=True)
+#plot_mpg_times_payload_hist(df_vius, region='US', commodity='all', truck_range='all', range_threshold=0, commodity_threshold=0, weight_by_tm=False)
+
+## For each commodity
+#for commodity in InfoObjects.FAF5_VIUS_commodity_map:
+#    plot_mpg_times_payload_hist(df_agg, region='US', commodity=commodity, truck_range='all', range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name'], binning=np.asarray([0,50,100,125,150,200,600]), density=True)
+    
+## For each range
+#for truck_range in InfoObjects.FAF5_VIUS_range_map:
+#    plot_mpg_times_payload_hist(df_agg, region='US', commodity='all', truck_range=truck_range, range_threshold=0, commodity_threshold=0, set_range_title = truck_range, set_range_save = InfoObjects.FAF5_VIUS_range_map[truck_range]['short name'], binning=np.asarray([0,50,100,125,150,200,600]), density=True)
+    
+## For each coarsely-aggregated range
+#for truck_range in InfoObjects.FAF5_VIUS_range_map_coarse:
+#    plot_mpg_times_payload_hist(df_agg_coarse_range, region='US', commodity='all', truck_range=truck_range, range_threshold=0, commodity_threshold=0, set_range_title = truck_range, set_range_save = InfoObjects.FAF5_VIUS_range_map_coarse[truck_range]['short name'], binning=np.asarray([0,50,100,125,150,200,600]), density=True)
+#
+## Make distributions of payload for each aggregated commodity and range
+for commodity in InfoObjects.FAF5_VIUS_commodity_map:
+    for truck_range in InfoObjects.FAF5_VIUS_range_map_coarse:
+        plot_mpg_times_payload_hist(df_agg_coarse_range, region='US', commodity=commodity, truck_range=truck_range, range_threshold=0, commodity_threshold=0, set_commodity_title = commodity, set_commodity_save = InfoObjects.FAF5_VIUS_commodity_map[commodity]['short name'], set_range_title = truck_range, set_range_save = InfoObjects.FAF5_VIUS_range_map_coarse[truck_range]['short name'], binning=np.asarray([0,50,100,125,150,200,600]), density=True)
 
 #-----------------------------------------------------#
 
