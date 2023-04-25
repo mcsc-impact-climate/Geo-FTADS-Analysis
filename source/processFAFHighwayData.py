@@ -17,6 +17,7 @@ import geopandas as gpd
 import geopy
 from tqdm import tqdm, trange
 from pathlib import Path
+from CommonTools import get_top_dir
 
 import time
 
@@ -72,29 +73,8 @@ def saveShapefile(file, name):
     if not os.path.exists(dir):
         os.makedirs(dir)
     file.to_file(name)
-
-def get_top_dir():
-    '''
-    Gets the path to the top level of the git repo (one level up from the source directory)
-        
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    top_dir (string): Path to the top level of the git repo
-        
-    NOTE: None
-    '''
-    source_path = Path(__file__).resolve()
-    source_dir = source_path.parent
-    top_dir = os.path.dirname(source_dir)
-    return top_dir
     
-top_dir = get_top_dir()
-    
-def read_highway_assignments():
+def read_highway_assignments(top_dir):
     '''
     Reads in the FAF5 highway assignments as a dataframe, and gets the columns of interest
 
@@ -115,8 +95,11 @@ def read_highway_assignments():
     return highway_assignments_filtered_df
     
 def main():
+    # Get the path to the top level of the Git repo
+    top_dir = get_top_dir()
+
     # Read in the highway flow assignments for each link
-    df_highway_assignments = read_highway_assignments()
+    df_highway_assignments = read_highway_assignments(top_dir)
     #start_time = time.time()
     
     # Merge the highway flow assignments in with the shapefile containing the highway links
