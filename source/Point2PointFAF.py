@@ -30,6 +30,7 @@ import geopy
 from tqdm import tqdm, trange
 from CommonTools import get_top_dir
 import LCATools as LCAT
+from CommonTools import get_top_dir
 
 
 # =============================================================================
@@ -52,6 +53,7 @@ path = os.getcwd()
 # prints parent directory
 # print('Parent Directory', os.path.abspath(os.path.join(path, os.pardir)))
 #top_dir = os.path.dirname(path)
+
 top_dir = get_top_dir()
                               
 def geocode(loc):
@@ -120,20 +122,26 @@ def readData(cols=None):
     return data
 
 
-# @jit(target_backend='cuda')
-def processData(dest, mode):
+def filterLCA(item='CO2 (w/ C in VOC & CO)', comm='all'):
     '''
-    Assigns a net ton (either import or export) to each FAF5 region
-    
+    The purpose of this method is to import the LCA data and filter it in a
+        manner that is easily readable for processing
+
     Parameters
     ----------
-    dest (pd.DataFrame): A pandas dataframe containing (currently) all domestic regions from the FAF5_metadata
+    item : String, optional
+        The pollutant modifier in which things will be filtered by.
+            The default is 'CO2 (w/ C in VOC & CO)'.
+    comm : String, optional
+        The commodity in which all things will be filtered by. In the event
+            that the input is None, it will include all commodities.
+            The default is 'all'.
 
     Returns
     -------
-    None
-        
-    NOTE: dms_dest -> index 2; dms_orig -> index 1; tons_2020 -> index 12
+    lca_filt : DataFrame
+        DataFrame based on the LCA data containing the relevant rows based on 
+            the filters.
 
     '''
     data = readData(["dms_orig", "dms_dest", "tons_2020", "dms_mode"])
@@ -234,9 +242,6 @@ def filterLCA(item='CO2 (w/ C in VOC & CO)', comm='all'):
     commodities = []
     modes = []
     
-    # print(list(LCAT.df_lca_dict.keys()))
-    # print(LCAT.df_lca_dict['truck'])
-    
     # It is a two layer dictionary with the first being modes 
     # The second layer is commodities
     for key, mode in emit.items():
@@ -247,8 +252,6 @@ def filterLCA(item='CO2 (w/ C in VOC & CO)', comm='all'):
             lca_filt = pd.concat([lca_filt.loc[:], new_row]).reset_index(drop=True)
             commodities.append(comm)
             modes.append(key)
-            # print(new_row)
-            # print(lca_filt)
             
         else:
             for cKey, commodity in mode.items():
@@ -261,70 +264,84 @@ def filterLCA(item='CO2 (w/ C in VOC & CO)', comm='all'):
                 
     lca_filt['Commodity'] = commodities
     lca_filt['Modes'] = modes
-    # print(lca_filt)
-    # print(commodities)
     
     return lca_filt
 
-# The method will be modified to incorporate the below calculation of emissions in 
-#   completeOD() for simplification purposes
-def emissions_OD(dest, mode, comm=None):
-    data = readData(["dms_orig", "dms_dest", "tons_2020", "dms_mode", 'tmiles_2020', 'sctg2'])
-    
-    # This is dest*mode based on the idea that we account for all possible 
-    #   values (excluding the finer commodity ones)
-    tot_len = len(dest)*len(mode)
-    
-    tons_in = np.zeros(tot_len)
-    tons_out = np.zeros(tot_len)
-    ton_miles = np.zeros(tot_len)
-    
-    emissions = np.zeros(tot_len)
-    
-    emissions_data = filterLCA()
-    
-    # Currently the algorithm works by iterating through the values in the meta
-    #   data follows by iterating over the entirety of the data
-    # The new goal is to break things down by mode utilizing the "dms_mode" key
-    i = 0
-    for row in tqdm(dest.values):
-        # 0 will be truck, 1 will be rail, 2 will be water
-        #   for momo in mode.values:        
-        for line in data.values:           
-            if line[3] == mode['Numeric Label'][0]:
-                j = i
-                eMult = emissions_data['WTW'][0]
-            elif line[3] == mode['Numeric Label'][1]:
-                j = i+1
-                eMult = emissions_data['WTW'][1]
-            elif line[3] == mode['Numeric Label'][2]:
-                j = i+2
-                eMult = emissions_data['WTH'][2]
-            else:
-                # This continue exists as we only want to consider truck, rail,
-                #   or water
-                continue
-            
-            if line[1] == row[0]:
-                tons_in[j] += line[2]
-                ton_miles[j] += line[4]
-                emissions[j] += line[4] * eMult
-                
-            if line[0] == row[0]:
-                tons_out[j] += line[2]
-        
-        i+=1
-        # if i==2: break
-    
-    dest['Total Import'] = tons_in
-    dest['Total Export'] = tons_out
-    dest['FAF_Zone'] = dest['Numeric Label'].apply(str).apply(lambda x: x.zfill(3))
-    # dest = dest.rename(columns={'Numeric Label': 'FAF_Zone'})  # DMM: Renaming for consistency with shapefile
-    dest['Mode'] = pd.concat([mode['Description']]*tot_len, ignore_index=True)
-    dest['Ton-Miles'] = ton_miles
-    dest['Emissions'] = emissions
-    
-    return dest
+
+# No longer used
+# =============================================================================
+# # The method will be modified to incorporate the below calculation of emissions in 
+# #   completeOD() for simplification purposes
+# def emissions_OD(dest, mode, comm=None):
+#     '''
+#     Assigns a net ton (either import or export) to each FAF5 region
+#     
+#     Parameters
+#     ----------
+#     dest (pd.DataFrame): A pandas dataframe containing (currently) all domestic regions from the FAF5_metadata
+# 
+#     Returns
+#     -------
+#     None
+#         
+#     NOTE: dms_dest -> index 2; dms_orig -> index 1; tons_2020 -> index 12
+# 
+#     '''
+#     data = readData(["dms_orig", "dms_dest", "tons_2020", "dms_mode", 'tmiles_2020', 'sctg2'])
+#     
+#     # This is dest*mode based on the idea that we account for all possible 
+#     #   values (excluding the finer commodity ones)
+#     tot_len = len(dest)*len(mode)
+#     
+#     tons_in = np.zeros(tot_len)
+#     tons_out = np.zeros(tot_len)
+#     ton_miles = np.zeros(tot_len)
+#     
+#     emissions = np.zeros(tot_len)
+#     
+#     emissions_data = filterLCA()
+#     
+#     # Currently the algorithm works by iterating through the values in the meta
+#     #   data follows by iterating over the entirety of the data
+#     # The new goal is to break things down by mode utilizing the "dms_mode" key
+#     i = 0
+#     for row in tqdm(dest.values):
+#         # 0 will be truck, 1 will be rail, 2 will be water
+#         #   for momo in mode.values:        
+#         for line in data.values:           
+#             if line[3] == mode['Numeric Label'][0]:
+#                 j = i
+#                 eMult = emissions_data['WTW'][0]
+#             elif line[3] == mode['Numeric Label'][1]:
+#                 j = i+1
+#                 eMult = emissions_data['WTW'][1]
+#             elif line[3] == mode['Numeric Label'][2]:
+#                 j = i+2
+#                 eMult = emissions_data['WTH'][2]
+#             else:
+#                 # This continue exists as we only want to consider truck, rail,
+#                 #   or water
+#                 continue
+#             
+#             if line[1] == row[0]:
+#                 tons_in[j] += line[2]
+#                 ton_miles[j] += line[4]
+#                 emissions[j] += line[4] * eMult
+#                 
+#             if line[0] == row[0]:
+#                 tons_out[j] += line[2]
+#         
+#         i+=1
+#     
+#     dest['Total Import'] = tons_in
+#     dest['Total Export'] = tons_out
+#     dest['FAF_Zone'] = dest['Numeric Label'].apply(str).apply(lambda x: x.zfill(3))
+#     dest['Mode'] = pd.concat([mode['Description']]*tot_len, ignore_index=True)
+#     dest['Ton-Miles'] = ton_miles
+#     dest['Emissions'] = emissions
+#     
+#     return dest
+# =============================================================================
 
 
 def completeOD(mode, commodity):
@@ -349,8 +366,7 @@ def completeOD(mode, commodity):
     data : DataFrame
         DESCRIPTION.
 
-    '''
-    
+    '''  
     data = readData(["dms_orig", "dms_dest", "tons_2020", "dms_mode", 'tmiles_2020', 'sctg2'])
     tot_len = len(data)
 
@@ -407,7 +423,7 @@ def getCompleteOD():
     return data
 
 
-def filterDataOD(data, mode, commodity):
+def filterDataMC(data, mode, commodity):
     '''
     This method filters the data based on a given array of modes and commodities.
 
@@ -441,13 +457,53 @@ def filterDataOD(data, mode, commodity):
             if line[-1] == row[0]:
                 if line[-2] == row[1]:
                     emissions[i] += line[-3]
+                    
         i += 1
         
     data_filtered['Emissions'] = emissions()
     
     return data_filtered
+
+
+def filterOD(dest, data, direction=True):
+    data_filtered = pd.DataFrame()
     
+    tot_len = len(dest)
     
+    tons_in = np.zeros(tot_len)
+    tons_out = np.zeros(tot_len)
+    ton_miles = np.zeros(tot_len)
+    
+    emissions = np.zeros(tot_len)
+    
+    i = 0
+    for row in tqdm(dest.values):
+        for line in data.values:
+            if row[0] == line[1]:
+                if line[1] == row[0]: # Import
+                    tons_in[i] += line[2]
+                    
+                    if direction:
+                        ton_miles[i] += line[3]
+                        emissions[i] += line[-3]
+                    
+                if line[0] == row[0]: # Export
+                    tons_out[i] += line[2]
+                    
+                    if not direction:
+                        ton_miles[i] += line[3]
+                        emissions[i] += line[-3]
+            
+        i+=1
+    
+    data_filtered['Total Import'] = tons_in
+    data_filtered['Total Export'] = tons_out
+    data_filtered['Ton-Miles'] = ton_miles
+    data_filtered['Emissions'] = emissions
+    
+    return data_filtered
+
+
 def mergeShapefile(dest, shapefile_path, by_region = False):
     '''
     Merges the shapefile containing FAF5 region borders with the csv file containing total tonnage
@@ -526,7 +582,8 @@ def main ():
     # Load FAF5 Regional Metadata
     dest, mode, comms = readMeta()
     dataOD = completeOD(mode, comms)
-    saveFile(dataOD, 'total_tons_short')
+    
+    saveFile(dataOD, 'completeOD')
     
     # dest_with_tonnage = emissions_OD(dest, mode)
     # saveFile(dest_with_tonnage, 'total_tons_short')
