@@ -147,6 +147,12 @@ wget "https://www.eia.gov/electricity/gridmonitor/sixMonthFiles/EIA930_BALANCE_2
 wget "https://www.eia.gov/electricity/gridmonitor/sixMonthFiles/EIA930_BALANCE_2022_Jan_Jun.csv" -O power_demand_by_balancing_authority/EIA930_BALANCE_2022_Jan_Jun.csv
 ```
 
+### Power demand by state
+```bash
+# from https://www.eia.gov/electricity/data/state/
+wget https://www.eia.gov/electricity/data/state/existcapacity_annual.xlsx
+```
+
 You can now cd back out of the data directory
 ```bash
 cd ..
