@@ -185,9 +185,9 @@ i=1
 for mode in "${MODES[@]}"; do
   for region in "${REGIONS[@]}"; do
     for commodity in "${COMMODITIES[@]}"; do
-        echo python source/Point2PointFAF.py -m truck -o ${region} -c "'${commodity}'"
-        python source/Point2PointFAF.py -m truck -o ${region} -c "'${commodity}'" &> Logs/truck_origin_${region}.txt &
-        python source/Point2PointFAF.py -m truck -d ${region} -c "'${commodity}'" &> Logs/truck_destination_${region}.txt &
+        echo python source/Point2PointFAF.py -m truck -o ${region} -c "${commodity}"
+        python source/Point2PointFAF.py -m truck -o ${region} -c "${commodity}" &> Logs/truck_origin_${region}.txt &
+        python source/Point2PointFAF.py -m truck -d ${region} -c "${commodity}" &> Logs/truck_destination_${region}.txt &
   
         if ! ((i % 8)); then
             echo Pausing to let jobs finish
