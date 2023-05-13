@@ -801,8 +801,8 @@ def main():
 
 ###----------------------------------- Distributions wrt GREET class for each commodity --------------------------------------###
 #    # Evaluate and plot the distribution of ton-miles with respect to GREET class and fuel type for each commodity
-    all_class_fuel_dists = make_all_class_fuel_dists()
-    save_as_csv_per_class(all_class_fuel_dists, filename='norm_distribution', info_name='normalized distribution', unc_name='statistical uncertainty')
+#    all_class_fuel_dists = make_all_class_fuel_dists()
+#    save_as_csv_per_class(all_class_fuel_dists, filename='norm_distribution', info_name='normalized distribution', unc_name='statistical uncertainty')
 #
 #    for commodity in all_class_fuel_dists:
 #        if commodity=='all':
@@ -817,8 +817,8 @@ def main():
 
 ###---------------------------------- Average payload wrt GREET class for each commodity -------------------------------------###
 #    # Evaluate and plot the average payload with respect to GREET class for each commodity
-    all_payloads_per_class = calculate_all_per_class(quantity_str='payload')
-    save_as_csv_per_class(all_payloads_per_class, filename='payload', info_name='average payload', unc_name='standard deviation')
+#    all_payloads_per_class = calculate_all_per_class(quantity_str='payload')
+#    save_as_csv_per_class(all_payloads_per_class, filename='payload', info_name='average payload', unc_name='standard deviation')
 #    for commodity in all_payloads_per_class:
 #        if commodity=='all':
 #            str_save = f"average_payload_per_greet_class_commodity_all"
@@ -841,8 +841,8 @@ def main():
 
 ###------------------------------------ Average mpg wrt GREET class for each commodity ---------------------------------------###
     # Evaluate and plot the distribution of average mpg with respect to GREET class for each commodity
-    all_mpgs_per_class = calculate_all_per_class(quantity_str='mpg')
-    save_as_csv_per_class(all_mpgs_per_class, filename='mpg', info_name='average mpg', unc_name='standard deviation')
+#    all_mpgs_per_class = calculate_all_per_class(quantity_str='mpg')
+#    save_as_csv_per_class(all_mpgs_per_class, filename='mpg', info_name='average mpg', unc_name='standard deviation')
 #    for commodity in all_mpgs_per_class:
 #        if commodity=='all':
 #            str_save = f"average_mpg_per_greet_class_commodity_all"

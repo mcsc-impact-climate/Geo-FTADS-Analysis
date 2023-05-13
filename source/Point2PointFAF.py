@@ -94,7 +94,7 @@ def readData(cols=None):
     '''
     dataPath = f'{top_dir}/data/FAF5_regional_flows_origin_destination/FAF5.4.1_2018-2020.csv'
     data = pd.read_csv(dataPath)
-    #data = pd.read_csv(dataPath, nrows=10000)  # DMM: This line is just for testing/development, to reduce processing time
+    #data = pd.read_csv(dataPath, nrows=1000)  # DMM: This line is just for testing/development, to reduce processing time
     
     if cols is not None: data = data[cols]
     
@@ -230,7 +230,7 @@ def filterLCA(item='CO2 (w/ C in VOC & CO)', comm='all'):
 # =============================================================================
 
 
-def completeOD(mode, commodity):
+def completeOD(mode, commodity, selected_mode=None, selected_commodity=None, selected_origin=None, selected_destination=None):
     '''
     The idea behind this method is that since modifying the origin destination
         pairs by commodity and then mode is the same as going over the entire
@@ -254,71 +254,38 @@ def completeOD(mode, commodity):
 
     '''  
     data = readData(["dms_orig", "dms_dest", "tons_2020", "dms_mode", 'tmiles_2020', 'sctg2'])
-    tot_len = len(data)
-
     emissions_data = filterLCA(comm=None)
-    emissions = np.zeros(0)
-    
-    data_columns = {}
-    for column in data.columns:
-        data_columns[column] = np.zeros(0)
-    
-    mode_complete = []
-    comm_complete = []
 
-    i_out = 0
-    data_out = pd.DataFrame(columns = data.columns)
-    for row in tqdm(data.values):
-        # Finds the keys for mode and commodity
-        # commodity_sp = commodity.loc[row[5]][1]
-        
-        # print(row[5])
-        # print(row[3])
-        if row[3] <= 3:
-            commodity_sp = commodity.loc[commodity['Numeric Label'] == row[5]].values[0][1]
-            mode_sp = mode.loc[mode['Numeric Label'] == row[3]].values[0][1].lower()
-        else:
-            #data_out = data_out.drop([data_out.index[i_out]])
-            continue
-        
-        # print(mode.)
-        # print(commodity_sp)
-        # print('comm sp found')
-        if mode_sp == 'water':
-            w2 = 'WTH'
-            mode_sp = 'ship'
-        else:
-            w2 = 'WTW'
-        
-        # print(commodity_sp)
-        # print(emissions_data)
-        # print(mode_sp, commodity_sp)
-        modifier = emissions_data.loc[(emissions_data['Modes'] == mode_sp) & (emissions_data['Commodity'] == commodity_sp)][w2].values[0]
-        # print(modifier[w2].values[0])
-        # sys.exit()
-        
-        # print(row[4])
-        # print('line')
-        
-        emissions = np.append(emissions, row[4] * modifier)
-        mode_complete.append(mode_sp)
-        comm_complete.append(commodity_sp)
+    # Remove rows with dms_mode > 3
+    if (not selected_origin is None) and (not selected_origin=='all'):
+        data = data.drop(data[data.dms_orig != int(selected_origin)].index)
+    if (not selected_destination is None) and (not selected_destination=='all'):
+        data = data.drop(data[data.dms_dest != int(selected_destination)].index)
+                
+    data = data.drop(data[data.dms_mode > 3].index)
+    data['emissions'] = data['sctg2']
+    data['commodity'] = data['sctg2']
+    data['mode'] = data['sctg2']
 
-        i_col=0
-        for column in data.columns:
-            data_columns[column] = np.append(data_columns[column], row[i_col])
-            i_col += 1
-        
-        i_out += 1
-        
-    for column in data.columns:
-        data_out[column] = data_columns[column]
-    
-    data_out['emissions'] = emissions
-    data_out['commodity'] = comm_complete
-    data_out['mode'] = mode_complete
+    for this_mode in mode['Numeric Label']:
+        for this_commodity in commodity['Numeric Label']:
+            cCommodity_mode = (data['dms_mode'] == this_mode) & (data['sctg2'] == this_commodity)
+
+            commodity_sp = commodity.loc[commodity['Numeric Label'] == this_commodity].values[0][1]
+            data['commodity'][cCommodity_mode] = commodity_sp
+
+            mode_sp = mode.loc[mode['Numeric Label'] == this_mode].values[0][1].lower()
+            if mode_sp == 'water':
+                w2 = 'WTH'
+                mode_sp = 'ship'
+            else:
+                w2 = 'WTW'
+
+            data['mode'][cCommodity_mode] = mode_sp
+            emissions_modifier = emissions_data.loc[(emissions_data['Modes'] == mode_sp) & (emissions_data['Commodity'] == commodity_sp)][w2].values[0]
+            data['emissions'][cCommodity_mode] = data['tmiles_2020'][cCommodity_mode] * emissions_modifier
             
-    return data_out
+    return data
 
 
 def getCompleteOD():
@@ -361,9 +328,7 @@ def filterDataMC(data, mode, commodity):
     '''
     data_filtered = pd.DataFrame()
     data_length = len(mode) * len(commodity)
-    
-    print([mode]*len(commodity))
-    
+        
     data_filtered['Mode'] = pd.concat([mode]*len(commodity), ignore_index=True)
     data_filtered['Commodity'] = pd.concat([commodity]*len(mode), ignore_index=True)
     
@@ -405,11 +370,11 @@ def filterOD(dest, data, direction=True):
         for line in data.values:
             if line[1] == row[0] or line[0] == row[0]:
                 tons_tot[i] += line[2]
-                ton_miles_tot[i] += line[3]
+                ton_miles_tot[i] += line[4]
                 emissions_tot[i] += line[-3]
             if line[1] == row[0]: # Import
                 tons_in[i] += line[2]
-                ton_miles_in[i] += line[3]
+                ton_miles_in[i] += line[4]
                 emissions_in[i] += line[-3]
 #                    if direction:
 #                        ton_miles[i] += line[3]
@@ -417,7 +382,7 @@ def filterOD(dest, data, direction=True):
                 
             if line[0] == row[0]: # Export
                 tons_out[i] += line[2]
-                ton_miles_out[i] += line[3]
+                ton_miles_out[i] += line[4]
                 emissions_out[i] += line[-3]
                     
 #                    if not direction:
@@ -426,7 +391,7 @@ def filterOD(dest, data, direction=True):
             
         i+=1
     
-    data_filtered['FAF_Zone'] = dest['Numeric Label'].apply(str).apply(lambda x: x.zfill(2))
+    data_filtered['FAF_Zone'] = dest['Numeric Label'].apply(str).apply(lambda x: x.zfill(3))
     data_filtered['Tons Import'] = tons_in
     data_filtered['Tons Export'] = tons_out
     data_filtered['Tons Total'] = tons_tot
@@ -434,7 +399,7 @@ def filterOD(dest, data, direction=True):
     data_filtered['Tmiles Import'] = ton_miles_in
     data_filtered['Tmiles Export'] = ton_miles_out
     data_filtered['Tmiles Total'] = ton_miles_tot
-    
+
     data_filtered['E Import'] = emissions_in
     data_filtered['E Export'] = emissions_out
     data_filtered['E Total'] = emissions_tot
@@ -478,7 +443,9 @@ def mergeShapefile(dest, shapefile_path):
     merged_dataframe['E Exp Den'] = merged_dataframe['E Export'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
     merged_dataframe['E Tot Den'] = merged_dataframe['E Total'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
     
-    return merged_dataframe
+    dest_filtered = merged_dataframe.filter(['FAF_Zone', 'Tons Import', 'Tons Export', 'Tons Total', 'Tmiles Import', 'Tmiles Export', 'Tmiles Total', 'E Import', 'E Export', 'E Total', 'Tons Imp Den', 'Tons Exp Den', 'Tons Tot Den', 'Tmil Imp Den', 'Tmil Exp Den', 'Tmil Tot Den', 'E Imp Den', 'E Exp Den', 'E Tot Den'], axis=1)
+    
+    return merged_dataframe, dest_filtered
 
 
 def saveFile(file, name):
@@ -529,7 +496,7 @@ def main ():
     dest, mode, comm = readMeta()
     #print(dest, mode, comms)
     
-    dataOD = completeOD(mode, comm)#, selected_modes, selected_commodities, origin_region=11, dest_region='all')#, origin_region='all', dest_region='all')
+    dataOD = completeOD(mode, comm, selected_origin=args.origin, selected_destination=args.dest)#, selected_modes, selected_commodities, origin_region=11, dest_region='all')#, origin_region='all', dest_region='all')
     
     # Apply selections
     cBaseline = (dataOD['dms_orig'] > -9999)
@@ -559,7 +526,6 @@ def main ():
     data_filtered = filterOD(dest, dataOD_selected, direction=True)
         
     commodity_save = args.commodity.replace(' ', '_').replace('/', '_')
-    saveFile(data_filtered, f'mode_{args.mode}_commodity_{args.commodity}_origin_{args.origin}_dest_{args.dest}')
 
 #    with pd.option_context('display.max_rows', None,):
 #        print(data_filtered)
@@ -586,8 +552,9 @@ def main ():
     #dest['Total Import'] = dest['Total Import'].astype('float')
     #dest['Total Export'] = dest['Total Export'].astype('float')
 
-    merged_dataframe = mergeShapefile(data_filtered, f'{top_dir}/data/FAF5_regions/Freight_Analysis_Framework_(FAF5)_Regions.shp')
-    saveShapefile(merged_dataframe, f'{top_dir}/data/Point2Point_outputs/mode_{args.mode}_commodity_{args.commodity}_origin_{args.origin}_dest_{args.dest}.shp')
+    merged_dataframe, data_filtered = mergeShapefile(data_filtered, f'{top_dir}/data/FAF5_regions/Freight_Analysis_Framework_(FAF5)_Regions.shp')
+    saveFile(data_filtered, f'mode_{args.mode}_commodity_{commodity_save}_origin_{args.origin}_dest_{args.dest}')
+    saveShapefile(merged_dataframe, f'{top_dir}/data/Point2Point_outputs/mode_{args.mode}_commodity_{commodity_save}_origin_{args.origin}_dest_{args.dest}.shp')
     
     
 main()

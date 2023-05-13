@@ -1,4 +1,6 @@
-COMMODITIES=("Live animals/fish"
+COMMODITIES=(
+all
+"Live animals/fish"
 "Cereal grains"
 "Other ag prods."
 "Animal feed"
@@ -41,7 +43,9 @@ COMMODITIES=("Live animals/fish"
 "Waste/scrap"
 "Mixed freight")
 
-REGIONS=(11
+REGIONS=(
+all
+11
 12
 19
 20
@@ -172,18 +176,26 @@ REGIONS=(11
 540
 551
 559
-560)
+560
+)
+
+MODES=(all truck water rail)
 
 i=1
-for region in "${REGIONS[@]}"; do
-  echo python source/Point2PointFAF.py -m truck -o ${region}
-  python source/Point2PointFAF.py -m truck -o ${region} &> Logs/truck_origin_${region}.txt &
-  python source/Point2PointFAF.py -m truck -d ${region} &> Logs/truck_destination_${region}.txt &
+for mode in "${MODES[@]}"; do
+  for region in "${REGIONS[@]}"; do
+    for commodity in "${COMMODITIES[@]}"; do
+        echo python source/Point2PointFAF.py -m truck -o ${region} -c "'${commodity}'"
+        python source/Point2PointFAF.py -m truck -o ${region} -c "'${commodity}'" &> Logs/truck_origin_${region}.txt &
+        python source/Point2PointFAF.py -m truck -d ${region} -c "'${commodity}'" &> Logs/truck_destination_${region}.txt &
   
-  if ! ((i % 8)); then
-    echo Pausing to let jobs finish
-    wait
-  fi
+        if ! ((i % 8)); then
+            echo Pausing to let jobs finish
+            wait
+        fi
   
-  i=$((i+1))
+        i=$((i+1))
+        echo Processed $i jobs
+    done
+  done
 done

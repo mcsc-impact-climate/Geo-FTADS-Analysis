@@ -210,28 +210,6 @@ python processFAFHighwayData.py
 
 This should produce a shapefile in `data/egrid2020_subregions_merged`.
 
-## Creating total domestic imports and exports
-
-The script [Point2PointFAF.py](./source/Point2PointFAF.py) uses the csv data in the FAF5 regional database to calculate the total domestic imports and exports of all commodities to and from all FAF5 regions, and merged this data with the FAF5 shapefiles. To run:
-
-```bash
-cd source
-python Point2PointFAF.py
-```
-
-
-## Visualizing layers with QGIS
-
-The script [PlotWithQGIS.py](./PlotWithQGIS.py) reads in processed shapefiles containing:
-* total imports and exports for all of the FAF5 regions 
-* CO2e intensity (in lb/MWh) of the US powergrid
-
-and plots them as colormaps in QGIS. It also visualizes the network links as lines on the map, with the line width of each link weighted by its total annual freight flow (in tons). This should look something like:
-
-<!-- Executing [PlotWithQGIS.py](./PlotWithQGIS.py) in the QGIS GUI (after first running [Point2PointFAF.py](./source/Point2PointFAF.py)) should produce output PDF files in the [layouts](./layouts) directory, which look something like: -->
-
-![Total domestic exports](./images/highway_and_total_flows.png "Total Domestic Exports")
-
 ## Analyzing VIUS data
 
 The script [AnalyzeVius.py] produces distributions of GREET vehicle class, fuel type, age, and payload from the VIUS data. To run:
@@ -239,3 +217,61 @@ The script [AnalyzeVius.py] produces distributions of GREET vehicle class, fuel 
 ```bash
 python source/AnalyzeVius.py
 ```
+
+## Processing VIUS data to evaluate average product of fuel efficiency and payload
+
+Run the script [ViusTools.py](./source/ViusTools.py) to produce an output file tabulating the product of fuel efficiency (mpg) times payload for each commodity, along with the associated standard deviation:
+
+```bash
+python source/ViusTools.py
+```
+
+This should produce the following output file: `data/VIUS_Results/mpg_times_payload.csv`. 
+
+## Producing shapefiles to visualize freight flows and emission intensities
+
+The script [Point2PointFAF.py](./source/Point2PointFAF.py) combines outputs from VIUS, GREET and FAF5 and merges it with geospatial shapefiles with the contours of FAF5 regions to associate each region with tons, ton-miles, and associated emissions of imports to and exports from each region, along with areal densities of these three quantities (i.e. divided by the surface area of the associated region). There is also functionality to evaluate these quantities for a user-specified mode, commodity, origin region, or destination region. 
+
+To run:
+
+```bash
+python source/Point2PointFAF.py -m user_specified_mode -c "user_specified_commodity" -o user_specified_origin_ID -d user_specified_destination_ID
+```
+
+This should produce a csv and shapefile in `data/Point2Point_outputs/mode_truck_commodity_Logs_origin_11_dest_all.[extension]`. 
+
+NOTE: The "" around the commodity option is important because some commodities contain spaces, and python does NOT like command line arguments with spaces...
+
+where each argument defaults to 'all' if left unspecified. The mode is one of {all, truck, water, rail}. The available commodities can be found in the 'Commodity (SCTG2)' sheet in `data/FAF5_regional_flows_origin_destination/FAF5_metadata.xlsx` ('Description' column). The origin and destination region IDs can be found in the 'FAF Zone (Domestic)' sheet of the same excel file ('Numeric Label' column'). 
+
+For example, to filter for logs carried by trucks from FAF5 region 11 to FAF5 region 139:
+
+```bash
+python source/Point2PointFAF.py -m truck -c Logs -o 11 -d 139
+```
+
+There's also a bash script in `source/run_all_Point2Point.sh` that can be executed to produce merged shapefiles for all combinations of modes, commodities, origins and destinations. 
+
+To run:
+
+```bash
+bash source/run_all_Point2Point.sh
+```
+
+WARNING: This may take several hours to run in full, and the shapefiles and csv files produced will take up ~100 GB. To reduce this, you can comment out items that you don't want in the COMMODITIES, REGIONS and MODES variables.
+
+## Visualizing layers with QGIS
+
+The script [PlotWithQGIS.py](./PlotWithQGIS.py) reads in processed shapefiles containing:
+* total imports and exports for all of the FAF5 regions 
+* CO2e intensity (in lb/MWh) of the US powergrid
+* Public charging and alternative refueling stations along highway corridors
+* Highway links and assignments
+* Electricity rates by state
+* Demand charges by utility
+
+and plots them as colormaps in QGIS. It also visualizes the network links as lines on the map, with the line width of each link weighted by its total annual freight flow (in tons). This should look something like:
+
+<!-- Executing [PlotWithQGIS.py](./PlotWithQGIS.py) in the QGIS GUI (after first running [Point2PointFAF.py](./source/Point2PointFAF.py)) should produce output PDF files in the [layouts](./layouts) directory, which look something like: -->
+
+![Total domestic exports](./images/highway_and_total_flows.png "Total Domestic Exports")
