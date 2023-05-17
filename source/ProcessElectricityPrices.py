@@ -204,20 +204,20 @@ def main():
     # Read electricity price data for 2021 by state
     state_data = read_state_data(top_dir)
     
-#    # Merge the electricity price data by state with the shapefile with state borders
-#    merged_state_data = merge_state_shapefile(state_data, f'{top_dir}/data/state_boundaries/tl_2012_us_state.shp')
-#
-#    # Save the merged shapefile
-#    saveShapefile(merged_state_data, f'{top_dir}/data/electricity_rates_merged/electricity_rates_by_state_merged.shp')
+    # Merge the electricity price data by state with the shapefile with state borders
+    merged_state_data = merge_state_shapefile(state_data, f'{top_dir}/data/state_boundaries/tl_2012_us_state.shp')
 
-#    # Read electricity price data for 2020 by zipcode
-#    zipcode_data = read_zipcode_data(top_dir)
-#
-#    # Merge the electricity price data by zipcode with the shapefile with zipcode borders
-#    merged_zipcode_data = merge_zipcode_shapefile(zipcode_data, f'{top_dir}/data/zip_code_regions/USA_ZIP_Code_Boundaries.shp')
-#
-#    # Save the merged shapefile
-#    saveShapefile(merged_zipcode_data, f'{top_dir}/data/electricity_rates_merged/electricity_rates_by_zipcode_merged.shp')
+    # Save the merged shapefile
+    saveShapefile(merged_state_data, f'{top_dir}/data/electricity_rates_merged/electricity_rates_by_state_merged.shp')
+
+    # Read electricity price data for 2020 by zipcode
+    zipcode_data = read_zipcode_data(top_dir)
+
+    # Merge the electricity price data by zipcode with the shapefile with zipcode borders
+    merged_zipcode_data = merge_zipcode_shapefile(zipcode_data, f'{top_dir}/data/zip_code_regions/USA_ZIP_Code_Boundaries.shp')
+
+    # Save the merged shapefile
+    saveShapefile(merged_zipcode_data, f'{top_dir}/data/electricity_rates_merged/electricity_rates_by_zipcode_merged.shp')
  
     # Read maximum demand charge by utility ID
     demand_charge_data = read_demand_charge_data(top_dir)
