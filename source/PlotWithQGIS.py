@@ -276,7 +276,7 @@ def main():
     
     # Add commercial electricity prices by state
     elec_prices_by_state = readShapefile(f'{top_dir}/data/electricity_rates_merged/electricity_rates_by_state_merged.shp', 'Commercial Elec Price by State (cents / kWh)')
-    applyGradient(elec_prices_by_state, 'Cents/kWh.', colormap='Reds')
+    applyGradient(elec_prices_by_state, 'Cents_kWh', colormap='Reds')
     
     # Add commercial electricity prices by zip code
     elec_prices_by_zipcode = readShapefile(f'{top_dir}/data/electricity_rates_merged/electricity_rates_by_zipcode_merged.shp', 'Commercial Elec Price by Zipcode (cents / kWh)')

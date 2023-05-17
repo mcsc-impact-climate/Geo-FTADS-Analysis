@@ -60,7 +60,7 @@ def main():
     
     # Merge the eGrids data in with the shapefile with subregion borders
     merged_dataframe = mergeShapefile(egrid_data, f'{top_dir}/data/egrid2020_subregions/eGRID_Subregions.shp', 'ZipSubregi')
-    
+        
     # Save the merged shapefile
     saveShapefile(merged_dataframe, f'{top_dir}/data/egrid2020_subregions_merged/egrid2020_subregions_merged.shp')
     
