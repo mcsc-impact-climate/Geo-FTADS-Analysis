@@ -259,10 +259,6 @@ The script [Point2PointFAF.py](./source/Point2PointFAF.py) combines outputs from
 Before running this code, you'll need to have first run the following:
 
 ```bash
-python source/processFAFHighwayData.py 
-python source/ProcessGridData.py 
-python source/ProcessElectricityDemand.py
-python source/ProcessElectricityPrices.py 
 python source/ViusTools.py
 ```
 
@@ -305,6 +301,17 @@ The script [PlotWithQGIS.py](./PlotWithQGIS.py) reads in processed shapefiles co
 * Demand charges by utility
 
 and plots them as colormaps in QGIS. It also visualizes the network links as lines on the map, with the line width of each link weighted by its total annual freight flow (in tons). This should look something like:
+
+Before running this code, you'll need to have run the following:
+
+```bash
+python source/processFAFHighwayData.py 
+python source/ProcessGridData.py 
+python source/ProcessElectricityDemand.py
+python source/ProcessElectricityPrices.py 
+```
+
+as well as `python source/Point2PointFAF.py [arguments]` for any freight flow and emission intensity layers you'd like to visualize (more detailed instructions [above](./README.md#producing-shapefiles-to-visualize-freight-flows-and-emission-intensities)). Note that these layers currently need to be read in manually. 
 
 <!-- Executing [PlotWithQGIS.py](./PlotWithQGIS.py) in the QGIS GUI (after first running [Point2PointFAF.py](./source/Point2PointFAF.py)) should produce output PDF files in the [layouts](./layouts) directory, which look something like: -->
 
