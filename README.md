@@ -205,10 +205,34 @@ The script [ProcessGridData.py](./source/ProcessGridData.py) reads in the shapef
 To run:
 
 ```bash
-python processFAFHighwayData.py 
+python source/ProcessGridData.py 
 ```
 
 This should produce a shapefile in `data/egrid2020_subregions_merged`.
+
+## Processing electricity demand data
+
+The script [rocessElectricityDemand.py](./source/ProcessElectricityDemand.py) reads in the shapefile containing the borders of US states, along with the associated electricity demand data, and joins the shapefile with the electricity demand data via the subregion ID to produce a combined shapefile.
+
+To run:
+
+```bash
+python source/ProcessElectricityDemand.py
+```
+
+This should produce a shapefile in `data/electricity_demand_merged`.
+
+## Processing electricity prices and demand charges
+
+The script [ProcessElectricityPrices.py](./source/ProcessElectricityPrices.py) reads in the shapefile containing borders of zip codes and states, along with the associated electricity price data and demand charges, and joins the shapefiles with the electricity price data via the subregion ID to produce combined shapefiles.
+
+To run:
+
+```bash
+python source/ProcessElectricityPrices.py 
+```
+
+This should produce shapefiles for zipcode-level and state-level electricity prices in `data/electricity_rates_merged`
 
 ## Analyzing VIUS data
 
@@ -231,6 +255,16 @@ This should produce the following output file: `data/VIUS_Results/mpg_times_payl
 ## Producing shapefiles to visualize freight flows and emission intensities
 
 The script [Point2PointFAF.py](./source/Point2PointFAF.py) combines outputs from VIUS, GREET and FAF5 and merges it with geospatial shapefiles with the contours of FAF5 regions to associate each region with tons, ton-miles, and associated emissions of imports to and exports from each region, along with areal densities of these three quantities (i.e. divided by the surface area of the associated region). There is also functionality to evaluate these quantities for a user-specified mode, commodity, origin region, or destination region. 
+
+Before running this code, you'll need to have first run the following:
+
+```bash
+python source/processFAFHighwayData.py 
+python source/ProcessGridData.py 
+python source/ProcessElectricityDemand.py
+python source/ProcessElectricityPrices.py 
+python source/ViusTools.py
+```
 
 To run:
 
