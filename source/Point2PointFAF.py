@@ -28,31 +28,10 @@ import pandas as pd
 import geopandas as gpd
 import geopy
 from tqdm import tqdm, trange
-from CommonTools import get_top_dir
 import LCATools as LCAT
 from CommonTools import get_top_dir
+import argparse
 
-
-# =============================================================================
-# # Get the path to top level of the git directory so we can use relative paths
-# source_dir = os.path.dirname(_console.console.tabEditorWidget.currentWidget().path)
-# if source_dir.endswith('/source'):
-#     top_dir = source_dir[:-7]
-# elif source_dir.endswith('/source/'):
-#     top_dir = source_dir[:-8]
-# else:
-#     print("ERROR: Expect current directory to end with 'source'. Cannot use relative directories as-is. Exiting...")
-#     sys.exitfunc()
-# =============================================================================
-
-# Convert to class using python's built in __init__ and __call__ later
-# def getDir():
-path = os.getcwd()
-# print("Current Directory", path)
- 
-# prints parent directory
-# print('Parent Directory', os.path.abspath(os.path.join(path, os.pardir)))
-#top_dir = os.path.dirname(path)
 
 top_dir = get_top_dir()
                               
@@ -115,7 +94,7 @@ def readData(cols=None):
     '''
     dataPath = f'{top_dir}/data/FAF5_regional_flows_origin_destination/FAF5.4.1_2018-2020.csv'
     data = pd.read_csv(dataPath)
-    #data = pd.read_csv(dataPath, nrows=100)  # DMM: This line is just for testing/development, to reduce processing time
+    #data = pd.read_csv(dataPath, nrows=1000)  # DMM: This line is just for testing/development, to reduce processing time
     
     if cols is not None: data = data[cols]
     
@@ -144,99 +123,6 @@ def filterLCA(item='CO2 (w/ C in VOC & CO)', comm='all'):
             the filters.
 
     '''
-    data = readData(["dms_orig", "dms_dest", "tons_2020", "dms_mode"])
-    tons_in = np.zeros(len(dest))
-    tons_out = np.zeros(len(dest))
-
-    # Currently the algorithm works by iterating through the values in the meta data
-    #   folloqws by iterating over the entirety of the data
-    # The new goal is to break things down by mode utilizing the "dms_mode" key
-    i = 0
-    for row in tqdm(dest.values):
-        print(row)
-        for momo in mode.values:
-            for line in data.values:
-                # if tons_in[i] == 0: print(line[0], line[1])
-                if line[1] == row[0]:
-                    tons_in[i] += line[2]
-                    
-                if line[0] == row[0]:
-                    tons_out[i] += line[2]
-        i+=1
-        # if i==2: break
-    
-    # Incorec -> should be zfilling 'Numeric Label" instead
-    dest['Total Import'] = tons_in # pd.Series(np.rint(tons_in).astype(int)).astype(str).str.zfill(9)
-    dest['Total Export'] = tons_out
-    dest['Numeric Label'] = dest['Numeric Label'].apply(str).apply(lambda x: x.zfill(3))
-    dest['Mode'] = pd.concat([mode]*len(dest)/len(mode), ignore_index=True)
-    dest = dest.rename(columns={'Numeric Label': 'FAF_Zone'})  # DMM: Renaming for consistency with shapefile
-    return dest
-    
-def processDataByRegion(dest):
-    '''
-    Assigns a net ton (either import or export) to each FAF5 region for imports to or exports from the specified region.
-    
-    NOTE: This function will be updated or replaced to incorporate Micah's update to evaluate emissions
-    
-    Parameters
-    ----------
-    dest (pd.DataFrame): A pandas dataframe containing (currently) all domestic regions from the FAF5_metadata
-
-    Returns
-    -------
-    None
-        
-    NOTE: dms_dest -> index 2; dms_orig -> index 1; tons_2020 -> index 12
-
-    '''
-    tons_exported_to_dict = {}
-    tons_imported_from_dict = {}
-    
-    dest_dict = {}
-    
-    for region in dest.values:
-        region_code = region[0]
-        region_info = region_code
-        tons_exported_to_dict[region_info] = np.zeros(len(dest))
-        tons_imported_from_dict[region_info] = np.zeros(len(dest))
-        dest_dict[region_info] = dest.copy(deep=True)
-    
-    data = readData(["dms_orig", "dms_dest", "tons_2020"])
-
-    # Currently the algorithm works by iterating through the values in the meta data
-    #   follows by iterating over the entirety of the data
-    i = 0
-    for row in tqdm(dest.values):
-        # i: row (faf5 region)
-        for line in data.values:
-            # if tons_in[i] == 0: print(line[0], line[1])
-            
-            # If the cargo is going to the region associated with the given row (i), add it to the exports from the origin (line[0]) to the given row (i)
-            if line[1] == row[0]:
-                origin_region = line[0]
-                tons_exported_to_dict[origin_region][i] += line[2]
-
-            # If the cargo is originating from the region associated with the given row (i), add it to the imports from the given row (i) to the destination (line[1])
-            if line[0] == row[0]:
-                dest_region = line[1]
-                tons_imported_from_dict[dest_region][i] += line[2]
-        i+=1
-        # if i==2: break
-
-    # Fill in the imports and exports to/from each region
-    for region in dest_dict:
-        dest_dict[region]['Total Imported From'] = tons_imported_from_dict[region_info]
-        dest_dict[region]['Total Exported To'] = tons_exported_to_dict[region_info]
-        
-        # Incorec -> should be zfilling 'Numeric Label" instead
-        dest_dict[region]['Numeric Label'] = dest['Numeric Label'].apply(str).apply(lambda x: x.zfill(3))
-        dest_dict[region] = dest_dict[region].rename(columns={'Numeric Label': 'FAF_Zone'})  # DMM: Renaming for consistency with shapefile
-        
-    return dest_dict
-
-
-def filterLCA(item='CO2 (w/ C in VOC & CO)', comm='all'):
     emit = LCAT.df_lca_dict
     lca_filt = pd.DataFrame()
     commodities = []
@@ -344,7 +230,7 @@ def filterLCA(item='CO2 (w/ C in VOC & CO)', comm='all'):
 # =============================================================================
 
 
-def completeOD(mode, commodity):
+def completeOD(mode, commodity, selected_mode=None, selected_commodity=None, selected_origin=None, selected_destination=None):
     '''
     The idea behind this method is that since modifying the origin destination
         pairs by commodity and then mode is the same as going over the entire
@@ -368,40 +254,37 @@ def completeOD(mode, commodity):
 
     '''  
     data = readData(["dms_orig", "dms_dest", "tons_2020", "dms_mode", 'tmiles_2020', 'sctg2'])
-    tot_len = len(data)
-
     emissions_data = filterLCA(comm=None)
-    emissions = np.zeros(tot_len)
-    
-    mode_complete = np.zeros(tot_len)
-    comm_complete = np.zeros(tot_len)
 
-    i = 0    
-    for row in tqdm(data.values):
-        # Finds the keys for mode and commodity
-        commodity_sp = commodity.loc[row[5]][1]
-        mode_sp = mode.loc[row[3]][1].lower()
-        
-        if mode_sp == 'ship':
-            w2 = 'WTH'
-        else:
-            w2 = 'WTW'
-        
-        # print(commodity_sp)
-        modifier = emissions_data.loc[
-            (emissions_data['Modes'] == mode_sp) 
-            & (emissions_data['Commodity'] == commodity_sp)].iloc[-1][w2]
-        
-        emissions[i] = row[4] * modifier
-        mode_complete[i] = mode_sp
-        comm_complete[i] = commodity_sp
-        
-        i += 1
+    # Remove rows with dms_mode > 3
+    if (not selected_origin is None) and (not selected_origin=='all'):
+        data = data.drop(data[data.dms_orig != int(selected_origin)].index)
+    if (not selected_destination is None) and (not selected_destination=='all'):
+        data = data.drop(data[data.dms_dest != int(selected_destination)].index)
+                
+    data = data.drop(data[data.dms_mode > 3].index)
+    data['emissions'] = data['sctg2']
+    data['commodity'] = data['sctg2']
+    data['mode'] = data['sctg2']
 
-    data['emissions'] = emissions
-    data['commodity'] = comm_complete
-    data['mode'] = mode_complete
-    
+    for this_mode in mode['Numeric Label']:
+        for this_commodity in commodity['Numeric Label']:
+            cCommodity_mode = (data['dms_mode'] == this_mode) & (data['sctg2'] == this_commodity)
+
+            commodity_sp = commodity.loc[commodity['Numeric Label'] == this_commodity].values[0][1]
+            data['commodity'][cCommodity_mode] = commodity_sp
+
+            mode_sp = mode.loc[mode['Numeric Label'] == this_mode].values[0][1].lower()
+            if mode_sp == 'water':
+                w2 = 'WTH'
+                mode_sp = 'ship'
+            else:
+                w2 = 'WTW'
+
+            data['mode'][cCommodity_mode] = mode_sp
+            emissions_modifier = emissions_data.loc[(emissions_data['Modes'] == mode_sp) & (emissions_data['Commodity'] == commodity_sp)][w2].values[0]
+            data['emissions'][cCommodity_mode] = data['tmiles_2020'][cCommodity_mode] * emissions_modifier
+            
     return data
 
 
@@ -445,7 +328,7 @@ def filterDataMC(data, mode, commodity):
     '''
     data_filtered = pd.DataFrame()
     data_length = len(mode) * len(commodity)
-    
+        
     data_filtered['Mode'] = pd.concat([mode]*len(commodity), ignore_index=True)
     data_filtered['Commodity'] = pd.concat([commodity]*len(mode), ignore_index=True)
     
@@ -472,39 +355,59 @@ def filterOD(dest, data, direction=True):
     
     tons_in = np.zeros(tot_len)
     tons_out = np.zeros(tot_len)
-    ton_miles = np.zeros(tot_len)
+    tons_tot = np.zeros(tot_len)
     
-    emissions = np.zeros(tot_len)
+    ton_miles_in = np.zeros(tot_len)
+    ton_miles_out = np.zeros(tot_len)
+    ton_miles_tot = np.zeros(tot_len)
+    
+    emissions_in = np.zeros(tot_len)
+    emissions_out = np.zeros(tot_len)
+    emissions_tot = np.zeros(tot_len)
     
     i = 0
     for row in tqdm(dest.values):
         for line in data.values:
-            if row[0] == line[1]:
-                if line[1] == row[0]: # Import
-                    tons_in[i] += line[2]
+            if line[1] == row[0] or line[0] == row[0]:
+                tons_tot[i] += line[2]
+                ton_miles_tot[i] += line[4]
+                emissions_tot[i] += line[-3]
+            if line[1] == row[0]: # Import
+                tons_in[i] += line[2]
+                ton_miles_in[i] += line[4]
+                emissions_in[i] += line[-3]
+#                    if direction:
+#                        ton_miles[i] += line[3]
+#                        emissions[i] += line[-3]
+                
+            if line[0] == row[0]: # Export
+                tons_out[i] += line[2]
+                ton_miles_out[i] += line[4]
+                emissions_out[i] += line[-3]
                     
-                    if direction:
-                        ton_miles[i] += line[3]
-                        emissions[i] += line[-3]
-                    
-                if line[0] == row[0]: # Export
-                    tons_out[i] += line[2]
-                    
-                    if not direction:
-                        ton_miles[i] += line[3]
-                        emissions[i] += line[-3]
+#                    if not direction:
+#                        ton_miles[i] += line[3]
+#                        emissions[i] += line[-3]
             
         i+=1
     
-    data_filtered['Total Import'] = tons_in
-    data_filtered['Total Export'] = tons_out
-    data_filtered['Ton-Miles'] = ton_miles
-    data_filtered['Emissions'] = emissions
+    data_filtered['FAF_Zone'] = dest['Numeric Label'].apply(str).apply(lambda x: x.zfill(3))
+    data_filtered['Tons Import'] = tons_in
+    data_filtered['Tons Export'] = tons_out
+    data_filtered['Tons Total'] = tons_tot
+    
+    data_filtered['Tmiles Import'] = ton_miles_in
+    data_filtered['Tmiles Export'] = ton_miles_out
+    data_filtered['Tmiles Total'] = ton_miles_tot
+
+    data_filtered['E Import'] = emissions_in
+    data_filtered['E Export'] = emissions_out
+    data_filtered['E Total'] = emissions_tot
     
     return data_filtered
 
 
-def mergeShapefile(dest, shapefile_path, by_region = False):
+def mergeShapefile(dest, shapefile_path):
     '''
     Merges the shapefile containing FAF5 region borders with the csv file containing total tonnage
     calculated in processData()
@@ -524,29 +427,32 @@ def mergeShapefile(dest, shapefile_path, by_region = False):
     
     # Select columns of interest
     shapefile_filtered = shapefile.filter(['Short Description', 'FAF_Zone', 'FAF_Zone_D', 'ShapeSTAre', 'ShapeSTLen', 'geometry'], axis=1)
-    
-    if by_region:
-        dest_filtered = dest.filter(['FAF_Zone', 'Total Imported From', 'Total Exported To'], axis=1)
-    else:
-        dest_filtered = dest.filter(['FAF_Zone', 'Total Import', 'Total Export'], axis=1)
+    dest_filtered = dest.filter(['FAF_Zone', 'Tons Import', 'Tons Export', 'Tons Total', 'Tmiles Import', 'Tmiles Export', 'Tmiles Total', 'E Import', 'E Export', 'E Total'], axis=1)
     
     merged_dataframe = shapefile_filtered.merge(dest_filtered, on='FAF_Zone', how='left')
     
     # Add columns with imports and exports per unit area (km^2)
     meters_per_mile = 1609.34
+    merged_dataframe['Tons Imp Den'] = merged_dataframe['Tons Import'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
+    merged_dataframe['Tons Exp Den'] = merged_dataframe['Tons Export'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
+    merged_dataframe['Tons Tot Den'] = merged_dataframe['Tons Total'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
+    merged_dataframe['Tmil Imp Den'] = merged_dataframe['Tmiles Import'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
+    merged_dataframe['Tmil Exp Den'] = merged_dataframe['Tmiles Export'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
+    merged_dataframe['Tmil Tot Den'] = merged_dataframe['Tmiles Total'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
+    merged_dataframe['E Imp Den'] = merged_dataframe['E Import'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
+    merged_dataframe['E Exp Den'] = merged_dataframe['E Export'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
+    merged_dataframe['E Tot Den'] = merged_dataframe['E Total'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
     
-    if by_region:
-        merged_dataframe['Tot Imp Dens'] = merged_dataframe['Total Imported From'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
-        merged_dataframe['Tot Exp Dens'] = merged_dataframe['Total Exported To'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
-    else:
-        merged_dataframe['Tot Imp Dens'] = merged_dataframe['Total Import'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
-        merged_dataframe['Tot Exp Dens'] = merged_dataframe['Total Export'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
-        
-    return merged_dataframe
+    dest_filtered = merged_dataframe.filter(['FAF_Zone', 'Tons Import', 'Tons Export', 'Tons Total', 'Tmiles Import', 'Tmiles Export', 'Tmiles Total', 'E Import', 'E Export', 'E Total', 'Tons Imp Den', 'Tons Exp Den', 'Tons Tot Den', 'Tmil Imp Den', 'Tmil Exp Den', 'Tmil Tot Den', 'E Imp Den', 'E Exp Den', 'E Tot Den'], axis=1)
+    
+    return merged_dataframe, dest_filtered
 
 
 def saveFile(file, name):
-    savePath = f'{top_dir}/data/'
+    savePath = f'{top_dir}/data/Point2Point_outputs/'
+    if not os.path.exists(savePath):
+        os.makedirs(savePath)
+        
     file.to_csv(savePath + f'{name}.csv', index=False)
     print(f'file has been saved as a csv')
     
@@ -575,15 +481,67 @@ def saveShapefile(file, name):
         os.makedirs(dir)
     file.to_file(name)
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-m', '--mode', default='truck')
+parser.add_argument('-c', '--commodity', default='all')
+parser.add_argument('-o', '--origin', default='all')
+parser.add_argument('-d', '--dest', default='all')
 
 def main ():
+    args = parser.parse_args()
+
     # filterLCA()
     
     # Load FAF5 Regional Metadata
-    dest, mode, comms = readMeta()
-    dataOD = completeOD(mode, comms)
+    dest, mode, comm = readMeta()
+    #print(dest, mode, comms)
     
-    saveFile(dataOD, 'completeOD')
+    dataOD = completeOD(mode, comm, selected_origin=args.origin, selected_destination=args.dest)#, selected_modes, selected_commodities, origin_region=11, dest_region='all')#, origin_region='all', dest_region='all')
+    
+    # Apply selections
+    cBaseline = (dataOD['dms_orig'] > -9999)
+    if args.mode == 'all':
+        cMode = True
+    else:
+        cMode = (dataOD['mode'] == args.mode)
+    
+    if args.commodity == 'all':
+        cCommodity = True
+    else:
+        cCommodity = (dataOD['commodity'] == args.commodity)
+
+    if args.origin == 'all':
+        cOrigin = True
+    else:
+        cOrigin = (dataOD['dms_orig'] == int(args.origin))
+        
+    if args.dest == 'all':
+        cDest = True
+    else:
+        cDest = (dataOD['dms_dest'] == int(args.dest))
+    
+    dataOD_selected = dataOD[cBaseline&cMode&cCommodity&cOrigin&cDest]
+    
+    # Sum emissions and ton-miles over all trips
+    data_filtered = filterOD(dest, dataOD_selected, direction=True)
+        
+    commodity_save = args.commodity.replace(' ', '_').replace('/', '_')
+
+#    with pd.option_context('display.max_rows', None,):
+#        print(data_filtered)
+
+
+    # print(comms.loc[comms['Numeric Label'] == 1].values[0][1])
+    # print(mode.loc[mode['Numeric Label'] == 1].values[0][1])
+    # print(mode[mode.Numeric_Label=='1'].Description.item())
+    # print(dataOD)
+    
+    #print(mode.loc[mode['Description']=='Truck'])
+    #datfil1 = filterDataMC(dataOD, mode, comms)
+    #print(datafil1)
+    
+    #saveFile(dataOD, 'completeOD')
+
     
     # dest_with_tonnage = emissions_OD(dest, mode)
     # saveFile(dest_with_tonnage, 'total_tons_short')
@@ -594,14 +552,9 @@ def main ():
     #dest['Total Import'] = dest['Total Import'].astype('float')
     #dest['Total Export'] = dest['Total Export'].astype('float')
 
-#    merged_dataframe = mergeShapefile(dest_with_tonnage, f'{top_dir}/data/FAF5_regions/Freight_Analysis_Framework_(FAF5)_Regions.shp')
-#    saveShapefile(merged_dataframe, f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp')
-
-#    # Evaluate imports and exports to/from each individual region
-#    dest_with_tonnage_by_region_dict = processDataByRegion(dest)
-#
-#    for region in dest_with_tonnage_by_region_dict:
-#        merged_dataframe = mergeShapefile(dest_with_tonnage_by_region_dict[region], f'{top_dir}/data/FAF5_regions/Freight_Analysis_Framework_(FAF5)_Regions.shp', by_region=True)
-#        saveShapefile(merged_dataframe, f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage_{region}.shp')
-        
+    merged_dataframe, data_filtered = mergeShapefile(data_filtered, f'{top_dir}/data/FAF5_regions/Freight_Analysis_Framework_(FAF5)_Regions.shp')
+    saveFile(data_filtered, f'mode_{args.mode}_commodity_{commodity_save}_origin_{args.origin}_dest_{args.dest}')
+    saveShapefile(merged_dataframe, f'{top_dir}/data/Point2Point_outputs/mode_{args.mode}_commodity_{commodity_save}_origin_{args.origin}_dest_{args.dest}.shp')
+    
+    
 main()
