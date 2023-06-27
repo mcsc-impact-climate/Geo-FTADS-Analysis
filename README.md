@@ -161,6 +161,22 @@ unzip tl_2019_us_primaryroads.zip -d tl_2019_us_primaryroads
 rm tl_2019_us_primaryroads.zip
 ```
 
+### Bay area county boundaries
+```bash
+# from https://geodata.lib.berkeley.edu/catalog/ark28722-s7hs4j
+wget https://spatial.lib.berkeley.edu/public/ark28722-s7hs4j/data.zip
+unzip data.zip -d bay_area_counties
+rm data.zip
+```
+
+### Counties in Utah
+```bash
+# from https://gis.utah.gov/data/boundaries/citycountystate/
+wget https://opendata.arcgis.com/datasets/90431cac2f9f49f4bcf1505419583753_0.zip
+unzip 90431cac2f9f49f4bcf1505419583753_0.zip -d utah_counties
+rm 90431cac2f9f49f4bcf1505419583753_0.zip
+```
+
 You can now cd back out of the data directory
 ```bash
 cd ..
