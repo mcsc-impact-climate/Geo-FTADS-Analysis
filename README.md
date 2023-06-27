@@ -153,6 +153,14 @@ wget "https://www.eia.gov/electricity/gridmonitor/sixMonthFiles/EIA930_BALANCE_2
 wget https://www.eia.gov/electricity/data/state/existcapacity_annual.xlsx
 ```
 
+### U.S. Primary Roads National Shapefile
+```bash
+# from https://catalog.data.gov/dataset/tiger-line-shapefile-2019-nation-u-s-primary-roads-national-shapefile
+wget https://www2.census.gov/geo/tiger/TIGER2019/PRIMARYROADS/tl_2019_us_primaryroads.zip
+unzip tl_2019_us_primaryroads.zip -d tl_2019_us_primaryroads
+rm tl_2019_us_primaryroads.zip
+```
+
 You can now cd back out of the data directory
 ```bash
 cd ..
