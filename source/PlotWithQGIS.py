@@ -132,7 +132,7 @@ def style_highway_links(links):
     # Apply the graduated symbol renderer defined above to the network links
     links.setRenderer(renderer)
 
-def applyGradient(regions, target_field, colormap='Blues'):
+def applyGradient(regions, target_field, colormap='Reds'):
     '''
     Applies a color gradient to the FAF5 regions according to the specified target field
 
@@ -152,7 +152,7 @@ def applyGradient(regions, target_field, colormap='Blues'):
     format.setPrecision(2)
     format.setTrimTrailingZeroes(True)
     color_ramp = QgsStyle().defaultStyle().colorRamp(colormap)
-    ramp_num_steps = 10  # Number of bins to use for the color gradient
+    ramp_num_steps = 5  # Number of bins to use for the color gradient
 
     renderer = QgsGraduatedSymbolRenderer(target_field)
     renderer.setClassAttribute(target_field)
@@ -261,13 +261,19 @@ def main():
     add_basemap('type=xyz&zmin=0&zmax=20&url=https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', 'ESRI Gray')
 
     # Plot and save total domestic imports
-#    faf5_regions_import = readShapefile(f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp', 'Imports (ton / sq mile)')
-#    applyGradient(faf5_regions_import, 'Tot Imp De')
-#    #saveMap([regions], 'Total Domestic Imports', 'Imports [tons/year]', 'total_domestic_imports', f'{top_dir}/layouts/total_domestic_imports.pdf')
-#
-#    # Plot and save total domestic exports
-#    faf5_regions_export = readShapefile(f'{top_dir}/data/FAF5_regions_with_tonnage/FAF5_regions_with_tonnage.shp', 'Exports (ton / sq mile)')
-#    applyGradient(faf5_regions_export, 'Tot Exp De')
+    
+    faf5_regions_import = readShapefile(f'{top_dir}/data/Point2Point_outputs/mode_truck_commodity_all_origin_all_dest_all.shp', 'Imports (ton-miles / sq mile)')
+    applyGradient(faf5_regions_import, 'Tmil Imp D')
+    #saveMap([regions], 'Total Domestic Imports', 'Imports [ton-miles/year]', 'total_domestic_imports', f'{top_dir}/layouts/total_domestic_imports.pdf')
+
+    # Plot and save total domestic exports
+    faf5_regions_export = readShapefile(f'{top_dir}/data/Point2Point_outputs/mode_truck_commodity_all_origin_all_dest_all.shp', 'Exports (ton-miles / sq mile)')
+    applyGradient(faf5_regions_export, 'Tmil Exp D')
+    #saveMap([regions], 'Total Domestic Exports', 'Exports [tons/year]', 'total_domestic_exports', f'{top_dir}/layouts/total_domestic_exports.pdf')
+    
+    # Plot and save total domestic exports+imports
+    faf5_regions_total = readShapefile(f'{top_dir}/data/Point2Point_outputs/mode_truck_commodity_all_origin_all_dest_all.shp', 'Imports+Exports (ton-miles / sq mile)')
+    applyGradient(faf5_regions_total, 'Tmil Tot D')
     #saveMap([regions], 'Total Domestic Exports', 'Exports [tons/year]', 'total_domestic_exports', f'{top_dir}/layouts/total_domestic_exports.pdf')
     
     # Add grid emission intensity
