@@ -1,0 +1,78 @@
+Kingsland, GA 5,000 Installed/Operational
+Ontario, CA 5,000 Planned/Under Construction
+Mountain View, CA 4,000 Installed/Operational
+DeBary, FL 2,000 Planned/Under Construction
+Durham, NC 2,000 Planned/Under Construction
+Oak Harbor, OH 2,000 Planned/Under Construction
+Palm Springs, CA 2,000 Installed/Operational
+Southwest WA 1,500 Installed/Operational
+Arvada, CO 1,250 Installed/Commissioning
+Oswego, NY 1,250 Installed/Operational
+CA 1,250 Planned/Under Construction
+Borrego Springs, CA 1,000 Planned/Under Construction
+Champaign, Urbana, IL 1,000 Installed/Operational
+Denver, CO 1,000 Installed/Operational
+Kansas City, MO 1,000 Installed/Operational
+Moses Lake, WA 1,000 Planned/Under Construction
+South Harrison, NC 1,000 Planned/Under Construction
+Tuscaloosa, AL 1,000 Installed/Operational
+CA 900 Planned/Under Construction
+Orlando, FL 500 Planned/Under Construction
+Prairie Island, MN 500 Planned/Under Construction
+Sonoma, CA 500 Installed
+CA 250 Installed/Commissioning
+Idaho Falls, ID 250 Installed/Operational
+Red Wing, MN 250 Planned/Under Construction
+Austin, TX 180 Installed
+Austin, TX 180 Installed
+Boston, MA 180 Planned/Under Construction
+CA 180 Installed
+CA 180 Installed
+CA 180 Installed
+CA 180 Installed
+CA 180 Installed
+CA 180 Installed
+Columbus, IN 180 Installed
+Columbus, OH 180 Installed
+Costa Mesa, CA 180 Installed
+Emeryville, CA 180 Installed
+GA 180 Installed
+GA 180 Planned/Under Construction
+HI 180 Installed
+HI 180 Installed
+HI 180 Installed
+Leesport, PA 180 Installed
+Lexington, MA 180 Installed
+MA 180 Planned/Under Construction
+Mahwah, NJ 180 Installed
+NJ 180 Installed
+Oakland, CA 180 Installed
+San Francisco, CA 180 Installed
+San Francisco, CA 180 Installed
+San Francisco, CA 180 Installed
+San Jose, CA 180 Installed
+San Jose, CA 180 Installed
+Santa Clara, CA 180 Installed
+SC 180 Planned/Under Construction
+Tempe, AZ 180 Installed
+WA 180 Planned/Under Construction
+Braintree, MA 120 Installed
+CA 120 Planned/Under Construction
+CA 120 Installed
+CA 120 Installed
+Canandaigua, NY 120 Installed
+Hertford Cty, NC 120 Installed
+KY 120 Installed
+KY 120 Installed
+Lincoln, RI 120 Installed
+MA 120 Installed
+NC 120 Installed
+NY 120 Installed
+NY 120 Installed
+NY 120 Planned/Under Construction
+OH 120 Installed
+PA 120 Installed
+San Carlos, CA 120 Installed
+San Carlos, CA 120 Installed
+Sugar Land, TX 120 Installed
+UT 120 Planned/Under Construction
