@@ -11,14 +11,11 @@ Users can interact with QGIS either through the user interface ([link to user ma
 ## Pre-requisites
 * An installation of QGIS: [link to downloads for Mac, Windows and Linux](https://qgis.org/en/site/forusers/download.html)
 * python3
-* Access to the [sesame-core](https://github.mit.edu/sesame/sesame-core) repository
 
 ## Setup
 
-Clone this repo, including submodules. **Note:** You will need access to the [sesame-core](https://github.mit.edu/sesame/sesame-core) repository in order to clone it as a submodule. 
-
 ```bash
-git clone --recurse-submodules git@github.com:cubicalknight/FAF5-Analysis.git
+git clone git@github.com:cubicalknight/FAF5-Analysis.git
 ```
 
 Install python requirements
@@ -203,12 +200,7 @@ To run a script in QGIS:
 The following scripts should be run outside of QGIS:
 * [Point2PointFAF.py](./source/Point2PointFAF.py)
 
-Scripts run outside of QGIS should be executed directly with the python installation that was used to install the requirements in `requirements.txt`(./requirements.txt). For example:
-
-```bash
-cd source
-python Point2PointFAF.py
-```
+Scripts run outside of QGIS should be executed directly with the python installation that was used to install the requirements in `requirements.txt`(./requirements.txt) (examples below).
 
 ## Processing highway assignments
 
