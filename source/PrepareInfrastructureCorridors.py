@@ -245,14 +245,6 @@ def main():
     saveShapefile(dict_infrastructure['BayArea'], f'{top_dir}/data/hd_zev_corridors/bayarea.shp')
     saveShapefile(dict_infrastructure['SaltLake'], f'{top_dir}/data/hd_zev_corridors/saltlake.shp')
     saveShapefile(dict_infrastructure['Northeast'], f'{top_dir}/data/hd_zev_corridors/northeast.shp')
-    
-#    # Merge the highway flow assignments in with the shapefile containing the highway links
-#    merged_dataframe = mergeShapefile(df_highway_assignments, f'{top_dir}/data/FAF5_network_links/Freight_Analysis_Framework_(FAF5)_Network_Links.shp')
-#
-#    #print(f'Merging took {time.time() - start_time} seconds')
-#
-#    # Save the merged shapefile
-#    saveShapefile(merged_dataframe, f'{top_dir}/data/highway_assignment_links/highway_assignment_links.shp')
         
 main()
 

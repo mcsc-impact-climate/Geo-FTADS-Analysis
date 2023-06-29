@@ -10,9 +10,9 @@ Purpose: Quick script to convert electrolyzer data copied from https://www.hydro
 import re
 
 f_txt = open('electrolyzers.txt', 'r')
-f_csv = open('electrolyzers.csv', 'w')
+f_csv = open('electrolyzers_prelim.csv', 'w')
 
-f_csv.write('Location, Power (kW), Status\n')
+f_csv.write('Location,Power (kW),Status\n')
 
 for line in f_txt:
     # Remove commas
