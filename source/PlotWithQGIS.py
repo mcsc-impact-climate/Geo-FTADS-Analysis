@@ -132,7 +132,7 @@ def style_highway_links(links):
     # Apply the graduated symbol renderer defined above to the network links
     links.setRenderer(renderer)
 
-def applyGradient(regions, target_field, colormap='Reds'):
+def applyColorGradient(regions, target_field, colormap='Reds'):
     '''
     Applies a color gradient to the FAF5 regions according to the specified target field
 
@@ -162,6 +162,34 @@ def applyGradient(regions, target_field, colormap='Reds'):
     renderer.updateColorRamp(color_ramp)
     regions.setRenderer(renderer)
     regions.triggerRepaint()
+    
+def applySizeGradient(list_of_layers, target_field, marker_shape = 'circle')
+
+    # Specify the range of possible weighting factors as the max and min range of the target field
+    ramp_max = links.maximumValue(links.fields().indexFromName(target_field))
+    ramp_min = links.minimumValue(links.fields().indexFromName(target_field))
+
+    # Classify the tonnages into 5 bins
+    ramp_num_steps = 5
+
+    # Initialize a graduated renderer object specify how the network link symbol properties will vary according to the numerical target field
+    renderer = QgsGraduatedSymbolRenderer(target_field)
+    renderer.setClassAttribute(target_field)
+
+    # Specify the network link symbol to be a black line in all cases
+    symbol = QgsSymbol.defaultSymbol(links.geometryType())
+    symbol.setColor(QtGui.QColor('#000000'))
+    renderer.setSourceSymbol(symbol)
+
+    # Specify the binning method (jenks), number of bins, and range of line widths for the graduated renderer
+    renderer.setClassificationMethod(QgsClassificationJenks())
+    renderer.updateClasses(links, ramp_num_steps)
+    renderer.setSymbolSizes(0.1, 2)
+    #renderer.updateColorRamp()
+
+    # Apply the graduated symbol renderer defined above to the network links
+    links.setRenderer(renderer)
+    
 
 def saveMap(layers, layout_title, legend_title, layout_name, file_name):
     '''
@@ -262,47 +290,62 @@ def main():
 
     # Plot and save total domestic imports
     
-    faf5_regions_import = readShapefile(f'{top_dir}/data/Point2Point_outputs/mode_truck_commodity_all_origin_all_dest_all.shp', 'Imports (ton-miles / sq mile)')
-    applyGradient(faf5_regions_import, 'Tmil Imp D')
-    #saveMap([regions], 'Total Domestic Imports', 'Imports [ton-miles/year]', 'total_domestic_imports', f'{top_dir}/layouts/total_domestic_imports.pdf')
-
-    # Plot and save total domestic exports
-    faf5_regions_export = readShapefile(f'{top_dir}/data/Point2Point_outputs/mode_truck_commodity_all_origin_all_dest_all.shp', 'Exports (ton-miles / sq mile)')
-    applyGradient(faf5_regions_export, 'Tmil Exp D')
-    #saveMap([regions], 'Total Domestic Exports', 'Exports [tons/year]', 'total_domestic_exports', f'{top_dir}/layouts/total_domestic_exports.pdf')
+#    faf5_regions_import = readShapefile(f'{top_dir}/data/Point2Point_outputs/mode_truck_commodity_all_origin_all_dest_all.shp', 'Imports (ton-miles / sq mile)')
+#    applyColorGradient(faf5_regions_import, 'Tmil Imp D')
+#    #saveMap([regions], 'Total Domestic Imports', 'Imports [ton-miles/year]', 'total_domestic_imports', f'{top_dir}/layouts/total_domestic_imports.pdf')
+#
+#    # Plot and save total domestic exports
+#    faf5_regions_export = readShapefile(f'{top_dir}/data/Point2Point_outputs/mode_truck_commodity_all_origin_all_dest_all.shp', 'Exports (ton-miles / sq mile)')
+#    applyColorGradient(faf5_regions_export, 'Tmil Exp D')
+#    #saveMap([regions], 'Total Domestic Exports', 'Exports [tons/year]', 'total_domestic_exports', f'{top_dir}/layouts/total_domestic_exports.pdf')
+#
+#    # Plot and save total domestic exports+imports
+#    faf5_regions_total = readShapefile(f'{top_dir}/data/Point2Point_outputs/mode_truck_commodity_all_origin_all_dest_all.shp', 'Imports+Exports (ton-miles / sq mile)')
+#    applyColorGradient(faf5_regions_total, 'Tmil Tot D')
+#    #saveMap([regions], 'Total Domestic Exports', 'Exports [tons/year]', 'total_domestic_exports', f'{top_dir}/layouts/total_domestic_exports.pdf')
+#
+#    # Add grid emission intensity
+#    egrids_regions = readShapefile(f'{top_dir}/data/egrid2020_subregions_merged/egrid2020_subregions_merged.shp', 'CO2e intensity of power grid (lb/MWh)')
+#    applyColorGradient(egrids_regions, 'SRC2ERTA', colormap='Reds')
+#
+#    # Add commercial electricity prices by state
+#    elec_prices_by_state = readShapefile(f'{top_dir}/data/electricity_rates_merged/electricity_rates_by_state_merged.shp', 'Commercial Elec Price by State (cents / kWh)')
+#    applyColorGradient(elec_prices_by_state, 'Cents_kWh', colormap='Reds')
+#
+##    # Add commercial electricity prices by zip code
+##    elec_prices_by_zipcode = readShapefile(f'{top_dir}/data/electricity_rates_merged/electricity_rates_by_zipcode_merged.shp', 'Commercial Elec Price by Zipcode (cents / kWh)')
+##    applyColorGradient(elec_prices_by_zipcode, 'comm_rate', colormap='Reds')
+#
+#    # Add maximum demand charges
+#    demand_charges_by_utility = readShapefile(f'{top_dir}/data/electricity_rates_merged/demand_charges_merged.shp', 'Maximum Demand Charge by Utility ($/kW)')
+#    applyColorGradient(demand_charges_by_utility, 'MaxDemCh', colormap='Reds')
+#
+#    # Add the highway assignments
+#    links = load_highway_links(f'{top_dir}/data/highway_assignment_links/highway_assignment_links.shp')
+#
+#    # Style highway links
+#    style_highway_links(links)
+#
+#    # Add alternative fueling stations for highway corridors
+#    dcfc_stations = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_elec/US_elec.shp', 'DCFC Corridor Stations', color='orange')
+#    hydrogen_stations = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_hy/US_hy.shp', 'Hydrogen Corridor Stations', color='purple')
+#    hydrogen_lng = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_lng/US_lng.shp', 'LNG Corridor Stations', color='green')
+#    hydrogen_cng = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_cng/US_cng.shp', 'CNG Corridor Stations', color='pink')
+#    hydrogen_lpg = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_lpg/US_lpg.shp', 'LPG Corridor Stations', color='cyan')
+#
+#    # Add proposed infrastructure corridors for heavy duty trucking
+#    eastcoast_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/eastcoast.shp', 'Funded Corridor Project: East Coast Commercial ZEV (CALSTART)', color='orange')
+#    midwest_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/midwest.shp', 'Funded Corridor Project: I-80 Midwest Corridor (Cummins Inc)', color='purple')
+#    h2la_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/h2la.shp', 'Funded Corridor Project: Houston to Los Angeles Hydrogen Corridor Project (GTI Energy)', color='green')
+#    la_i710_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/h2la.shp', 'Funded Corridor Project: Charging Network around the I-710 Corridor (Los Angeles Cleantech Incubator)', color='pink')
+#    northeast_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/northeast.shp', 'Funded Corridor Project: Northeast Electric Highways Study (National Grid)', color='cyan')
+#    bayarea_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/bayarea.shp', 'Funded Corridor Project: San Francisco and Bay Area Regional Medium-and Heavy-Duty Electrification Roadmap (Rocky Mountain Institute)', color='yellow')
+#    saltlake_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/saltlake.shp', 'Funded Corridor Project: Multi-Modal Corridor Electrification Plan - Greater Salt Lake City Region (Utah State University)', color='red')
     
-    # Plot and save total domestic exports+imports
-    faf5_regions_total = readShapefile(f'{top_dir}/data/Point2Point_outputs/mode_truck_commodity_all_origin_all_dest_all.shp', 'Imports+Exports (ton-miles / sq mile)')
-    applyGradient(faf5_regions_total, 'Tmil Tot D')
-    #saveMap([regions], 'Total Domestic Exports', 'Exports [tons/year]', 'total_domestic_exports', f'{top_dir}/layouts/total_domestic_exports.pdf')
-    
-    # Add grid emission intensity
-    egrids_regions = readShapefile(f'{top_dir}/data/egrid2020_subregions_merged/egrid2020_subregions_merged.shp', 'CO2e intensity of power grid (lb/MWh)')
-    applyGradient(egrids_regions, 'SRC2ERTA', colormap='Reds')
-    
-    # Add commercial electricity prices by state
-    elec_prices_by_state = readShapefile(f'{top_dir}/data/electricity_rates_merged/electricity_rates_by_state_merged.shp', 'Commercial Elec Price by State (cents / kWh)')
-    applyGradient(elec_prices_by_state, 'Cents_kWh', colormap='Reds')
-    
-#    # Add commercial electricity prices by zip code
-#    elec_prices_by_zipcode = readShapefile(f'{top_dir}/data/electricity_rates_merged/electricity_rates_by_zipcode_merged.shp', 'Commercial Elec Price by Zipcode (cents / kWh)')
-#    applyGradient(elec_prices_by_zipcode, 'comm_rate', colormap='Reds')
-    
-    # Add maximum demand charges
-    demand_charges_by_utility = readShapefile(f'{top_dir}/data/electricity_rates_merged/demand_charges_merged.shp', 'Maximum Demand Charge by Utility ($/kW)')
-    applyGradient(demand_charges_by_utility, 'MaxDemCh', colormap='Reds')
-    
-    # Add the highway assignments
-    links = load_highway_links(f'{top_dir}/data/highway_assignment_links/highway_assignment_links.shp')
-    
-    # Style highway links
-    style_highway_links(links)
-    
-    # Add alternative fueling stations for highway corridors
-    dcfc_stations = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_elec/US_elec.shp', 'DCFC Corridor Stations', color='orange')
-    hydrogen_stations = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_hy/US_hy.shp', 'Hydrogen Corridor Stations', color='purple')
-    hydrogen_lng = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_lng/US_lng.shp', 'LNG Corridor Stations', color='green')
-    hydrogen_cng = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_cng/US_cng.shp', 'CNG Corridor Stations', color='pink')
-    hydrogen_lpg = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_lpg/US_lpg.shp', 'LPG Corridor Stations', color='cyan')
+    # Add hydrogen hubs
+    electrolyzer_planned = readShapefile(f'{top_dir}/data/hydrogen_hubs/shapefiles/electrolyzer_planned_under_construction.shp', 'Hydrogen Electrolyzer Facility Capacities [Planned or Under Construction] (kW)', color='orange')
+    electrolyzer_installed = readShapefile(f'{top_dir}/data/hydrogen_hubs/shapefiles/electrolyzer_installed.shp', 'Hydrogen Electrolyzer Facility Capacities [Installed] (kW)', color='yellow')
+    electrolyzer_operational = readShapefile(f'{top_dir}/data/hydrogen_hubs/shapefiles/electrolyzer_installed.shp', 'Hydrogen Electrolyzer Facility Capacities [Operational] (kW)', color='green')
+    refinery_SMR = readShapefile(f'{top_dir}/data/hydrogen_hubs/shapefiles/refinery.shp', 'Refinery Hydrogen Production Capacity (SMR or Byproduct) (million standar cubic feet per day)', color='purple')
 
 main()
