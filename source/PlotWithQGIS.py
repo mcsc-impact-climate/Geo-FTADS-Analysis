@@ -163,32 +163,43 @@ def applyColorGradient(regions, target_field, colormap='Reds'):
     regions.setRenderer(renderer)
     regions.triggerRepaint()
     
-def applySizeGradient(list_of_layers, target_field, marker_shape = 'circle')
+def applySizeGradient(list_of_layers, list_of_colors, target_field, marker_shape = 'circle'):
 
     # Specify the range of possible weighting factors as the max and min range of the target field
-    ramp_max = links.maximumValue(links.fields().indexFromName(target_field))
-    ramp_min = links.minimumValue(links.fields().indexFromName(target_field))
-
+    ramp_max=-9e9
+    ramp_min=9e9
+    
+    for layer in list_of_layers:
+        this_ramp_max = layer.maximumValue(layer.fields().indexFromName(target_field))
+        this_ramp_min = layer.minimumValue(layer.fields().indexFromName(target_field))
+        if this_ramp_max > ramp_max:
+            ramp_max = this_ramp_max
+        if this_ramp_min < ramp_min:
+            ramp_min = this_ramp_min
+            
     # Classify the tonnages into 5 bins
-    ramp_num_steps = 5
+    ramp_num_steps = 4
+        
+    i_layer = 0
+    for layer in list_of_layers:
 
-    # Initialize a graduated renderer object specify how the network link symbol properties will vary according to the numerical target field
-    renderer = QgsGraduatedSymbolRenderer(target_field)
-    renderer.setClassAttribute(target_field)
+        # Initialize a graduated renderer object specify how the network link symbol properties will vary according to the numerical target field
+        renderer = QgsGraduatedSymbolRenderer(target_field)
+        renderer.setClassAttribute(target_field)
 
-    # Specify the network link symbol to be a black line in all cases
-    symbol = QgsSymbol.defaultSymbol(links.geometryType())
-    symbol.setColor(QtGui.QColor('#000000'))
-    renderer.setSourceSymbol(symbol)
+        # Specify the network link symbol to be a black line in all cases
+        symbol = QgsMarkerSymbol.createSimple({'name': marker_shape, 'color': list_of_colors[i_layer]})
+        #symbol.setShape(QgsSimpleMarkerSymbolLayerBase.Star)
+        renderer.setSourceSymbol(symbol)
+        #renderer.symbol().symbolLayer(0).setShape(QgsSimpleMarkerSymbolLayerBase.Star)
 
-    # Specify the binning method (jenks), number of bins, and range of line widths for the graduated renderer
-    renderer.setClassificationMethod(QgsClassificationJenks())
-    renderer.updateClasses(links, ramp_num_steps)
-    renderer.setSymbolSizes(0.1, 2)
-    #renderer.updateColorRamp()
-
-    # Apply the graduated symbol renderer defined above to the network links
-    links.setRenderer(renderer)
+        # Specify the binning method (jenks), number of bins, and range of line widths for the graduated renderer
+        renderer.setClassificationMethod(QgsClassificationJenks())
+    
+        renderer.updateClasses(layer, ramp_num_steps)
+        renderer.setSymbolSizes(1, 8)
+        layer.setRenderer(renderer)
+        i_layer += 1
     
 
 def saveMap(layers, layout_title, legend_title, layout_name, file_name):
@@ -345,7 +356,9 @@ def main():
     # Add hydrogen hubs
     electrolyzer_planned = readShapefile(f'{top_dir}/data/hydrogen_hubs/shapefiles/electrolyzer_planned_under_construction.shp', 'Hydrogen Electrolyzer Facility Capacities [Planned or Under Construction] (kW)', color='orange')
     electrolyzer_installed = readShapefile(f'{top_dir}/data/hydrogen_hubs/shapefiles/electrolyzer_installed.shp', 'Hydrogen Electrolyzer Facility Capacities [Installed] (kW)', color='yellow')
-    electrolyzer_operational = readShapefile(f'{top_dir}/data/hydrogen_hubs/shapefiles/electrolyzer_installed.shp', 'Hydrogen Electrolyzer Facility Capacities [Operational] (kW)', color='green')
-    refinery_SMR = readShapefile(f'{top_dir}/data/hydrogen_hubs/shapefiles/refinery.shp', 'Refinery Hydrogen Production Capacity (SMR or Byproduct) (million standar cubic feet per day)', color='purple')
-
+    electrolyzer_operational = readShapefile(f'{top_dir}/data/hydrogen_hubs/shapefiles/electrolyzer_operational.shp', 'Hydrogen Electrolyzer Facility Capacities [Operational] (kW)', color='green')
+    
+    applySizeGradient([electrolyzer_planned, electrolyzer_installed, electrolyzer_operational], ['orange', 'yellow', 'green'], 'Power_kW', 'circle')
+    
+    #refinery_SMR = readShapefile(f'{top_dir}/data/hydrogen_hubs/shapefiles/refinery.shp', 'Refinery Hydrogen Production Capacity (SMR or Byproduct) (million standar cubic feet per day)', color='purple')
 main()
