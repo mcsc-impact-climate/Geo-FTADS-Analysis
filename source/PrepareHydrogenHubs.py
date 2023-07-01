@@ -30,6 +30,7 @@ def prepare_electrolyzer_hubs(top_dir):
     -------
     df_geodata (pd.DataFrame): Geodataframe containing the electrolyzer capacities and geospatial data
     '''
+    
     df_data = pd.read_csv(f'{top_dir}/data/hydrogen_hubs/electrolyzers.csv')
     
     df_geodata = gpd.GeoDataFrame(df_data, geometry=gpd.points_from_xy(df_data.Longitude, df_data.Latitude), crs="EPSG:4326")
@@ -64,6 +65,7 @@ def prepare_refinery_hubs(top_dir):
     -------
     df_geodata (pd.DataFrame): Geodataframe containing the hydrogen production capacities and geospatial data of the refineries
     '''
+    
     df_data = pd.read_csv(f'{top_dir}/data/hydrogen_hubs/Hydrogen_Production_Facilities_Capacity.csv')
     
     df_geodata = gpd.GeoDataFrame(df_data, geometry=gpd.points_from_xy(df_data.Longitude, df_data.Latitude), crs="EPSG:4326")
