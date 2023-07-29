@@ -30,7 +30,7 @@ def getTopDir():
     return top_dir
     
 
-def readShapefile(path, name, color='white'):
+def readShapefile(path, name, color='white', opacity=1):
     '''
     Reads in a shapefile
 
@@ -57,6 +57,9 @@ def readShapefile(path, name, color='white'):
         QgsProject.instance().addMapLayer(layer)
         
     layer.renderer().symbol().setColor(QColor(color))
+    
+    # Set opacity
+    layer.setOpacity(opacity)
 
     # Apply a filter for the moment to remove Hawaii and Alaska
 #    if 'FAF5' in path:
@@ -377,5 +380,8 @@ def main():
 #
 #    # Get principal ports
 #    principal_ports = readShapefile(f'{top_dir}/data/Principal_Ports/Principal_Port.shp', 'Principal ports', color='blue')
+
+    # Read in the circle for the default identification of facilities within a 600 mile radius
+    facilities_circle = readShapefile(f'{top_dir}/data/facilities_in_circle_default/circle.shp', 'Default circle for facilities in radius', color='orange', opacity=0.25)
     
 main()
