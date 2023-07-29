@@ -191,19 +191,19 @@ def applySizeGradient(list_of_layers, list_of_colors, target_field, marker_shape
     for layer in list_of_layers:
 
         # Initialize a graduated renderer object specify how the network link symbol properties will vary according to the numerical target field
-        renderer = QgsGraduatedSymbolRenderer(target_field)
+        intervals = QgsClassificationEqualInterval().classes(ramp_min, ramp_max, ramp_num_steps)
+        render_range_list = [QgsRendererRange(i, QgsMarkerSymbol.createSimple({'name': marker_shape, 'color': list_of_colors[i_layer]})) for i in intervals]
+        renderer = QgsGraduatedSymbolRenderer(target_field, render_range_list)
+        #renderer = QgsGraduatedSymbolRenderer(target_field)
         renderer.setClassAttribute(target_field)
 
         # Specify the network link symbol to be a black line in all cases
         symbol = QgsMarkerSymbol.createSimple({'name': marker_shape, 'color': list_of_colors[i_layer]})
-        #symbol.setShape(QgsSimpleMarkerSymbolLayerBase.Star)
         renderer.setSourceSymbol(symbol)
-        #renderer.symbol().symbolLayer(0).setShape(QgsSimpleMarkerSymbolLayerBase.Star)
 
         # Specify the binning method (jenks), number of bins, and range of line widths for the graduated renderer
-        renderer.setClassificationMethod(QgsClassificationJenks())
-    
-        renderer.updateClasses(layer, ramp_num_steps)
+        #renderer.setClassificationMethod(QgsClassificationJenks())
+        #renderer.updateClasses(layer, ramp_num_steps)
         renderer.setSymbolSizes(2, 8)
         layer.setRenderer(renderer)
         i_layer += 1
@@ -382,6 +382,21 @@ def main():
 #    principal_ports = readShapefile(f'{top_dir}/data/Principal_Ports/Principal_Port.shp', 'Principal ports', color='blue')
 
     # Read in the circle for the default identification of facilities within a 600 mile radius
-    facilities_circle = readShapefile(f'{top_dir}/data/facilities_in_circle_default/shapefiles/circle.shp', 'Default circle for facilities in radius', color='orange', opacity=0.25)
+    circle_name = 'default'
+    facilities_circle = readShapefile(f'{top_dir}/data/facilities_in_circle_{circle_name}/shapefiles/circle.shp', 'Default circle for facilities in radius', color='orange', opacity=0.25)
+    
+    # Read in all truck stops and hydrogen hubs within the circle
+    truck_stops_in_circle = readShapefile(f'{top_dir}/data/facilities_in_circle_{circle_name}/shapefiles/Truck_Stop_Parking.shp', 'Truck stops in Circle', color='red')
+
+    # Add hydrogen hubs
+    electrolyzer_planned_in_circle = readShapefile(f'{top_dir}/data/facilities_in_circle_{circle_name}/shapefiles/electrolyzer_planned_under_construction.shp', 'Hydrogen Electrolyzer Facility Capacities in Circle [Planned or Under Construction] (kW)', color='orange')
+    electrolyzer_installed_in_circle = readShapefile(f'{top_dir}/data/facilities_in_circle_{circle_name}/shapefiles/electrolyzer_installed.shp', 'Hydrogen Electrolyzer Facility Capacities in Circle [Installed] (kW)', color='yellow')
+    electrolyzer_operational_in_circle = readShapefile(f'{top_dir}/data/facilities_in_circle_{circle_name}/shapefiles/electrolyzer_operational.shp', 'Hydrogen Electrolyzer Facility Capacities in Circle [Operational] (kW)', color='green')
+
+    applySizeGradient([electrolyzer_planned_in_circle, electrolyzer_installed_in_circle, electrolyzer_operational_in_circle], ['orange', 'yellow', 'green'], 'Power_kW', 'circle')
+
+    refinery_SMR_in_circle = readShapefile(f'{top_dir}/data/facilities_in_circle_{circle_name}/shapefiles/refinery.shp', 'Refinery Hydrogen Production Capacity in Circle (SMR or Byproduct) (million standar cubic feet per day)', color='purple')
+    applySizeGradient([refinery_SMR_in_circle], ['purple'], 'Cap_MMSCFD', 'square')
+    
     
 main()

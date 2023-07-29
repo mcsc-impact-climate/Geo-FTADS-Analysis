@@ -194,8 +194,12 @@ def main():
     dir = f'{top_dir}/data/facilities_in_circle_{args.name}/shapefiles'
     if not os.path.exists(dir):
         os.makedirs(dir)
-#
+
     saveShapefile(gpd_electrolyzer_planned_in_circle, f'{top_dir}/data/facilities_in_circle_{args.name}/shapefiles/electrolyzer_planned_under_construction.shp')
+    saveShapefile(gpd_electrolyzer_installed_in_circle, f'{top_dir}/data/facilities_in_circle_{args.name}/shapefiles/electrolyzer_installed.shp')
+    saveShapefile(gpd_electrolyzer_operational_in_circle, f'{top_dir}/data/facilities_in_circle_{args.name}/shapefiles/electrolyzer_operational.shp')
+    saveShapefile(gpd_refinery_in_circle, f'{top_dir}/data/facilities_in_circle_{args.name}/shapefiles/refinery.shp')
+    saveShapefile(gpd_truck_stop_in_circle, f'{top_dir}/data/facilities_in_circle_{args.name}/shapefiles/Truck_Stop_Parking.shp')
 
     saveShapefile(gpd_circle, f'{top_dir}/data/facilities_in_circle_{args.name}/shapefiles/circle.shp')
     
