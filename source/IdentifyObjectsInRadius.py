@@ -85,8 +85,15 @@ def identify_points_in_circle(gpd_circle, gpd_points):
     -------
     gpd_points_in_circle (gpd.DataFrame): Geodataframe with the points identified within the circle.
     '''
+    
+    # Convert the circle from a polygon to a GeoPandas dataframe
+    gdf_circle = gpd.GeoDataFrame(geometry=gpd_circle, crs="EPSG:4326")
+    gpd_points = gpd_points.to_crs("EPSG:4326")
+    gpd_points_in_circle = gpd.sjoin(gpd_points, gdf_circle)
+    
+    return gpd_points_in_circle
 
-def make_readme(center_long, center_lat, radius):
+def make_readme(center_long, center_lat, radius, name='default'):
     '''
     Make a README to document the circle info
     
@@ -95,13 +102,22 @@ def make_readme(center_long, center_lat, radius):
     center_long (double): Longitude of the center of the circle
     center_lat (double): Latitude of the center of the circle
     radius (double): Radius of the circle
+    name (string): Name of the circle
 
     Returns
     -------
     None
     '''
+    
+    top_dir = get_top_dir()
+    
+    # Make a README indicating the central coordinates, radius, and name of the circle
+    info = f'Circle name: {name} \nCentral coordinates: ({center_lat}, {center_long}) \nCircle radius: {radius} miles \nShapefiles can be found in: {top_dir}/data/facilities_in_circle_{name}/shapefiles \nInfo for facilities located in circle can be found in: {top_dir}/data/facilities_in_circle_{name}/facilities_in_circle.xlsx'
+    f_readme = open(f'{top_dir}/data/facilities_in_circle_{name}/README.md', 'w')
+    f_readme.write(info)
+    
 
-def make_info_table(dict_output):
+def make_info_table(dict_output, name='default'):
     '''
     Makes an excel spreadsheet with the relevant info for each facility in the circle
     
@@ -113,6 +129,31 @@ def make_info_table(dict_output):
     -------
     None
     '''
+    
+    top_dir = get_top_dir()
+    
+    with pd.ExcelWriter(f'{top_dir}/data/facilities_in_circle_{name}/facilities_in_circle.xlsx') as writer:
+        for key in dict_output:
+            gpd_output = dict_output[key]
+            
+            # Add longitude and latitude if needed
+            if not 'Latitude' in gpd_output.columns:
+                gpd_output['Latitude'] = gpd_output.geometry.y
+            if not 'Longitude' in gpd_output.columns:
+                gpd_output['Longitude'] = gpd_output.geometry.x
+                
+            # Remove unneeded columns
+            gpd_output = gpd_output.drop(['geometry', 'index_right'], axis=1)
+            if 'OBJECTID' in gpd_output.columns:
+                gpd_output = gpd_output.drop(['OBJECTID'], axis=1)
+            if 'State_numb' in gpd_output.columns:
+                gpd_output = gpd_output.drop(['State_numb'], axis=1)
+            if '' in gpd_output.columns:
+                gpd_output = gpd_output.drop([''], axis=1)
+                            
+            # Save to the file
+            gpd_output.to_excel(writer, sheet_name=key, index=False)
+    
     
 parser = argparse.ArgumentParser()
 parser.add_argument('-a', '--latitude', default=33, type=float)
@@ -142,32 +183,33 @@ def main():
     # Make a circle of the given radius
     gpd_circle = make_circle(args.longitude, args.latitude, args.radius)
     
-    
-#    gpd_electrolyzer_planned_in_circle = identify_points_in_circle(gpd_circle, gpd_electrolyzer_planned)
-#    gpd_electrolyzer_installed_in_circle = identify_points_in_circle(gpd_circle, gpd_electrolyzer_installed)
-#    gpd_electrolyzer_operational_in_circle = identify_points_in_circle(gpd_circle, gpd_electrolyzer_operational)
-#
-#    gpd_refinery_in_circle = identify_points_in_circle(gpd_circle, gpd_refinery)
+    gpd_electrolyzer_planned_in_circle = identify_points_in_circle(gpd_circle, gpd_electrolyzer_planned)
+    gpd_electrolyzer_installed_in_circle = identify_points_in_circle(gpd_circle, gpd_electrolyzer_installed)
+    gpd_electrolyzer_operational_in_circle = identify_points_in_circle(gpd_circle, gpd_electrolyzer_operational)
 
-#    gpd_truck_stop_in_circle = identify_points_in_circle(gpd_circle, gpd_truck_stop)
+    gpd_refinery_in_circle = identify_points_in_circle(gpd_circle, gpd_refinery)
+
+    gpd_truck_stop_in_circle = identify_points_in_circle(gpd_circle, gpd_truck_stop)
 
     dir = f'{top_dir}/data/facilities_in_circle_{args.name}/shapefiles'
     if not os.path.exists(dir):
         os.makedirs(dir)
 #
-#    saveShapefile(gpd_electrolyzer_planned_in_circle, f'{top_dir}/data/facilities_in_circle_{args.name}/shapefiles/electrolyzer_planned_under_construction.shp')
+    saveShapefile(gpd_electrolyzer_planned_in_circle, f'{top_dir}/data/facilities_in_circle_{args.name}/shapefiles/electrolyzer_planned_under_construction.shp')
 
-    saveShapefile(gpd_circle, f'{top_dir}/data/facilities_in_circle_{args.name}/circle.shp')
-#
-#    dict_output = {
-#    'H2 Electrolyzers: Planned & Under Construction': gpd_electrolyzer_planned_in_circle,
-#    'H2 Electrolyzers: Installed': gpd_electrolyzer_installed_in_circle,
-#    'H2 Electrolyzers: Operational': gpd_electrolyzer_operational_in_circle,
-#    'H2 Electrolyzers: Operational': gpd_electrolyzer_operational_in_circle,
-#    'H2 from Refineries': gpd_refinery_in_circle,
-#    'Truck stops': gpd_truck_stop_in_circle,
-#    }
-#
-#    make_info_table(dict_output)
+    saveShapefile(gpd_circle, f'{top_dir}/data/facilities_in_circle_{args.name}/shapefiles/circle.shp')
+    
+    # Make a README with the relevant info
+    make_readme(args.longitude, args.latitude, args.radius, name='default')
+
+    dict_output = {
+    'H2 Elec (Planned)': gpd_electrolyzer_planned_in_circle,
+    'H2 Elec (Installed)': gpd_electrolyzer_installed_in_circle,
+    'H2 Elec (Operational)': gpd_electrolyzer_operational_in_circle,
+    'H2 from Ref': gpd_refinery_in_circle,
+    'Truck stops': gpd_truck_stop_in_circle,
+    }
+
+    make_info_table(dict_output)
 
 main()

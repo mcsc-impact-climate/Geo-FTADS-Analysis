@@ -337,17 +337,17 @@ def main():
 #    demand_charges_by_utility = readShapefile(f'{top_dir}/data/electricity_rates_merged/demand_charges_merged.shp', 'Maximum Demand Charge by Utility ($/kW)')
 #    applyColorGradient(demand_charges_by_utility, 'MaxDemCh', colormap='Reds')
 
-    # Add and style the highway assignments
-    links_all = load_highway_links(f'{top_dir}/data/highway_assignment_links/highway_assignment_links.shp', layer_name = 'Highway Flux (tons/link)')
-    style_highway_links(links_all, color='black')
-    
-    # Add and style the highway assignments (single unit)
-    links_single_unit = load_highway_links(f'{top_dir}/data/highway_assignment_links/highway_assignment_links_single_unit.shp', layer_name = 'SU Highway Flux (tons/link)')
-    style_highway_links(links_single_unit, color='red')
-
-    # Add and style the highway assignments (combined unit)
-    links_combined_unit = load_highway_links(f'{top_dir}/data/highway_assignment_links/highway_assignment_links_combined_unit.shp', layer_name = 'CU Highway Flux (tons/link)')
-    style_highway_links(links_combined_unit, color='blue')
+#    # Add and style the highway assignments
+#    links_all = load_highway_links(f'{top_dir}/data/highway_assignment_links/highway_assignment_links.shp', layer_name = 'Highway Flux (tons/link)')
+#    style_highway_links(links_all, color='black')
+#
+#    # Add and style the highway assignments (single unit)
+#    links_single_unit = load_highway_links(f'{top_dir}/data/highway_assignment_links/highway_assignment_links_single_unit.shp', layer_name = 'SU Highway Flux (tons/link)')
+#    style_highway_links(links_single_unit, color='red')
+#
+#    # Add and style the highway assignments (combined unit)
+#    links_combined_unit = load_highway_links(f'{top_dir}/data/highway_assignment_links/highway_assignment_links_combined_unit.shp', layer_name = 'CU Highway Flux (tons/link)')
+#    style_highway_links(links_combined_unit, color='blue')
 
 #    # Add alternative fueling stations for highway corridors
 #    dcfc_stations = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_elec/US_elec.shp', 'DCFC Corridor Stations', color='orange')
@@ -364,24 +364,24 @@ def main():
 #    northeast_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/northeast.shp', 'Funded Corridor Project: Northeast Electric Highways Study (National Grid)', color='cyan')
 #    bayarea_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/bayarea.shp', 'Funded Corridor Project: San Francisco and Bay Area Regional Medium-and Heavy-Duty Electrification Roadmap (Rocky Mountain Institute)', color='yellow')
 #    saltlake_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/saltlake.shp', 'Funded Corridor Project: Multi-Modal Corridor Electrification Plan - Greater Salt Lake City Region (Utah State University)', color='red')
-#
-#    # Get truck stop parking data
-#    truck_stop_parking = readShapefile(f'{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking.shp', 'Truck stops', color='red')
-#
-#    # Add hydrogen hubs
-#    electrolyzer_planned = readShapefile(f'{top_dir}/data/hydrogen_hubs/shapefiles/electrolyzer_planned_under_construction.shp', 'Hydrogen Electrolyzer Facility Capacities [Planned or Under Construction] (kW)', color='orange')
-#    electrolyzer_installed = readShapefile(f'{top_dir}/data/hydrogen_hubs/shapefiles/electrolyzer_installed.shp', 'Hydrogen Electrolyzer Facility Capacities [Installed] (kW)', color='yellow')
-#    electrolyzer_operational = readShapefile(f'{top_dir}/data/hydrogen_hubs/shapefiles/electrolyzer_operational.shp', 'Hydrogen Electrolyzer Facility Capacities [Operational] (kW)', color='green')
-#
-#    applySizeGradient([electrolyzer_planned, electrolyzer_installed, electrolyzer_operational], ['orange', 'yellow', 'green'], 'Power_kW', 'circle')
-#
-#    refinery_SMR = readShapefile(f'{top_dir}/data/hydrogen_hubs/shapefiles/refinery.shp', 'Refinery Hydrogen Production Capacity (SMR or Byproduct) (million standar cubic feet per day)', color='purple')
-#    applySizeGradient([refinery_SMR], ['purple'], 'Cap_MMSCFD', 'square')
-#
+
+    # Get truck stop parking data
+    truck_stop_parking = readShapefile(f'{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking.shp', 'Truck stops', color='red')
+
+    # Add hydrogen hubs
+    electrolyzer_planned = readShapefile(f'{top_dir}/data/hydrogen_hubs/shapefiles/electrolyzer_planned_under_construction.shp', 'Hydrogen Electrolyzer Facility Capacities [Planned or Under Construction] (kW)', color='orange')
+    electrolyzer_installed = readShapefile(f'{top_dir}/data/hydrogen_hubs/shapefiles/electrolyzer_installed.shp', 'Hydrogen Electrolyzer Facility Capacities [Installed] (kW)', color='yellow')
+    electrolyzer_operational = readShapefile(f'{top_dir}/data/hydrogen_hubs/shapefiles/electrolyzer_operational.shp', 'Hydrogen Electrolyzer Facility Capacities [Operational] (kW)', color='green')
+
+    applySizeGradient([electrolyzer_planned, electrolyzer_installed, electrolyzer_operational], ['orange', 'yellow', 'green'], 'Power_kW', 'circle')
+
+    refinery_SMR = readShapefile(f'{top_dir}/data/hydrogen_hubs/shapefiles/refinery.shp', 'Refinery Hydrogen Production Capacity (SMR or Byproduct) (million standar cubic feet per day)', color='purple')
+    applySizeGradient([refinery_SMR], ['purple'], 'Cap_MMSCFD', 'square')
+
 #    # Get principal ports
 #    principal_ports = readShapefile(f'{top_dir}/data/Principal_Ports/Principal_Port.shp', 'Principal ports', color='blue')
 
     # Read in the circle for the default identification of facilities within a 600 mile radius
-    facilities_circle = readShapefile(f'{top_dir}/data/facilities_in_circle_default/circle.shp', 'Default circle for facilities in radius', color='orange', opacity=0.25)
+    facilities_circle = readShapefile(f'{top_dir}/data/facilities_in_circle_default/shapefiles/circle.shp', 'Default circle for facilities in radius', color='orange', opacity=0.25)
     
 main()
