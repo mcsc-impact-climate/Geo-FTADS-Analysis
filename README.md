@@ -306,6 +306,10 @@ bash source/run_all_Point2Point.sh
 
 WARNING: This may take several hours to run in full, and the shapefiles and csv files produced will take up ~100 GB. To reduce this, you can comment out items that you don't want in the COMMODITIES, REGIONS and MODES variables.
 
+## Identifying truck stops and hydrogen production facilities within a given radius
+
+The script [IdentifyFacilitiesInRadius.py](./source/IdentifyFacilitiesInRadius.py) 
+
 ## Visualizing layers with QGIS
 
 The script [PlotWithQGIS.py](./PlotWithQGIS.py) reads in processed shapefiles containing:
