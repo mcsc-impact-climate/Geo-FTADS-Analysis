@@ -1,6 +1,6 @@
 State,Fuel Use Incentive,Fuel Type,Fuel Use Incentive Source
-Alabama,Biofuel Research and Development Funding,Biofuel,https://afdc.energy.gov/laws/12274
-Alabama,Biofuel Production Jobs Tax Credit,Biofuel,https://afdc.energy.gov/laws/11694
+Alabama,Biofuel Research and Development Funding,"Biodiesel, Ethanol",https://afdc.energy.gov/laws/12274
+Alabama,Biofuel Production Jobs Tax Credit,"Biodiesel, Ethanol",https://afdc.energy.gov/laws/11694
 Alabama,Commercial EV Time-of-use Rates - Alabama Power,Electricity,https://afdc.energy.gov/laws/12642
 Alaska,Electric Vehicle (EV) Time-of-Use (TOU) Rate – Alaska Electric Light & Power (AELP),Electricity,https://afdc.energy.gov/laws/12574
 California,Electric Vehicle (EV) Time-of-Use (TOU) Rate – Liberty Utilities,Electricity,https://afdc.energy.gov/laws/12598
@@ -12,3 +12,35 @@ Colorado,Public Electric Utility Services Authorization,Electricity,https://afdc
 Delaware,Vehicle-to-Grid Energy Credit,Electricity,https://afdc.energy.gov/laws/6592
 Delaware,Electric Vehicle (EV) Charging Station Rebate - Delaware Electric Cooperative (DEC),Electricity,https://afdc.energy.gov/laws/12042
 Connecticut,Public Electric Vehicle (EV) Charging Rate Pilot Program - Eversource,Electricity,https://afdc.energy.gov/laws/12417
+Georgia,Biofuel Production Tax Exemption,"Biodiesel, Ethanol",https://afdc.energy.gov/laws/12409
+Georgia,Alternative Fuel and Advanced Vehicle Job Creation Tax Credit,"Biodiesel, Ethanol, Electricity",https://afdc.energy.gov/laws/10253
+Hawaii,Biofuels Procurement Preference,"Biodiesel, Ethanol",https://afdc.energy.gov/laws/6077
+Illinois,Biofuels Tax Exemption,"Biodiesel, Ethanol",https://afdc.energy.gov/laws/5697
+Indiana,Electric Vehicle (EV) Time-Of-Use (TOU) Rates - Applied Energy Services (AES) Indiana,Electricity,https://afdc.energy.gov/laws/9272
+Indiana,Mid-Level Ethanol Blend Retailer Tax Credit,Ethanol,https://afdc.energy.gov/laws/9293
+Iowa,E85 Retailer Tax Credit,Ethanol,https://afdc.energy.gov/laws/6425
+Iowa,Biodiesel Blend Retailer Tax Credit,Biodiesel,https://afdc.energy.gov/laws/6082
+Iowa,Biodiesel Production Tax Credit,Biodiesel,https://afdc.energy.gov/laws/13300
+Kansas,Renewable Fuel Retailer Tax Incentive,"Biodiesel, Ethanol",https://afdc.energy.gov/laws/6201
+Kansas,Biofuel Blending Equipment Tax Exemption,"Biodiesel, Ethanol",https://afdc.energy.gov/laws/8304
+Kansas,Biofuel Production Facility Tax Exemption,Ethanol,https://afdc.energy.gov/laws/8306
+Kansas,Biodiesel Rebates - Kansas Soybean Commission,Biodiesel,https://afdc.energy.gov/laws/11755
+Kentucky,On-Farm Biofuel Production Grants,"Biodiesel, Ethanol",https://afdc.energy.gov/laws/10738
+Kentucky,Biodiesel Production and Blending Tax Credit,"Biodiesel, Renewable Diesel",https://afdc.energy.gov/laws/5831
+Kentucky,Ethanol Production Tax Credit,Ethanol,https://afdc.energy.gov/laws/6409
+Kentucky,Alternative Fuel Manufacturing Tax Incentives,"Biodiesel, Ethanol",https://afdc.energy.gov/laws/11974
+Kentucky,Alternative Fuel Production Tax Incentives,"Biodiesel, Ethanol, Hydrogen",https://afdc.energy.gov/laws/11975
+Kentucky,Propane Excise Tax Exemption,Propane,https://afdc.energy.gov/laws/5413
+Massachusetts,Electric Vehicle (EV) Charging Incentive - Braintree Electric Light Department (BELD),Electricity,https://afdc.energy.gov/laws/12047
+Michigan,Commercial Electric Vehicle (EV) Time-Of-Use (TOU) Rate and Rebate – Indiana Michigan Power,Electricity,https://afdc.energy.gov/laws/13178
+Minnesota,Biofuel Production Grant Program,Biodiesel,https://afdc.energy.gov/laws/11851
+Minnesota,Ethanol Production Facility Environmental Assessment Exemption,Ethanol,https://afdc.energy.gov/laws/9398
+Minnesota,Electric Vehicle (EV) Charging Station Rebate and Time-Of-Use (TOU) Rate - LREC,Electricity,https://afdc.energy.gov/laws/12147
+Minnesota,Commercial Off-Peak Electric Vehicle (EV) Charging Incentive – Xcel Energy,Electricity,https://afdc.energy.gov/laws/13197
+Minnesota,Electric Vehicle (EV) Wind Energy Promotion - Great River Energy,Electricity,https://afdc.energy.gov/laws/11944
+Minnesota,Commercial Electric Vehicle (EV) Demand Charge Rate – Minnesota Power,Electricity,https://afdc.energy.gov/laws/13194
+Missouri,Biodiesel Retailer Tax Credit,Biodiesel,https://afdc.energy.gov/laws/13128
+Montana,Ethanol Production Incentive,Ethanol,https://afdc.energy.gov/laws/6166
+Montana,Ethanol Production Facility Property Tax Exemption,Ethanol,https://afdc.energy.gov/laws/10855
+Montana,Biodiesel Tax Refund,Biodiesel,https://afdc.energy.gov/laws/6502
+Montana,Biodiesel Tax Exemption,Biodiesel,https://afdc.energy.gov/laws/6555
