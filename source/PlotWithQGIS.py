@@ -303,6 +303,29 @@ def add_basemap(path, name):
     '''
     basemap_layer=QgsRasterLayer(path, name, 'wms')
     QgsProject.instance().addMapLayer(basemap_layer)
+    
+def add_regional_support(top_dir, support_type='incentives_and_regulations', support_target='all', fuel_target='all'):
+    '''
+    Adds regional incentives and regulations to from AFDC. Visualizes the number of incentives/regulations for each type of support and fuel/emissions target
+
+    Parameters
+    ----------
+    top_dir (string): path to the top level of the directory
+    
+    support_type (string): Type of support (incentive, regulation, or both)
+    
+    support_target (string): What outcome is the support targeting (emissions, fuel use, infrastructure, vehicle purchase, or all)
+    
+    fuel_target (string): What fuel is the support targeting (Biodiesel, Ethanol, Electricity, Hydrogen, Natural Gas, Propane, or Renewable Diesel). In the case of aggregated support targets, emissions is also included in this list.
+
+    Returns
+    -------
+    None
+    '''
+    print(support_type, support_target, fuel_target)
+    state_support = readShapefile(f'{top_dir}/data/incentives_and_regulations_merged/{support_target}_{support_type}.shp', f"{support_target.replace('_', ' ')} {support_type.replace('_', ' ')} ({fuel_target})")
+    applyColorGradient(state_support, fuel_target)
+    QgsProject.instance().layerTreeRoot().findLayer(state_support.id()).setItemVisibilityChecked(False)
 
 def main():
     top_dir = getTopDir()
@@ -362,18 +385,18 @@ def main():
 #    hydrogen_cng = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_cng/US_cng.shp', 'CNG Corridor Stations', color='pink')
 #    hydrogen_lpg = readShapefile(f'{top_dir}/data/Fuel_Corridors/US_lpg/US_lpg.shp', 'LPG Corridor Stations', color='cyan')
 
-    # Add proposed infrastructure corridors for heavy duty trucking
-    eastcoast_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/eastcoast.shp', 'Funded Corridor Project: East Coast Commercial ZEV (CALSTART)', color='orange')
-    change_line_width(eastcoast_corridor, 1.0)
-    midwest_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/midwest.shp', 'Funded Corridor Project: I-80 Midwest Corridor (Cummins Inc)', color='purple')
-    change_line_width(midwest_corridor, 1.0)
-    h2la_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/h2la.shp', 'Funded Corridor Project: Houston to Los Angeles Hydrogen Corridor Project (GTI Energy)', color='green')
-    change_line_width(h2la_corridor, 1.0)
-    la_i710_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/la_i710.shp', 'Funded Corridor Project: Charging Network around the I-710 Corridor (Los Angeles Cleantech Incubator)', color='pink')
-    change_line_width(la_i710_corridor, 1.0)
-    northeast_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/northeast.shp', 'Funded Corridor Project: Northeast Electric Highways Study (National Grid)', color='cyan')
-    bayarea_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/bayarea.shp', 'Funded Corridor Project: San Francisco and Bay Area Regional Medium-and Heavy-Duty Electrification Roadmap (Rocky Mountain Institute)', color='yellow')
-    saltlake_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/saltlake.shp', 'Funded Corridor Project: Multi-Modal Corridor Electrification Plan - Greater Salt Lake City Region (Utah State University)', color='red')
+#    # Add proposed infrastructure corridors for heavy duty trucking
+#    eastcoast_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/eastcoast.shp', 'Funded Corridor Project: East Coast Commercial ZEV (CALSTART)', color='orange')
+#    change_line_width(eastcoast_corridor, 1.0)
+#    midwest_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/midwest.shp', 'Funded Corridor Project: I-80 Midwest Corridor (Cummins Inc)', color='purple')
+#    change_line_width(midwest_corridor, 1.0)
+#    h2la_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/h2la.shp', 'Funded Corridor Project: Houston to Los Angeles Hydrogen Corridor Project (GTI Energy)', color='green')
+#    change_line_width(h2la_corridor, 1.0)
+#    la_i710_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/la_i710.shp', 'Funded Corridor Project: Charging Network around the I-710 Corridor (Los Angeles Cleantech Incubator)', color='pink')
+#    change_line_width(la_i710_corridor, 1.0)
+#    northeast_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/northeast.shp', 'Funded Corridor Project: Northeast Electric Highways Study (National Grid)', color='cyan')
+#    bayarea_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/bayarea.shp', 'Funded Corridor Project: San Francisco and Bay Area Regional Medium-and Heavy-Duty Electrification Roadmap (Rocky Mountain Institute)', color='yellow')
+#    saltlake_corridor = readShapefile(f'{top_dir}/data/hd_zev_corridors/saltlake.shp', 'Funded Corridor Project: Multi-Modal Corridor Electrification Plan - Greater Salt Lake City Region (Utah State University)', color='red')
 
 #    # Get truck stop parking data
 #    truck_stop_parking = readShapefile(f'{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking.shp', 'Truck stops', color='red')
@@ -402,11 +425,24 @@ def main():
 #    electrolyzer_planned_in_circle = readShapefile(f'{top_dir}/data/facilities_in_circle_{circle_name}/shapefiles/electrolyzer_planned_under_construction.shp', 'Hydrogen Electrolyzer Facility Capacities in Circle [Planned or Under Construction] (kW)', color='orange')
 #    electrolyzer_installed_in_circle = readShapefile(f'{top_dir}/data/facilities_in_circle_{circle_name}/shapefiles/electrolyzer_installed.shp', 'Hydrogen Electrolyzer Facility Capacities in Circle [Installed] (kW)', color='yellow')
 #    electrolyzer_operational_in_circle = readShapefile(f'{top_dir}/data/facilities_in_circle_{circle_name}/shapefiles/electrolyzer_operational.shp', 'Hydrogen Electrolyzer Facility Capacities in Circle [Operational] (kW)', color='green')
-#
+
 #    applySizeGradient([electrolyzer_planned_in_circle, electrolyzer_installed_in_circle, electrolyzer_operational_in_circle], ['orange', 'yellow', 'green'], 'Power_kW', 'circle')
 #
 #    refinery_SMR_in_circle = readShapefile(f'{top_dir}/data/facilities_in_circle_{circle_name}/shapefiles/refinery.shp', 'Refinery Hydrogen Production Capacity in Circle (SMR or Byproduct) (million standar cubic feet per day)', color='purple')
 #    applySizeGradient([refinery_SMR_in_circle], ['purple'], 'Cap_MMSCFD', 'square')
+
+    # Add layers of interest for regional incentives
+    add_regional_support(top_dir)
     
+    for support_type in ['incentives_and_regulations', 'incentives', 'regulations']:
+        for support_target in ['all', 'emissions', 'fuel_use', 'infrastructure', 'vehicle_purchase']:
+            if support_type == 'incentives_and_regulations' and support_target != 'all':
+                continue
+            if support_target == 'all':
+                fuel_targets = ['Biodiesel', 'Ethanol', 'Electricity', 'Hydrogen', 'Natural Gas', 'Propane', 'Renewable Diesel', 'Emissions']
+            else:
+                fuel_targets = ['Biodiesel', 'Ethanol', 'Electricity', 'Hydrogen', 'Natural Gas', 'Propane', 'Renewable Diesel']
+            for fuel_target in fuel_targets:
+                add_regional_support(top_dir, support_type=support_type, support_target=support_target, fuel_target=fuel_target)
     
 main()
