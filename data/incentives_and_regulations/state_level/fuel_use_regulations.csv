@@ -1,8 +1,8 @@
-State,Fuel Use Regulation,Fuel Type,Fuel Use Regulation Source
-Arizona,Joint Use of Government Fueling Infrastructure,All,https://afdc.energy.gov/laws/6206
+State,Name,Types,Source
+Arizona,Joint Use of Government Fueling Infrastructure,"Biodiesel, Ethanol, Electricity, Hydrogen, Natural Gas, Propane",https://afdc.energy.gov/laws/6206
 Arizona,Municipal Alternative Fuel Tax Regulation,Natural Gas,https://afdc.energy.gov/laws/9301
 California,Biomethane Promotion,Biomethane,https://afdc.energy.gov/laws/10419
-California,Low Carbon Fuel Standard,All,https://afdc.energy.gov/laws/6308
+California,Low Carbon Fuel Standard,"Biodiesel, Ethanol, Electricity, Hydrogen, Natural Gas, Propane",https://afdc.energy.gov/laws/6308
 Georgia,Ethanol Blending Regulation,Ethanol,https://afdc.energy.gov/laws/6516
 Illinois,Biodiesel Blend Use Requirement,Biodiesel,https://afdc.energy.gov/laws/5993
 Indiana,Immunity for Misuse of E85,Ethanol,https://afdc.energy.gov/laws/6032

@@ -1,4 +1,4 @@
-State,Infrastructure Incentive,Fuel Type,Infrastructure Incentive Source
+State,Name,Types,Source
 Alabama,EV Infrastructure Grants,Electricity,https://afdc.energy.gov/laws/12997
 Alabama,EV Charging Station Rebate - Tennessee Valley Authority,Electricity,https://afdc.energy.gov/laws/13231
 Alabama,Commercial EV Charging station Rebate - Alabama Power,Electricity,https://afdc.energy.gov/laws/13164
@@ -11,9 +11,9 @@ Arizona,Commercial Electric Vehicle (EV) Charging Station Rebate – Tucson Elec
 Arizona,Electric Vehicle (EV) Charging Station Rebate - Mohave Electric Cooperative (MEH),Electricity,https://afdc.energy.gov/laws/13017
 Arkansas,Electric Vehicle (EV) Charging Station Grants,Electricity,https://afdc.energy.gov/laws/12667
 California,Electric Vehicle (EV) Charging Station Incentive Program Support,Electricity,https://afdc.energy.gov/laws/11999
-California,Alternative Fuel and Vehicle Incentives,All,https://afdc.energy.gov/laws/6307
-California,Electric Vehicle (EV) Charging Station Incentives - San Joaquin Valley,All,https://afdc.energy.gov/laws/11657
-California,Alternative Fuel Infrastructure Grant – Santa Barbara County,All,https://afdc.energy.gov/laws/12505
+California,Alternative Fuel and Vehicle Incentives,"Biodiesel, Ethanol, Electricity, Hydrogen, Natural Gas, Propane",https://afdc.energy.gov/laws/6307
+California,Electric Vehicle (EV) Charging Station Incentives - San Joaquin Valley,"Biodiesel, Ethanol, Electricity, Hydrogen, Natural Gas, Propane",https://afdc.energy.gov/laws/11657
+California,Alternative Fuel Infrastructure Grant – Santa Barbara County,"Biodiesel, Ethanol, Electricity, Hydrogen, Natural Gas, Propane",https://afdc.energy.gov/laws/12505
 California,Commercial Electric Vehicle (EV) and EV Charging Station Rebates - TID,Electricity,https://afdc.energy.gov/laws/12602
 California,Electric Vehicle (EV) Charging Station Incentives for Medium- and Heavy-Duty Fleets - PG&E,Electricity,https://afdc.energy.gov/laws/12336
 California,Electric Vehicle (EV) Charging Station Rebate - Alameda Municipal Power (AMP),Electricity,https://afdc.energy.gov/laws/12102
@@ -23,15 +23,15 @@ California,Electric Vehicle (EV) Charging Station Rebate - Glendale Water and Po
 California,Commercial Electric Vehicle (EV) Charging Station Rebate - Pasadena Water and Power (PWP),Electricity,https://afdc.energy.gov/laws/12177
 California,Commercial Electric Vehicle (EV) Charging Station Rebate - LADWP,Electricity,https://afdc.energy.gov/laws/9232
 California,Electric Vehicle (EV) Charging Station Incentive – SDG&E,Electricity,https://afdc.energy.gov/laws/12510
-California,Alternative Fuel Vehicle (AFV) and Fueling Infrastructure Grants,All,https://afdc.energy.gov/laws/6132
-California,Establishment of a Zero Emission Medium- and Heavy-Duty Vehicle Program,ZEV,https://afdc.energy.gov/laws/11528
+California,Alternative Fuel Vehicle (AFV) and Fueling Infrastructure Grants,"Biodiesel, Ethanol, Electricity, Hydrogen, Natural Gas, Propane",https://afdc.energy.gov/laws/6132
+California,Establishment of a Zero Emission Medium- and Heavy-Duty Vehicle Program,"Electricity, Hydrogen",https://afdc.energy.gov/laws/11528
 Colorado,Fleet Electric Vehicle (EV) Charging Station Grants,Electricity,https://afdc.energy.gov/laws/13243
 Colorado,Non-Residential Electric Vehicle (EV) Charging Station Rebate – Black Hills Energy,Electricity,https://afdc.energy.gov/laws/12436
 Colorado,Electric Vehicle (EV) Charging Stations Funding Authorization,Electricity,https://afdc.energy.gov/laws/12635
-District of Columbia,Alternative Fuel Vehicle (AFV) Conversion and Infrastructure Tax Credit,All,https://afdc.energy.gov/laws/11493
+District of Columbia,Alternative Fuel Vehicle (AFV) Conversion and Infrastructure Tax Credit,"Biodiesel, Ethanol, Electricity, Hydrogen, Natural Gas, Propane",https://afdc.energy.gov/laws/11493
 District of Columbia,Public Electric Vehicle (EV) Charging Station Make-Ready Support – Pepco ,Electricity,https://afdc.energy.gov/laws/12705
 District of Columbia,Utility Electric Vehicle (EV) Charging Station Program Authorization,Electricity,https://afdc.energy.gov/laws/12155
-District of Columbia,Alternative Fuel Vehicle and Infrastructure Support,All,https://afdc.energy.gov/laws/12089
+District of Columbia,Alternative Fuel Vehicle and Infrastructure Support,"Biodiesel, Ethanol, Electricity, Hydrogen, Natural Gas, Propane",https://afdc.energy.gov/laws/12089
 District of Columbia,Mid-Atlantic Region Electric Vehicle (EV) Support,Electricity,https://afdc.energy.gov/laws/13067
 Connecticut,Electric Vehicle (EV) Charging Station Grants,Electricity,https://afdc.energy.gov/laws/13032
 Connecticut,Electric Vehicle (EV) and EV Charging Station Rebates - Norwich Public Utilities,Electricity,https://afdc.energy.gov/laws/12281

@@ -1,10 +1,9 @@
-State,Vehicle Purchase Incentive,Fuel Type,Vehicle Purchase Incentive Source
+State,Name,Types,Source
 Alabama,Electric Vehicle (EV) Charging Station and Medium- and Heavy-Duty Diesel Vehicle Replacement Rebates,Electricity,https://afdc.energy.gov/laws/12273
 Alabama,Idle Reduction and Natural Gas Vehicle Weight Exemption,Natural Gas,https://afdc.energy.gov/laws/8360
-Arizona,High Occupancy Vehicle (HOV) Lane Exemption,Multiple,https://afdc.energy.gov/laws/12413
-Arizona,Reduced Alternative Fuel Vehicle (AFV) License Tax,Multiple,https://afdc.energy.gov/laws/4179
-Arizona,Alternative Fuel and Alternative Fuel Vehicle (AFV) Use Tax Exemption,Multiple,https://afdc.energy.gov/laws/5874
-Arizona,Idle Reduction and Alternative Fuel Vehicle Weight Exemption,Multiple,https://afdc.energy.gov/laws/6559
+Arizona,Reduced Alternative Fuel Vehicle (AFV) License Tax,"Biodiesel, Ethanol, Electricity, Hydrogen, Natural Gas, Propane",https://afdc.energy.gov/laws/4179
+Arizona,Alternative Fuel and Alternative Fuel Vehicle (AFV) Use Tax Exemption,"Biodiesel, Ethanol, Electricity, Hydrogen, Natural Gas, Propane",https://afdc.energy.gov/laws/5874
+Arizona,Idle Reduction and Alternative Fuel Vehicle Weight Exemption,"Biodiesel, Ethanol, Electricity, Hydrogen, Natural Gas, Propane",https://afdc.energy.gov/laws/6559
 Arizona,Commercial Electrification Assessment Incentives - Salt River Project (SRP),Electricity,https://afdc.energy.gov/laws/12594
 Arkansas,Clean Fuels Program,"Biodiesel, Ethanol, Electricity, Hydrogen, Natural Gas, Propane",https://afdc.energy.gov/laws/13225
 Arkansas,Diesel Emissions Reduction Grants,"Biodiesel, Ethanol, Electricity, Hydrogen, Natural Gas, Propane",https://afdc.energy.gov/laws/13224
