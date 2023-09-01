@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Shapefile Visualization</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" /> <!-- Link your external CSS file -->
+</head>
+<body>
+    <div id="map"></div>
+    <div class="legend-dropdown">
+        <label for="gradient-toggle">Visibility: </label>
+        <select id="gradient-toggle">
+            <option value="show">Show</option>
+            <option value="hide">Hide</option>
+        </select>
+    </div>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
