@@ -42,6 +42,9 @@ fetch('/get_shapefile_data')
         createLegend(map, data, 'Cents_kWh');
     });
 
+// Add a variable to track the shapefileLayer visibility
+var isShapefileLayerVisible = true;
+
 function createLegend(map, data, propertyName) {
     var legend = L.control({ position: 'bottomright' });
 
@@ -130,6 +133,27 @@ function createLegend(map, data, propertyName) {
 
         // Add the legend content to the div
         div.innerHTML = '<div><b>Legend</b></div>' + labels.join('');
+        
+        // Create a checkbox for the shapefileLayer visibility
+        var shapefileToggle = document.createElement('input');
+        shapefileToggle.type = 'checkbox';
+        shapefileToggle.id = 'shapefile-toggle';
+
+        // Add an event listener to the checkbox to toggle the shapefileLayer visibility
+        shapefileToggle.addEventListener('change', toggleShapefileVisibility);
+
+        // Create a container div for the checkbox and property name
+        var propertyContainer = document.createElement('div');
+        propertyContainer.className = 'legend-property-container';
+
+        // Add the checkbox to the container
+        propertyContainer.appendChild(shapefileToggle);
+
+        // Add the property name to the container
+        propertyContainer.appendChild(document.createTextNode(propertyName));
+
+        // Append the container to the legend div
+        div.appendChild(propertyContainer);
 
         return div;
     };
@@ -157,4 +181,14 @@ function calculateGradientColor(value, minValue, maxValue) {
 
     // Convert the RGB values to a CSS color string
     return 'rgb(' + interpolatedColor.join(',') + ')';
+}
+
+function toggleShapefileVisibility() {
+    isShapefileLayerVisible = !isShapefileLayerVisible;
+
+    if (isShapefileLayerVisible) {
+        shapefileLayer.addTo(map);
+    } else {
+        shapefileLayer.removeFrom(map);
+    }
 }
