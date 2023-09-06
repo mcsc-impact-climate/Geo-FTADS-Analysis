@@ -1,29 +1,29 @@
-from flask import Flask, jsonify, render_template, send_file
+from flask import Flask, jsonify, send_from_directory
+from flask_cors import CORS
 import geopandas as gpd
+import json
+import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=".")
+CORS(app)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return send_from_directory('.', 'index.html')
 
-@app.route('/get_shapefile_data')
-def get_shapefile_data():
-    shapefile_path = 'electricity_rates_by_state_merged.shp'
-    try:
-        # Read the Shapefile
-        gdf = gpd.read_file(shapefile_path)
-        gdf = gdf.to_crs({'init': 'epsg:4326'})  # Replace 'epsg:4326' with your desired CRS
-        
-        # Create a temporary GeoJSON file
-        temp_geojson_file = 'temp.geojson'
-        gdf.to_file(temp_geojson_file, driver='GeoJSON')
-        
-        # Return the temporary GeoJSON file to the client for download
-        return send_file(temp_geojson_file, as_attachment=True, download_name='shapefile.geojson')
-    
-    except Exception as e:
-        return jsonify({'error': str(e)})
+@app.route('/main.js')
+def serve_js():
+    return send_from_directory('.', 'main.js')
+
+shapefiles = ["electricity_rates_by_state_merged.shp", "US_elec.shp"]
+
+@app.route('/get_shapefiles')
+def get_shapefiles():
+    shapefile_data = {}
+    for sf in shapefiles:
+        shapefile = gpd.read_file(sf).to_crs(epsg=3857)
+        shapefile_data[sf] = json.loads(shapefile.to_json())
+    return jsonify(shapefile_data)
 
 if __name__ == '__main__':
     app.run(debug=True)
