@@ -248,6 +248,16 @@ To run:
 python source/ProcessElectricityPrices.py 
 ```
 
+## Processing State-level Incentives and Regulations
+
+The script [ProcessStateSupport.py](./ProcessStateSupport.py) reads in the shapefile containing borders of US states, along with CSV files containing state-level incentives relevant to trucking from the [AFDC website](https://afdc.energy.gov/laws/state), and joins the CSV files with the shapefile to produce a set of shapefiles with the number of incentives of each type (fuel, vehicle purchase, emissions and infrastructure) and fuel target (electrification, hydrogen, ethanol, etc.) for each state. 
+
+To run:
+
+```bash
+python source/ProcessStateSupport.py
+```
+
 This should produce shapefiles for zipcode-level and state-level electricity prices in `data/electricity_rates_merged`
 
 ## Analyzing VIUS data
@@ -336,3 +346,17 @@ as well as `python source/Point2PointFAF.py [arguments]` for any freight flow an
 <!-- Executing [PlotWithQGIS.py](./PlotWithQGIS.py) in the QGIS GUI (after first running [Point2PointFAF.py](./source/Point2PointFAF.py)) should produce output PDF files in the [layouts](./layouts) directory, which look something like: -->
 
 ![Total domestic exports](./images/highway_and_total_flows.png "Total Domestic Exports")
+
+
+## Visualizing Shapefiles with a Web Interface
+
+The code and shapefiles in [web_interface](./web_interface) represent an initial skeleton for functionality to visualize shapefiles interactively on a web interface. The code can be executed as follows:
+
+```bash 
+cd web_interface
+python app.py
+```
+
+If that executes without issue, you should be able to view the map in your browser at http://127.0.0.1:5000/. It currently looks something like this:
+
+![Interactive Web Map](./images/web_map.png "Interactive Web Map")
