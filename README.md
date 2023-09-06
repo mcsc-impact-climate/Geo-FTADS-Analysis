@@ -250,12 +250,22 @@ python source/ProcessElectricityPrices.py
 
 ## Processing State-level Incentives and Regulations
 
-The script [ProcessStateSupport.py](./ProcessStateSupport.py) reads in the shapefile containing borders of US states, along with CSV files containing state-level incentives relevant to trucking from the [AFDC website](https://afdc.energy.gov/laws/state), and joins the CSV files with the shapefile to produce a set of shapefiles with the number of incentives of each type (fuel, vehicle purchase, emissions and infrastructure) and fuel target (electrification, hydrogen, ethanol, etc.) for each state. 
+The script [ProcessStateSupport.py](./source/ProcessStateSupport.py) reads in the shapefile containing borders of US states, along with CSV files containing state-level incentives relevant to trucking from the [AFDC website](https://afdc.energy.gov/laws/state), and joins the CSV files with the shapefile to produce a set of shapefiles with the number of incentives of each type (fuel, vehicle purchase, emissions and infrastructure) and fuel target (electrification, hydrogen, ethanol, etc.) for each state. 
 
 To run:
 
 ```bash
 python source/ProcessStateSupport.py
+```
+
+# Processing planned infrastructure corridors for heavy duty vehicles
+
+The script [PrepareInfrastructureCorridors.py](./source/PrepareInfrastructureCorridors.py) reads in either a shapefile with the US highway system, or shapefiles with specific regions of planned heavy duty vehicle infrastructure corridors [announced by the Biden-Harris administration](https://www.energy.gov/articles/biden-harris-administration-announces-funding-zero-emission-medium-and-heavy-duty-vehicle). For corridors represented as subsets of the national highway system, the code produces shapefiles for each highway segment with a planned infrastructure project. For corridors represented as regions of the US, the code produces shapefiles showing the region(s) where the planned infrastructure project will take place. 
+
+To run:
+
+```bash
+python source/PrepareInfrastructureCorridors.py
 ```
 
 This should produce shapefiles for zipcode-level and state-level electricity prices in `data/electricity_rates_merged`
