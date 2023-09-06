@@ -1,7 +1,29 @@
 var vectorLayers = [];
-var map; // Declare map as a global variable
-var minAttributeValue = Infinity;
-var maxAttributeValue = -Infinity;
+var map;
+var attributeBounds = {}; // Object to store min and max attribute values for each shapefile
+
+
+const shapefileLabels = {
+  'electricity_rates_by_state_merged': 'Electricity rate (cents/kWh)',
+  'US_elec': 'DCFC Charging Stations',
+};
+
+// Key: shapefile name, Value: boolean indicating whether to apply a gradient
+const gradientFlags = {
+  'electricity_rates_by_state_merged': true,
+  'US_elec': false,
+};
+
+const gradientAttributes = {
+  'electricity_rates_by_state_merged': 'Cents_kWh',
+};
+
+// Key: shapefile name, Value: color to use
+const shapefileColors = {
+  'electricity_rates_by_state_merged': 'red',
+  'US_elec': 'blue',
+};
+
 
 // Fetch shapefile data from the Flask app
 fetch('/get_shapefiles')
@@ -15,27 +37,26 @@ fetch('/get_shapefiles')
     console.log('Fetched data:', data); // Debug log to check what's returned
     let allFeatures = [];
     
-    for (const [key, value] of Object.entries(data)) {
-      const features = new ol.format.GeoJSON().readFeatures(value, {
-        dataProjection: 'EPSG:3857',
-        featureProjection: 'EPSG:3857',
-      });
-      
-      allFeatures = allFeatures.concat(features);
-      
-      const vectorLayer = new ol.layer.Vector({
-        source: new ol.source.Vector({
-          features: features,
-        }),
-        style: createStyleFunction(attributeName),
-      });
+      for (const [key, value] of Object.entries(data)) {
+        const features = new ol.format.GeoJSON().readFeatures(value, {
+          dataProjection: 'EPSG:3857',
+          featureProjection: 'EPSG:3857',
+        });
+        
+        const minVal = Math.min(...features.map(f => f.get(gradientAttributes[key.split(".")[0]]) || Infinity));
+        const maxVal = Math.max(...features.map(f => f.get(gradientAttributes[key.split(".")[0]]) || -Infinity));
 
-      vectorLayers.push(vectorLayer);
-    }
+        attributeBounds[key] = { min: minVal, max: maxVal };
 
-    // Calculate min and max
-    minAttributeValue = Math.min(...allFeatures.map(f => f.get(attributeName) || Infinity));
-    maxAttributeValue = Math.max(...allFeatures.map(f => f.get(attributeName) || -Infinity));
+        const vectorLayer = new ol.layer.Vector({
+          source: new ol.source.Vector({
+            features: features,
+          }),
+          style: createStyleFunction(gradientAttributes[key.split(".")[0]], key)
+        });
+
+        vectorLayers.push(vectorLayer);
+      }
     
     initMap();
       
@@ -46,45 +67,43 @@ fetch('/get_shapefiles')
     console.log('Fetch Error:', error);
   });
 
-function createStyleFunction(attributeName) {
+function createStyleFunction(attributeName, shapefileName) {
   return function(feature) {
-    const geometryType = feature.getGeometry().getType();
+    const bounds = attributeBounds[shapefileName]; // Get the bounds for this specific shapefile
     const attributeValue = feature.get(attributeName);
+    
+    const useGradient = gradientFlags[shapefileName.split(".")[0]];
+    const layerColor = shapefileColors[shapefileName.split(".")[0]];
 
-    // Always style Point and MultiPoint as filled circles
-    if (geometryType === 'Point' || geometryType === 'MultiPoint') {
+    if (useGradient && bounds) {
+      const component = Math.floor(255 - (255 * (attributeValue - bounds.min) / (bounds.max - bounds.min)));
+      const fillColor = `rgb(255, ${component}, ${component})`;
+        
       return new ol.style.Style({
-        image: new ol.style.Circle({
-          radius: 3,
-          fill: new ol.style.Fill({
-            color: 'blue',
-          }),
+        stroke: new ol.style.Stroke({
+          color: 'black',
+          width: 2,
         }),
-        zIndex: 10 // Higher zIndex so points appear above polygons
+        fill: new ol.style.Fill({
+          color: fillColor,
+        }),
+        zIndex: 1 // Lower zIndex so polygons appear below points
       });
-    }
+      
+  } else {
+    return new ol.style.Style({
+      image: new ol.style.Circle({
+        radius: 3,
+        fill: new ol.style.Fill({
+          color: layerColor,  // use the color defined for this shapefile
+        }),
+      }),
+      zIndex: 10 // Higher zIndex so points appear above polygons
+    });
+  }
 
     if (attributeValue === null || attributeValue === undefined) {
       return null;  // Skip features with undefined or null values
-    }
-
-    // Generate a color based on the attribute value
-    if (!isNaN(minAttributeValue) && !isNaN(maxAttributeValue)) {
-      const component = Math.floor(255 - (255 * (attributeValue - minAttributeValue) / (maxAttributeValue - minAttributeValue)));
-      const fillColor = `rgb(255, ${component}, ${component})`;
-
-      if (geometryType === 'Polygon' || geometryType === 'MultiPolygon') {
-        return new ol.style.Style({
-          stroke: new ol.style.Stroke({
-            color: 'black',
-            width: 2,
-          }),
-          fill: new ol.style.Fill({
-            color: fillColor,
-          }),
-          zIndex: 1 // Lower zIndex so polygons appear below points
-        });
-      }
     }
 
     // For any other geometry type, use default styling
@@ -149,65 +168,72 @@ function updateLegend(data) {
   header.style.fontWeight = "bold";
   legendDiv.appendChild(header);
 
-  let maxWidth = 0;
-
   Object.keys(data).forEach((key, index) => {
     const layerDiv = document.createElement("div");
     layerDiv.style.display = "flex";
     layerDiv.style.alignItems = "center";
 
-    // Container for symbol or gradient, and min/max labels
     const symbolContainer = document.createElement("div");
     symbolContainer.style.display = "flex";
     symbolContainer.style.alignItems = "center";
-    symbolContainer.style.width = "120px";  // fixed width
+    symbolContainer.style.width = "120px"; // fixed width
 
-    // Add gradient or symbol
     const canvas = document.createElement("canvas");
     canvas.width = 50;
     canvas.height = 10;
     const ctx = canvas.getContext("2d");
 
-    if (isPolygonLayer(vectorLayers[index])) {
-      const minDiv = document.createElement("div");
-      minDiv.innerText = minAttributeValue;
-      minDiv.style.marginRight = "5px";
-      symbolContainer.appendChild(minDiv);
+    const useGradient = gradientFlags[key.split(".")[0]];
+    const layer = vectorLayers[index];  // Get the layer for this entry
+    const layerColor = shapefileColors[key.split(".")[0]];
 
-      const gradient = ctx.createLinearGradient(0, 0, 50, 0);
-      gradient.addColorStop(0, "rgb(255, 255, 255)");
-      gradient.addColorStop(1, `rgb(255, 0, 0)`);
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 50, 10);
-      symbolContainer.appendChild(canvas);
+    if (isPolygonLayer(layer)) {
+      if (useGradient) {
+        const bounds = attributeBounds[key];
+        const minDiv = document.createElement("div");
+        minDiv.innerText = bounds.min;
+        minDiv.style.marginRight = "5px";
+        symbolContainer.appendChild(minDiv);
 
-      const maxDiv = document.createElement("div");
-      maxDiv.innerText = maxAttributeValue;
-      maxDiv.style.marginLeft = "5px";
-      symbolContainer.appendChild(maxDiv);
+        const gradient = ctx.createLinearGradient(0, 0, 50, 0);
+        gradient.addColorStop(0, "rgb(255, 255, 255)");
+        gradient.addColorStop(1, `rgb(255, 0, 0)`);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 50, 10);
+        symbolContainer.appendChild(canvas);
+
+        const maxDiv = document.createElement("div");
+        maxDiv.innerText = bounds.max;
+        maxDiv.style.marginLeft = "5px";
+        symbolContainer.appendChild(maxDiv);
+      } else {
+        // Solid color rectangle
+        ctx.fillStyle = "rgb(255, 128, 128)";
+        ctx.fillRect(0, 0, 50, 10);
+        symbolContainer.appendChild(canvas);
+      }
     } else {
-      // Align the point symbol to the center
-      symbolContainer.style.justifyContent = "center";
-
       // Point symbol
-      ctx.fillStyle = "blue";
+      ctx.fillStyle = layerColor;
       ctx.beginPath();
       ctx.arc(25, 5, 3, 0, Math.PI * 2);
       ctx.fill();
+      canvas.style.marginLeft = "80px";  // Shift canvas to align the center
       symbolContainer.appendChild(canvas);
     }
 
     layerDiv.appendChild(symbolContainer);
 
-    // Add shapefile name
     const title = document.createElement("div");
-    title.innerText = key.split(".")[0];
+    title.innerText = shapefileLabels[key.split(".")[0]];
     title.style.marginLeft = "20px";
 
     layerDiv.appendChild(title);
     legendDiv.appendChild(layerDiv);
   });
 }
+
+
 
 
 // Update map size when the window is resized
