@@ -15,7 +15,7 @@ def index():
 def serve_js():
     return send_from_directory('.', 'main.js')
 
-shapefiles = ["electricity_rates_by_state_merged.shp", "US_elec.shp"]
+shapefiles = ["electricity_rates_by_state_merged.shp", "US_elec.shp", "highway_assignment_links_single_unit.shp"]
 
 @app.route('/get_shapefiles')
 def get_shapefiles():
