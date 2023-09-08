@@ -7,21 +7,13 @@ Created on Sat Apr 8 22:08:00
 @author: danikam
 """
 
-import os
-import sys
-
 import numpy as np
 import pandas as pd
 
 import geopandas as gpd
-import geopy
-from tqdm import tqdm, trange
-from pathlib import Path
-from CommonTools import get_top_dir
+from CommonTools import get_top_dir, saveShapefile
 
-import time
-
-def mergeShapefile(dest, shapefile_path, min_tonnage = 10000):
+def mergeShapefile(dest, shapefile_path, min_tonnage=None, road_class=None):
     '''
     Reads in the shapefile containing the highway links, and merges it with the highway flux assignments
 
@@ -31,51 +23,37 @@ def mergeShapefile(dest, shapefile_path, min_tonnage = 10000):
 
     shapefile_path (string): Path to the shapefile to be joined with the dataframe
     
-    min_tonnage (float): Minimum annual tons per link required to save the link to the output shapefile
+    min_tonnage (float or None): Minimum annual tons per link required to save the link to the output shapefile (if None, no filter applied)
+    
+    road_class (string or None): Road class to filter for (if None, no filter applied)
 
     Returns
     -------
     merged_Dataframe (pd.DataFrame): Joined dataframe
     '''
     
-    shapefile = gpd.read_file(shapefile_path, include_fields=['ID', 'LENGTH', 'DATA', 'VERSION', 'ShapeSTLen', 'geometry'])
+    shapefile = gpd.read_file(shapefile_path, include_fields=['ID', 'LENGTH', 'ShapeSTLen', 'geometry', 'Class'])
+    cClass = np.ones(len(shapefile), dtype=bool)
+    if not (road_class is None):
+        cClass = cClass & (~(shapefile['Class'].isna())) & (shapefile['Class'] == road_class)
+    shapefile = shapefile[cClass]
+    
     merged_dataframe = shapefile.merge(dest, on='ID', how='left')
     
 #    # Convert to tons per mile
 #    merged_dataframe['TOT Tons_22 All'] = merged_dataframe['TOT Tons_22 All'] / merged_dataframe['ShapeSTLen']
     
-    # Filter for links where the total tons transported (TOT Tons_22 All) isn't NULL and is greater than 10,000
-    merged_dataframe = merged_dataframe[(~(merged_dataframe['Tot Tons'].isna())) & (merged_dataframe['Tot Tons'] > min_tonnage)]
+    # Filter for links above a given tonnage and/or on a given road class
+    cFilter = np.ones(len(merged_dataframe), dtype=bool)
+    if not (min_tonnage is None):
+        cFilter = cFilter & (~(merged_dataframe['Tot Tons'].isna())) & (merged_dataframe['Tot Tons'] > min_tonnage)
+    merged_dataframe = merged_dataframe[cFilter]
     
     #print(merged_dataframe)
     
     return merged_dataframe
     
-def saveShapefile(file, name):
-    '''
-    Saves a pandas dataframe as a shapefile
-
-    Parameters
-    ----------
-    file (pd.DataFrame): Dataframe to be saved as a shapefile
-
-    name (string): Filename to the shapefile save to (must end in .shp)
-
-    Returns
-    -------
-    None
-    '''
-    # Make sure the filename ends in .shp
-    if not name.endswith('.shp'):
-        print("ERROR: Filename for shapefile must end in '.shp'. File will not be saved.")
-        exit()
-    # Make sure the full directory path to save to exists, otherwise create it
-    dir = os.path.dirname(name)
-    if not os.path.exists(dir):
-        os.makedirs(dir)
-    file.to_file(name)
-    
-def read_highway_assignments(top_dir, unit_type='All'):
+def read_highway_assignments(top_dir, unit_type='All', include_trips=False):
     '''
     Reads in the FAF5 highway assignments as a dataframe, and gets the columns of interest
 
@@ -83,6 +61,7 @@ def read_highway_assignments(top_dir, unit_type='All'):
     ----------
     top_dir (string): Path to top-level directory of the repository
     unit_type (string): Type of truck unit. SU: Single unit. CU: Combined unit.
+    include_trips (boolean): Indicates whether or not to include total trips in addition to tons
 
     Returns
     -------
@@ -98,8 +77,11 @@ def read_highway_assignments(top_dir, unit_type='All'):
     highway_assignments_df = pd.read_csv(f'{top_dir}/data/FAF5_highway_assignment_results/FAF5_2022_Highway_Assignment_Results/CSV Format/FAF5 Total {highway_assignment_modifier}Truck Flows by Commodity_2022.csv')
     
     # Filter for the columns we're interested in
-    highway_assignments_filtered_df = highway_assignments_df.filter(['ID', f'TOT Tons_22 {unit_type}'], axis=1)
-    highway_assignments_filtered_df = highway_assignments_filtered_df.rename(columns={f'TOT Tons_22 {unit_type}': 'Tot Tons'})
+    columns = ['ID', f'TOT Tons_22 {unit_type}']
+    if include_trips:
+        columns += [f'TOT Trips_22 {unit_type}']
+    highway_assignments_filtered_df = highway_assignments_df.filter(columns, axis=1)
+    highway_assignments_filtered_df = highway_assignments_filtered_df.rename(columns={f'TOT Tons_22 {unit_type}': 'Tot Tons', f'TOT Trips_22 {unit_type}': 'Tot Trips'})
     
     return highway_assignments_filtered_df
     
@@ -111,12 +93,14 @@ def main():
     df_highway_assignments_all = read_highway_assignments(top_dir, unit_type='All')
     df_highway_assignments_su = read_highway_assignments(top_dir, unit_type='SU')
     df_highway_assignments_cu = read_highway_assignments(top_dir, unit_type='CU')
+    df_highway_assignments_interstate = read_highway_assignments(top_dir, unit_type='All', include_trips=True)
     #start_time = time.time()
     
     # Merge the highway flow assignments in with the shapefile containing the highway links
-    merged_dataframe_all = mergeShapefile(df_highway_assignments_all, f'{top_dir}/data/FAF5_network_links/Freight_Analysis_Framework_(FAF5)_Network_Links.shp')
-    merged_dataframe_su = mergeShapefile(df_highway_assignments_su, f'{top_dir}/data/FAF5_network_links/Freight_Analysis_Framework_(FAF5)_Network_Links.shp')
-    merged_dataframe_cu = mergeShapefile(df_highway_assignments_cu, f'{top_dir}/data/FAF5_network_links/Freight_Analysis_Framework_(FAF5)_Network_Links.shp')
+    merged_dataframe_all = mergeShapefile(df_highway_assignments_all, f'{top_dir}/data/FAF5_network_links/Freight_Analysis_Framework_(FAF5)_Network_Links.shp', min_tonnage=10000)
+    merged_dataframe_su = mergeShapefile(df_highway_assignments_su, f'{top_dir}/data/FAF5_network_links/Freight_Analysis_Framework_(FAF5)_Network_Links.shp', min_tonnage=10000)
+    merged_dataframe_cu = mergeShapefile(df_highway_assignments_cu, f'{top_dir}/data/FAF5_network_links/Freight_Analysis_Framework_(FAF5)_Network_Links.shp', min_tonnage=10000)
+    merged_dataframe_interstate = mergeShapefile(df_highway_assignments_interstate, f'{top_dir}/data/FAF5_network_links/Freight_Analysis_Framework_(FAF5)_Network_Links.shp', min_tonnage=0, road_class=11)
     
     #print(f'Merging took {time.time() - start_time} seconds')
     
@@ -124,6 +108,6 @@ def main():
     saveShapefile(merged_dataframe_all, f'{top_dir}/data/highway_assignment_links/highway_assignment_links.shp')
     saveShapefile(merged_dataframe_su, f'{top_dir}/data/highway_assignment_links/highway_assignment_links_single_unit.shp')
     saveShapefile(merged_dataframe_cu, f'{top_dir}/data/highway_assignment_links/highway_assignment_links_combined_unit.shp')
-    
+    saveShapefile(merged_dataframe_interstate, f'{top_dir}/data/highway_assignment_links/highway_assignment_links_interstate.shp')
         
 main()
