@@ -11,14 +11,11 @@ Users can interact with QGIS either through the user interface ([link to user ma
 ## Pre-requisites
 * An installation of QGIS: [link to downloads for Mac, Windows and Linux](https://qgis.org/en/site/forusers/download.html)
 * python3
-* Access to the [sesame-core](https://github.mit.edu/sesame/sesame-core) repository
 
 ## Setup
 
-Clone this repo, including submodules. **Note:** You will need access to the [sesame-core](https://github.mit.edu/sesame/sesame-core) repository in order to clone it as a submodule. 
-
 ```bash
-git clone --recurse-submodules git@github.com:cubicalknight/FAF5-Analysis.git
+git clone git@github.com:cubicalknight/FAF5-Analysis.git
 ```
 
 Install python requirements
@@ -153,6 +150,30 @@ wget "https://www.eia.gov/electricity/gridmonitor/sixMonthFiles/EIA930_BALANCE_2
 wget https://www.eia.gov/electricity/data/state/existcapacity_annual.xlsx
 ```
 
+### U.S. Primary Roads National Shapefile
+```bash
+# from https://catalog.data.gov/dataset/tiger-line-shapefile-2019-nation-u-s-primary-roads-national-shapefile
+wget https://www2.census.gov/geo/tiger/TIGER2019/PRIMARYROADS/tl_2019_us_primaryroads.zip
+unzip tl_2019_us_primaryroads.zip -d tl_2019_us_primaryroads
+rm tl_2019_us_primaryroads.zip
+```
+
+### Bay area county boundaries
+```bash
+# from https://geodata.lib.berkeley.edu/catalog/ark28722-s7hs4j
+wget https://spatial.lib.berkeley.edu/public/ark28722-s7hs4j/data.zip
+unzip data.zip -d bay_area_counties
+rm data.zip
+```
+
+### Counties in Utah
+```bash
+# from https://gis.utah.gov/data/boundaries/citycountystate/
+wget https://opendata.arcgis.com/datasets/90431cac2f9f49f4bcf1505419583753_0.zip
+unzip 90431cac2f9f49f4bcf1505419583753_0.zip -d utah_counties
+rm 90431cac2f9f49f4bcf1505419583753_0.zip
+```
+
 You can now cd back out of the data directory
 ```bash
 cd ..
@@ -179,12 +200,7 @@ To run a script in QGIS:
 The following scripts should be run outside of QGIS:
 * [Point2PointFAF.py](./source/Point2PointFAF.py)
 
-Scripts run outside of QGIS should be executed directly with the python installation that was used to install the requirements in `requirements.txt`(./requirements.txt). For example:
-
-```bash
-cd source
-python Point2PointFAF.py
-```
+Scripts run outside of QGIS should be executed directly with the python installation that was used to install the requirements in `requirements.txt`(./requirements.txt) (examples below).
 
 ## Processing highway assignments
 
@@ -230,6 +246,26 @@ To run:
 
 ```bash
 python source/ProcessElectricityPrices.py 
+```
+
+## Processing State-level Incentives and Regulations
+
+The script [ProcessStateSupport.py](./source/ProcessStateSupport.py) reads in the shapefile containing borders of US states, along with CSV files containing state-level incentives relevant to trucking from the [AFDC website](https://afdc.energy.gov/laws/state), and joins the CSV files with the shapefile to produce a set of shapefiles with the number of incentives of each type (fuel, vehicle purchase, emissions and infrastructure) and fuel target (electrification, hydrogen, ethanol, etc.) for each state. 
+
+To run:
+
+```bash
+python source/ProcessStateSupport.py
+```
+
+# Processing planned infrastructure corridors for heavy duty vehicles
+
+The script [PrepareInfrastructureCorridors.py](./source/PrepareInfrastructureCorridors.py) reads in either a shapefile with the US highway system, or shapefiles with specific regions of planned heavy duty vehicle infrastructure corridors [announced by the Biden-Harris administration](https://www.energy.gov/articles/biden-harris-administration-announces-funding-zero-emission-medium-and-heavy-duty-vehicle). For corridors represented as subsets of the national highway system, the code produces shapefiles for each highway segment with a planned infrastructure project. For corridors represented as regions of the US, the code produces shapefiles showing the region(s) where the planned infrastructure project will take place. 
+
+To run:
+
+```bash
+python source/PrepareInfrastructureCorridors.py
 ```
 
 This should produce shapefiles for zipcode-level and state-level electricity prices in `data/electricity_rates_merged`
@@ -290,6 +326,10 @@ bash source/run_all_Point2Point.sh
 
 WARNING: This may take several hours to run in full, and the shapefiles and csv files produced will take up ~100 GB. To reduce this, you can comment out items that you don't want in the COMMODITIES, REGIONS and MODES variables.
 
+## Identifying truck stops and hydrogen production facilities within a given radius
+
+The script [IdentifyFacilitiesInRadius.py](./source/IdentifyFacilitiesInRadius.py) 
+
 ## Visualizing layers with QGIS
 
 The script [PlotWithQGIS.py](./PlotWithQGIS.py) reads in processed shapefiles containing:
@@ -316,3 +356,17 @@ as well as `python source/Point2PointFAF.py [arguments]` for any freight flow an
 <!-- Executing [PlotWithQGIS.py](./PlotWithQGIS.py) in the QGIS GUI (after first running [Point2PointFAF.py](./source/Point2PointFAF.py)) should produce output PDF files in the [layouts](./layouts) directory, which look something like: -->
 
 ![Total domestic exports](./images/highway_and_total_flows.png "Total Domestic Exports")
+
+
+## Visualizing Shapefiles with a Web Interface
+
+The code and shapefiles in [web_interface](./web_interface) represent an initial skeleton for functionality to visualize shapefiles interactively on a web interface. The code can be executed as follows:
+
+```bash 
+cd web_interface
+python app.py
+```
+
+If that executes without issue, you should be able to view the map in your browser at http://127.0.0.1:5000/. It currently looks something like this:
+
+![Interactive Web Map](./images/web_map.png "Interactive Web Map")
