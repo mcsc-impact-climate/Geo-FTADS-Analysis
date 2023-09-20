@@ -35,6 +35,9 @@ const shapefileColors = {
 // Create a mapping between layer keys and drop-down values
 const layerMapping = {};
 
+// Declare the data variable in a higher scope
+let data;
+
 // Fetch shapefile data from the Flask app
 fetch('/get_shapefiles')
   .then(response => {
@@ -43,7 +46,9 @@ fetch('/get_shapefiles')
     }
     return response.json();
   })
-  .then(data => {
+  .then(dataResponse => {
+    data = dataResponse; // Assign the data to the higher-scoped variable
+
     console.log('Fetched data:', data); // Debug log to check what's returned
     let allFeatures = [];
 
@@ -58,8 +63,7 @@ fetch('/get_shapefiles')
 
         const minVal = Math.min(...features.map(f => f.get(attributeName) || Infinity));
         const maxVal = Math.max(...features.map(f => f.get(attributeName) || -Infinity));
-
-        attributeBounds[key] = { min: minVal, max: maxVal };
+        attributeBounds[attributeKey] = { min: minVal, max: maxVal };
 
         const vectorLayer = new ol.layer.Vector({
           source: new ol.source.Vector({
@@ -78,6 +82,9 @@ fetch('/get_shapefiles')
     // Populate the layer selection drop-down using the mapping
     populateLayerDropdown(layerMapping);
 
+    // Attach the updateSelectedLayers function to the button click event
+    attachEventListeners();
+
     initMap();
 
     // Update the legend after layers have been processed
@@ -90,10 +97,13 @@ fetch('/get_shapefiles')
 // Attach the updateSelectedLayers function to the button click event
 function attachEventListeners() {
   const applyButton = document.querySelector('button');
-  applyButton.addEventListener('click', updateSelectedLayers);
+  applyButton.addEventListener('click', () => {
+    updateSelectedLayers();
+    updateLegend(data); // Call updateLegend after updating selected layers
+  });
 }
 
-attachEventListeners();
+//attachEventListeners();
 
 // Function to populate the layer selection drop-down using the mapping
 function populateLayerDropdown(mapping) {
@@ -146,7 +156,7 @@ function createStyleFunction(attributeName, shapefileName) {
     const attributeKey = shapefileName.split(".")[0];
     const attributeName = gradientAttributes[attributeKey];
 
-    const bounds = attributeBounds[shapefileName]; // Get the bounds for this specific shapefile
+    const bounds = attributeBounds[attributeKey]; // Get the bounds for this specific shapefile
     const attributeValue = feature.get(attributeName);
     
     const useGradient = gradientFlags[shapefileName.split(".")[0]];
@@ -278,6 +288,11 @@ function initMap() {
       zoom: 2,
     }),
   });
+
+    // Set the visibility of all vector layers to false initially
+  vectorLayers.forEach((layer) => {
+    layer.setVisible(false);
+  });
 }
 
 function updateLegend(data) {
@@ -296,72 +311,80 @@ function updateLegend(data) {
   header.style.fontWeight = "bold";
   legendDiv.appendChild(header);
 
-  Object.keys(data).forEach((key, index) => {
-    const layerDiv = document.createElement("div");
-    layerDiv.style.display = "flex";
-    layerDiv.style.alignItems = "center";
+  // Get the currently selected layers
+  const selectedLayers = getSelectedLayers();
 
-    const symbolLabelContainer = document.createElement("div");
-    symbolLabelContainer.style.display = "flex";
-    symbolLabelContainer.style.width = "150px";  // Setting fixed width to ensure alignment
-    symbolLabelContainer.style.alignItems = "center";
-    symbolLabelContainer.style.justifyContent = "center";
-
-    const symbolContainer = document.createElement("div");
-    symbolContainer.style.display = "flex";
-    symbolContainer.style.alignItems = "center";
-    symbolContainer.style.width = "120px"; // fixed width
-
-    const canvas = document.createElement("canvas");
-    canvas.width = 50;
-    canvas.height = 10;
-    const ctx = canvas.getContext("2d");
-
-    const useGradient = gradientFlags[key.split(".")[0]];
-    const layer = vectorLayers[index];  // Get the layer for this entry
-    const layerColor = shapefileColors[key.split(".")[0]] || 'blue'; // Fetch color from dictionary, or default to blue
+  // Iterate through the vectorLayers and update the legend
+  vectorLayers.forEach((layer) => {
+    const key = layer.get("key"); // Get the key property
     const attributeKey = key.split(".")[0];
-    const attributeName = gradientAttributes[attributeKey];
-    const bounds = attributeBounds[key];
 
-    if (isPolygonLayer(layer)) {
+    // Check if this layer is in the list of selected layers or if "All Layers" is selected
+    if (selectedLayers.includes(attributeKey) || selectedLayers.includes("all")) {
+      const layerDiv = document.createElement("div");
+      layerDiv.style.display = "flex";
+      layerDiv.style.alignItems = "center";
+
+      const symbolLabelContainer = document.createElement("div");
+      symbolLabelContainer.style.display = "flex";
+      symbolLabelContainer.style.width = "150px";  // Setting fixed width to ensure alignment
+      symbolLabelContainer.style.alignItems = "center";
+      symbolLabelContainer.style.justifyContent = "center";
+
+      const symbolContainer = document.createElement("div");
+      symbolContainer.style.display = "flex";
+      symbolContainer.style.alignItems = "center";
+      symbolContainer.style.width = "120px"; // fixed width
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 50;
+      canvas.height = 10;
+      const ctx = canvas.getContext("2d");
+
+      const useGradient = gradientFlags[attributeKey];
+      const layerColor = shapefileColors[attributeKey] || 'blue'; // Fetch color from dictionary, or default to blue
+      const attributeName = gradientAttributes[attributeKey];
+      const bounds = attributeBounds[key];
+
+      // Add legend entry only for visible layers
+      if (isPolygonLayer(layer)) {
         if (useGradient) {
-            const minVal = bounds.min > 100 ? bounds.min.toExponential(2) : bounds.min;
-            const minDiv = document.createElement("div");
-            minDiv.innerText = minVal.toString();
-            minDiv.style.marginRight = "5px";
-            symbolContainer.appendChild(minDiv);
-            symbolContainer.style.marginRight = "40px";
+          const minVal = bounds.min > 100 ? bounds.min.toExponential(2) : bounds.min;
+          const minDiv = document.createElement("div");
+          minDiv.innerText = minVal.toString();
+          minDiv.style.marginRight = "5px";
+          symbolContainer.appendChild(minDiv);
+          symbolContainer.style.marginRight = "40px";
 
-            const gradient = ctx.createLinearGradient(0, 0, 50, 0);
-            gradient.addColorStop(0, "rgb(255, 255, 255)");
-            gradient.addColorStop(1, `rgb(255, 0, 0)`);
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 50, 10);
-            symbolContainer.appendChild(canvas);
-            symbolContainer.style.marginRight = "40px";
+          const gradient = ctx.createLinearGradient(0, 0, 50, 0);
+          gradient.addColorStop(0, "rgb(255, 255, 255)");
+          gradient.addColorStop(1, `rgb(255, 0, 0)`);
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, 0, 50, 10);
+          symbolContainer.appendChild(canvas);
+          symbolContainer.style.marginRight = "40px";
 
-            const maxVal = bounds.max > 100 ? bounds.max.toExponential(2) : bounds.max;
-            const maxDiv = document.createElement("div");
-            maxDiv.innerText = maxVal.toString();
-            maxDiv.style.marginLeft = "5px";
-            symbolContainer.appendChild(maxDiv);
-            symbolContainer.style.marginRight = "40px";
-          } else {
-            // Solid color rectangle
-            ctx.fillStyle = "rgb(255, 128, 128)";
-            ctx.fillRect(0, 0, 50, 10);
-            symbolContainer.appendChild(canvas);
-            symbolContainer.style.marginRight = "40px";
-            }
-    } else if (isLineStringLayer(vectorLayers[index])) {
-          if (useGradient && bounds) { // Check to make sure bounds are actually defined
-            const minVal = bounds.min > 100 ? bounds.min.toExponential(2) : bounds.min;
-            const minDiv = document.createElement("div");
-            minDiv.innerText = minVal.toString(); // Minimum attribute value
-            minDiv.style.marginRight = "5px";
-            symbolContainer.appendChild(minDiv);
-            symbolContainer.style.marginRight = "40px";
+          const maxVal = bounds.max > 100 ? bounds.max.toExponential(2) : bounds.max;
+          const maxDiv = document.createElement("div");
+          maxDiv.innerText = maxVal.toString();
+          maxDiv.style.marginLeft = "5px";
+          symbolContainer.appendChild(maxDiv);
+          symbolContainer.style.marginRight = "40px";
+        } else {
+          // Solid color rectangle
+          ctx.fillStyle = "rgb(255, 128, 128)";
+          ctx.fillRect(0, 0, 50, 10);
+          symbolContainer.appendChild(canvas);
+          symbolContainer.style.marginRight = "40px";
+        }
+      } else if (isLineStringLayer(layer)) {
+        if (useGradient && bounds) { // Check to make sure bounds are actually defined
+          const minVal = bounds.min > 100 ? bounds.min.toExponential(2) : bounds.min;
+          const minDiv = document.createElement("div");
+          minDiv.innerText = minVal.toString(); // Minimum attribute value
+          minDiv.style.marginRight = "5px";
+          symbolContainer.appendChild(minDiv);
+          symbolContainer.style.marginRight = "40px";
 
           // New canvas for line width
           const canvas = document.createElement("canvas");
@@ -387,99 +410,114 @@ function updateLegend(data) {
           symbolContainer.style.marginRight = "40px";
 
           // Check to make sure bounds are actually defined
-            const maxVal = bounds.max > 100 ? bounds.max.toExponential(2) : bounds.max;
-            const maxDiv = document.createElement("div");
-            maxDiv.innerText = maxVal.toString(); // Maximum attribute value
-            maxDiv.style.marginLeft = "5px";
-            symbolContainer.appendChild(maxDiv);
-            symbolContainer.style.marginRight = "40px";
-            } else {
-            // New canvas for constant width line
-            const constantCanvas = document.createElement("canvas");
-            constantCanvas.width = 50;
-            constantCanvas.height = 10;  // Set height to 10 for constant line width
-            const constantCtx = constantCanvas.getContext("2d");
+          const maxVal = bounds.max > 100 ? bounds.max.toExponential(2) : bounds.max;
+          const maxDiv = document.createElement("div");
+          maxDiv.innerText = maxVal.toString(); // Maximum attribute value
+          maxDiv.style.marginLeft = "5px";
+          symbolContainer.appendChild(maxDiv);
+          symbolContainer.style.marginRight = "40px";
+        } else {
+          // New canvas for constant width line
+          const constantCanvas = document.createElement("canvas");
+          constantCanvas.width = 50;
+          constantCanvas.height = 10;  // Set height to 10 for constant line width
+          const constantCtx = constantCanvas.getContext("2d");
 
-            constantCtx.strokeStyle = layerColor;
-            constantCtx.lineWidth = 1;
+          constantCtx.strokeStyle = layerColor;
+          constantCtx.lineWidth = 1;
 
-            constantCtx.beginPath();
-            constantCtx.moveTo(0, 5);
-            constantCtx.lineTo(50, 5);
-            constantCtx.stroke();
+          constantCtx.beginPath();
+          constantCtx.moveTo(0, 5);
+          constantCtx.lineTo(50, 5);
+          constantCtx.stroke();
 
-            symbolContainer.appendChild(constantCanvas);
-            symbolContainer.style.marginRight = "40px";
+          symbolContainer.appendChild(constantCanvas);
+          symbolContainer.style.marginRight = "40px";
+        }
+      } else if (isPointLayer(layer)) { // this block is for point-like geometries
+        // check if gradient should be used for points
+        if (useGradient && bounds) {
+          // Minimum value and minimum point size
+          const minVal = bounds.min > 100 ? bounds.min.toExponential(2) : bounds.min;
+          const minDiv = document.createElement("div");
+          minDiv.innerText = minVal.toString();
+          minDiv.style.marginRight = "5px";
+          symbolContainer.appendChild(minDiv);
+
+          // Canvas to draw points
+          const minPointSize = 3;  // Minimum size (can set according to your needs)
+          const maxPointSize = 10; // Maximum size (can set according to your needs)
+
+          // Create canvas for the minimum point size
+          const minPointCanvas = document.createElement("canvas");
+          minPointCanvas.width = 20;
+          minPointCanvas.height = 20;
+          const minCtx = minPointCanvas.getContext("2d");
+
+          minCtx.fillStyle = layerColor;
+          minCtx.beginPath();
+          minCtx.arc(10, 10, minPointSize, 0, Math.PI * 2);
+          minCtx.fill();
+          symbolContainer.appendChild(minPointCanvas);
+
+          // Create canvas for the maximum point size
+          const maxPointCanvas = document.createElement("canvas");
+          maxPointCanvas.width = 20;
+          maxPointCanvas.height = 20;
+          const maxCtx = maxPointCanvas.getContext("2d");
+
+          maxCtx.fillStyle = layerColor;
+          maxCtx.beginPath();
+          maxCtx.arc(10, 10, maxPointSize, 0, Math.PI * 2);
+          maxCtx.fill();
+          symbolContainer.appendChild(maxPointCanvas);
+
+          // Maximum value
+          const maxVal = bounds.max > 100 ? bounds.max.toExponential(2) : bounds.max;
+          const maxDiv = document.createElement("div");
+          maxDiv.innerText = maxVal.toString();
+          maxDiv.style.marginLeft = "5px";
+          symbolContainer.appendChild(maxDiv);
+        } else {
+          // code for constant size points
+          ctx.fillStyle = layerColor;
+          ctx.beginPath();
+          ctx.arc(25, 5, 3, 0, Math.PI * 2);
+          ctx.fill();
+          canvas.style.marginLeft = "30px";  // Shift canvas to align the center
+          symbolContainer.appendChild(canvas);
+        }
+
+        symbolContainer.style.marginRight = "40px";
       }
-    } else if (isPointLayer(vectorLayers[index])) { // this block is for point-like geometries
-  // check if gradient should be used for points
-  if (useGradient && bounds) {
-    // Minimum value and minimum point size
-    const minVal = bounds.min > 100 ? bounds.min.toExponential(2) : bounds.min;
-    const minDiv = document.createElement("div");
-    minDiv.innerText = minVal.toString();
-    minDiv.style.marginRight = "5px";
-    symbolContainer.appendChild(minDiv);
 
-    // Canvas to draw points
-    const minPointSize = 3;  // Minimum size (can set according to your needs)
-    const maxPointSize = 10; // Maximum size (can set according to your needs)
+      layerDiv.appendChild(symbolContainer);
 
-    // Create canvas for the minimum point size
-    const minPointCanvas = document.createElement("canvas");
-    minPointCanvas.width = 20;
-    minPointCanvas.height = 20;
-    const minCtx = minPointCanvas.getContext("2d");
+      symbolLabelContainer.appendChild(symbolContainer);  // Append symbolContainer to symbolLabelContainer
 
-    minCtx.fillStyle = layerColor;
-    minCtx.beginPath();
-    minCtx.arc(10, 10, minPointSize, 0, Math.PI * 2);
-    minCtx.fill();
-    symbolContainer.appendChild(minPointCanvas);
+      const title = document.createElement("div");
+      title.innerText = shapefileLabels[attributeKey];
+      title.style.marginLeft = "20px";
 
-    // Create canvas for the maximum point size
-    const maxPointCanvas = document.createElement("canvas");
-    maxPointCanvas.width = 20;
-    maxPointCanvas.height = 20;
-    const maxCtx = maxPointCanvas.getContext("2d");
-
-    maxCtx.fillStyle = layerColor;
-    maxCtx.beginPath();
-    maxCtx.arc(10, 10, maxPointSize, 0, Math.PI * 2);
-    maxCtx.fill();
-    symbolContainer.appendChild(maxPointCanvas);
-
-    // Maximum value
-    const maxVal = bounds.max > 100 ? bounds.max.toExponential(2) : bounds.max;
-    const maxDiv = document.createElement("div");
-    maxDiv.innerText = maxVal.toString();
-    maxDiv.style.marginLeft = "5px";
-    symbolContainer.appendChild(maxDiv);
-  } else {
-    // code for constant size points
-    ctx.fillStyle = layerColor;
-    ctx.beginPath();
-    ctx.arc(25, 5, 3, 0, Math.PI * 2);
-    ctx.fill();
-    canvas.style.marginLeft = "30px";  // Shift canvas to align the center
-    symbolContainer.appendChild(canvas);
-  }
-
-  symbolContainer.style.marginRight = "40px";
+      layerDiv.appendChild(symbolLabelContainer);  // Append symbolLabelContainer to layerDiv
+      layerDiv.appendChild(title);
+      legendDiv.appendChild(layerDiv);
+    }
+  });
 }
 
-    layerDiv.appendChild(symbolContainer);
+function getSelectedLayers() {
+  const selectedLayers = [];
+  const layerDropdown = document.getElementById("layer-dropdown");
 
-    symbolLabelContainer.appendChild(symbolContainer);  // Append symbolContainer to symbolLabelContainer
+  // Get selected options from the drop-down
+  for (const option of layerDropdown.options) {
+    if (option.selected) {
+      selectedLayers.push(option.value);
+    }
+  }
 
-    const title = document.createElement("div");
-    title.innerText = shapefileLabels[key.split(".")[0]];
-    title.style.marginLeft = "20px";
-
-    layerDiv.appendChild(symbolLabelContainer);  // Append symbolLabelContainer to layerDiv
-    layerDiv.appendChild(title);
-    legendDiv.appendChild(layerDiv);
-  });
+  return selectedLayers;
 }
 
 
