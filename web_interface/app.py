@@ -15,7 +15,7 @@ def index():
 def serve_js():
     return send_from_directory('.', 'main.js')
 
-shapefile_directory = "../data"
+shapefile_directory = "shapefiles"
 shapefiles = [
     os.path.join(shapefile_directory, "electricity_rates_merged/electricity_rates_by_state_merged.shp"),
     os.path.join(shapefile_directory, "Fuel_Corridors/US_elec/US_elec.shp"),
