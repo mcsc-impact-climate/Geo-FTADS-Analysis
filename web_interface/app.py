@@ -17,10 +17,11 @@ def serve_js():
 
 shapefile_directory = "shapefiles"
 shapefiles = [
-    os.path.join(shapefile_directory, "electricity_rates_merged/electricity_rates_by_state_merged.shp"),
-    os.path.join(shapefile_directory, "Fuel_Corridors/US_elec/US_elec.shp"),
-    os.path.join(shapefile_directory, "highway_assignment_links/highway_assignment_links_single_unit.shp"),
-    os.path.join(shapefile_directory, "hydrogen_hubs/shapefiles/electrolyzer_operational.shp")]
+    os.path.join(shapefile_directory, "electricity_rates_by_state_merged.shp"),
+    os.path.join(shapefile_directory, "US_elec.shp"),
+    os.path.join(shapefile_directory, "highway_assignment_links_single_unit.shp"),
+    os.path.join(shapefile_directory, "electrolyzer_operational.shp"),
+]
 
 @app.route('/get_shapefiles')
 def get_shapefiles():
