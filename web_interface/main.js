@@ -4,23 +4,29 @@ var attributeBounds = {}; // Object to store min and max attribute values for ea
 const pointSizeFactor = 10;
 
 const shapefileLabels = {
+  'mode_truck_commodity_all_origin_all_dest_all': 'Imports+Exports (ton-miles / sq mile)',
   'electricity_rates_by_state_merged': 'Electricity rate (cents/kWh)',
   'US_elec': 'DCFC Charging Stations',
-  'highway_assignment_links_single_unit': 'Highway Freight Flows (annual tons/link)',
+  'highway_assignment_links_single_unit': 'Single-unit Highway Freight Flows (annual tons/link)',
+  'highway_assignment_links_interstate': 'Highway Freight Flows (annual tons/link)',
   'electrolyzer_operational': 'Operational Electrolyzers',
 };
 
 // Key: shapefile name, Value: boolean indicating whether to apply a gradient
 const gradientFlags = {
+  'mode_truck_commodity_all_origin_all_dest_all': true,
   'electricity_rates_by_state_merged': true,
   'US_elec': false,
   'highway_assignment_links_single_unit': true,
+  'highway_assignment_links_interstate': true,
   'electrolyzer_operational': true,
 };
 
 const gradientAttributes = {
+  'mode_truck_commodity_all_origin_all_dest_all': 'Tmil Tot D',
   'electricity_rates_by_state_merged': 'Cents_kWh',
   'highway_assignment_links_single_unit': 'Tot Tons',
+  'highway_assignment_links_interstate': 'Tot Tons',
   'electrolyzer_operational': 'Power_kW',
 };
 
@@ -28,7 +34,8 @@ const gradientAttributes = {
 const shapefileColors = {
   'electricity_rates_by_state_merged': 'red',
   'US_elec': 'blue',
-  'highway_assignment_links_single_unit': 'black',
+  'highway_assignment_links_single_unit': 'cyan',
+  'highway_assignment_links_interstate': 'black',
   'electrolyzer_operational': 'purple',
 };
 
@@ -349,7 +356,7 @@ function updateLegend(data) {
       // Add legend entry only for visible layers
       if (isPolygonLayer(layer)) {
         if (useGradient) {
-          const minVal = bounds.min > 100 ? bounds.min.toExponential(2) : bounds.min;
+          const minVal = bounds.min < 0.01 ? bounds.min.toExponential(1) : (bounds.min > 100 ? bounds.min.toExponential(1) : bounds.min.toFixed(1));
           const minDiv = document.createElement("div");
           minDiv.innerText = minVal.toString();
           minDiv.style.marginRight = "5px";
@@ -364,7 +371,7 @@ function updateLegend(data) {
           symbolContainer.appendChild(canvas);
           symbolContainer.style.marginRight = "40px";
 
-          const maxVal = bounds.max > 100 ? bounds.max.toExponential(2) : bounds.max;
+          const maxVal = bounds.max < 0.01 ? bounds.max.toExponential(1) : (bounds.max > 100 ? bounds.max.toExponential(1) : bounds.max.toFixed(1));
           const maxDiv = document.createElement("div");
           maxDiv.innerText = maxVal.toString();
           maxDiv.style.marginLeft = "5px";
@@ -379,7 +386,7 @@ function updateLegend(data) {
         }
       } else if (isLineStringLayer(layer)) {
         if (useGradient && bounds) { // Check to make sure bounds are actually defined
-          const minVal = bounds.min > 100 ? bounds.min.toExponential(2) : bounds.min;
+          const minVal = bounds.min < 0.01 ? bounds.min.toExponential(1) : (bounds.min > 100 ? bounds.min.toExponential(1) : bounds.min.toFixed(1));
           const minDiv = document.createElement("div");
           minDiv.innerText = minVal.toString(); // Minimum attribute value
           minDiv.style.marginRight = "5px";
@@ -410,7 +417,7 @@ function updateLegend(data) {
           symbolContainer.style.marginRight = "40px";
 
           // Check to make sure bounds are actually defined
-          const maxVal = bounds.max > 100 ? bounds.max.toExponential(2) : bounds.max;
+          const maxVal = bounds.max < 0.01 ? bounds.max.toExponential(1) : (bounds.max > 100 ? bounds.max.toExponential(1) : bounds.max.toFixed(1));
           const maxDiv = document.createElement("div");
           maxDiv.innerText = maxVal.toString(); // Maximum attribute value
           maxDiv.style.marginLeft = "5px";
@@ -438,7 +445,7 @@ function updateLegend(data) {
         // check if gradient should be used for points
         if (useGradient && bounds) {
           // Minimum value and minimum point size
-          const minVal = bounds.min > 100 ? bounds.min.toExponential(2) : bounds.min;
+          const minVal = bounds.min < 0.01 ? bounds.min.toExponential(1) : (bounds.min > 100 ? bounds.min.toExponential(1) : bounds.min.toFixed(1));
           const minDiv = document.createElement("div");
           minDiv.innerText = minVal.toString();
           minDiv.style.marginRight = "5px";
@@ -473,7 +480,7 @@ function updateLegend(data) {
           symbolContainer.appendChild(maxPointCanvas);
 
           // Maximum value
-          const maxVal = bounds.max > 100 ? bounds.max.toExponential(2) : bounds.max;
+          const maxVal = bounds.max < 0.01 ? bounds.max.toExponential(1) : (bounds.max > 100 ? bounds.max.toExponential(1) : bounds.max.toFixed(1));
           const maxDiv = document.createElement("div");
           maxDiv.innerText = maxVal.toString();
           maxDiv.style.marginLeft = "5px";

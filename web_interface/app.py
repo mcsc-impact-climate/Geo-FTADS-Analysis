@@ -17,9 +17,12 @@ def serve_js():
 
 shapefile_directory = "shapefiles"
 shapefiles = [
+    os.path.join("../data/Point2Point_outputs/mode_truck_commodity_all_origin_all_dest_all.shp"),
     os.path.join(shapefile_directory, "electricity_rates_by_state_merged.shp"),
     os.path.join(shapefile_directory, "US_elec.shp"),
+    os.path.join(shapefile_directory, "US_elec.shp"),
     os.path.join(shapefile_directory, "highway_assignment_links_single_unit.shp"),
+    #os.path.join("../data/highway_assignment_links/highway_assignment_links_interstate.shp"),
     os.path.join(shapefile_directory, "electrolyzer_operational.shp"),
 ]
 
