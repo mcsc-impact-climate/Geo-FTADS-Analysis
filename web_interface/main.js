@@ -67,7 +67,6 @@ fetch('/get_shapefiles')
 
 // Attach the updateSelectedLayers function to the button click event
 async function attachEventListeners() {
-  console.log('In attachEventListeners')
   const applyButton = document.querySelector('button');
   applyButton.addEventListener('click', async () => {
     await updateSelectedLayers(); // Wait for updateSelectedLayers to complete
@@ -108,31 +107,47 @@ function populateLayerDropdown(mapping) {
   }
 }
 
+// Function to compare two layers based on their geometry types
+function compareLayers(a, b) {
+  layer1 = layerCache[a]
+  layer2 = layerCache[b]
+  if (isPolygonLayer(layer1) && !isPolygonLayer(layer2)) {
+    return -1; // layer1 is a polygon layer, layer2 is not
+  } else if (!isPolygonLayer(layer1) && isPolygonLayer(layer2)) {
+    return 1; // layer2 is a polygon layer, layer1 is not
+  } else if (isPointLayer(layer1) && !isPointLayer(layer2)) {
+    return -1; // layer1 is a point layer, layer2 is not
+  } else if (!isPointLayer(layer1) && isPointLayer(layer2)) {
+    return 1; // layer2 is a point layer, layer1 is not
+  } else {
+    return 0; // both layers have the same geometry type
+  }
+}
+
 // Function to update the selected layers on the map
 async function updateSelectedLayers() {
-  console.log('In updateSelectedLayers()');
   const selectedLayers = getSelectedLayers();
 
   // Create an array of promises for loading layers
   const loadingPromises = [];
 
-  // Iterate through the selected layers and set visibility
-  selectedLayers.forEach(layerName => {
-    const attributeKey = layerName.split("/").pop().split(".")[0];
-
-    // Check if the layer is already in the cache; if not, load it
-    if (!layerCache[attributeKey]) {
+  // Iterate through the selected layers
+  for (const layerName of selectedLayers) {
+    if (!layerCache[layerName]) {
       // Push the promise returned by loadLayer into the array
       loadingPromises.push(loadLayer(layerName));
     } else {
       // Layer is in the cache; update its visibility
-      setLayerVisibility(attributeKey, true);
+      setLayerVisibility(layerName, true);
     }
-  });
+  }
 
   try {
-    // Wait for all loading promises to complete
+    // Wait for all loading promises to complete before proceeding
     await Promise.all(loadingPromises);
+
+    // Reorder selectedLayers based on the associated layers in layerCache
+    selectedLayers.sort((a, b) => compareLayers(a, b));
 
     // Hide layers that are not in the selectedLayers list
     Object.keys(layerCache).forEach(attributeKey => {
@@ -144,12 +159,25 @@ async function updateSelectedLayers() {
     // Handle errors if any loading promise fails
     console.error('Error loading layers:', error);
   }
+
+  // Clear all layers from the map except for the base layer
+  const baseLayer = map.getLayers().item(0); // Assuming the base layer is the first layer
+  map.getLayers().clear();
+
+  // Re-add the base layer to the map
+  if (baseLayer) {
+    map.addLayer(baseLayer);
+  }
+
+  // Add the selected layers to the map
+  for (const layerName of selectedLayers) {
+    map.addLayer(layerCache[layerName]);
+  }
 }
 
 
 // Function to load a specific layer from the server
 async function loadLayer(layerName) {
-  console.log('in loadLayer');
   // Construct the URL without the "shapefiles/" prefix
   const url = `/get_geojson/${layerName}`;
 
@@ -183,10 +211,7 @@ async function loadLayer(layerName) {
     });
 
     // Add the layer to the map and cache it
-    console.log('Adding layer to map');
-    map.addLayer(vectorLayer);
     layerCache[layerName] = vectorLayer;
-    console.log('Saving layer to vectorLayers');
     vectorLayers.push(vectorLayer);
   } catch (error) {
     console.log('Fetch Error:', error);
@@ -342,7 +367,6 @@ function initMap() {
 }
 
 function updateLegend(data) {
-  console.log('In updateLegend()')
   const legendDiv = document.getElementById("legend");
   legendDiv.style.display = "flex";
   legendDiv.style.flexDirection = "column";
