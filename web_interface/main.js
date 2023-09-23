@@ -5,38 +5,56 @@ const pointSizeFactor = 10;
 
 const shapefileLabels = {
   'Truck Imports and Exports': 'Imports+Exports (ton-miles / sq mile)',
-  'Electricity Rates': 'Electricity rate (cents/kWh)',
-  'DCFC Chargers': 'DCFC Charging Stations',
-  'Highway Flows (SU)': 'Single-unit Highway Freight Flows (annual tons/link)',
+  'Grid Emission Intensity': 'CO2e intensity of power grid (lb/MWh)',
+  'Commercial Electricity Price': 'Electricity rate (cents/kWh)',
+  'Maximum Demand Charge': 'Maximum Demand Charge by Utility ($/kW)',
   'Highway Flows (Interstate)': 'Highway Freight Flows (annual tons/link)',
-  'Electrolyzers': 'Operational Electrolyzers',
-};
-
-// Key: shapefile name, Value: boolean indicating whether to apply a gradient
-const gradientFlags = {
-  'Truck Imports and Exports': true,
-  'Electricity Rates': true,
-  'DCFC Chargers': false,
-  'Highway Flows (SU)': true,
-  'Highway Flows (Interstate)': true,
-  'Electrolyzers': true,
+  'Highway Flows (SU)': 'Single-unit Highway Freight Flows (annual tons/link)',
+  'Highway Flows (CU)': 'Combined-unit Highway Freight Flows (annual tons/link)',
+  'Operational Electrolyzers': 'Operational Hydrogen Electrolyzer Facility Capacity (kW)',
+  'Installed Electrolyzers': 'Installed Hydrogen Electrolyzer Facility Capacity (kW)',
+  'Planned Electrolyzers': 'Planned Hydrogen Electrolyzer Facility Capacity (kW)',
+  'Hydrogen from Refineries': 'Hydrogen Production Capacity from Refinery (million standard cubic feet per day)',
+  'State-Level Incentives and Regulations': 'Total Number of Incentives and Regulations',
 };
 
 const gradientAttributes = {
   'Truck Imports and Exports': 'Tmil Tot D',
-  'Electricity Rates': 'Cents_kWh',
+  'Grid Emission Intensity': 'SRC2ERTA',
+  'Commercial Electricity Price': 'Cents_kWh',
+  'Maximum Demand Charge': 'MaxDemCh',
   'Highway Flows (SU)': 'Tot Tons',
+  'Highway Flows (CU)': 'Tot Tons',
   'Highway Flows (Interstate)': 'Tot Tons',
-  'Electrolyzers': 'Power_kW',
+  'Operational Electrolyzers': 'Power_kW',
+  'Installed Electrolyzers': 'Power_kW',
+  'Planned Electrolyzers': 'Power_kW',
+  'Hydrogen from Refineries': 'Cap_MMSCFD',
+  'State-Level Incentives and Regulations': 'all',
 };
 
 // Key: shapefile name, Value: color to use
 const shapefileColors = {
   'Truck Imports and Exports': 'red',
-  'Electricity Rates': 'blue',
+  'Commercial Electricity Price': 'blue',
   'Highway Flows (SU)': 'cyan',
   'Highway Flows (Interstate)': 'black',
-  'Electrolyzers': 'purple',
+  'Operational Electrolyzers': 'red',
+  'Installed Electrolyzers': 'blue',
+  'Planned Electrolyzers': 'green',
+  'Hydrogen from Refineries': 'purple',
+  'East Coast ZEV Corridor': 'orange',
+  'Midwest ZEV Corridor': 'purple',
+  'Houston to LA H2 Corridor': 'green',
+  'I-710 EV Corridor': 'pink',
+  'Northeast EV Corridor': 'cyan',
+  'Bay Area EV Roadmap': 'yellow',
+  'Salt Lake City Region EV Plan': 'red',
+  'DCFC Chargers': 'red',
+  'Hydrogen Stations': 'green',
+  'LNG Stations': 'orange',
+  'CNG Stations': 'purple',
+  'LPG Stations': 'cyan',
 };
 
 // Create a mapping between layer keys and drop-down values
@@ -226,8 +244,7 @@ function createStyleFunction(layerName) {
 
     const bounds = attributeBounds[layerName]; // Get the bounds for this specific shapefile
     const attributeValue = feature.get(attributeName);
-    
-    const useGradient = gradientFlags[layerName];
+    const useGradient = layerName in gradientAttributes;  // Use a gradient if a gradient attribute is specified for the given layer
     const layerColor = shapefileColors[layerName] || 'blue'; // Fetch color from dictionary, or default to blue
 
     const geometryType = feature.getGeometry().getType();
@@ -261,10 +278,11 @@ function createStyleFunction(layerName) {
           zIndex: 10, // Higher zIndex so points appear above polygons
         });
       }
-    } else if (useGradient && bounds && (geometryType === 'Polygon' || geometryType === 'MultiPolygon')) {
-      const component = Math.floor(255 - (255 * (attributeValue - bounds.min) / (bounds.max - bounds.min)));
-      const fillColor = `rgb(255, ${component}, ${component})`;
-        
+    } else if (geometryType === 'Polygon' || geometryType === 'MultiPolygon') {
+        if (useGradient && bounds) {
+        const component = Math.floor(255 - (255 * (attributeValue - bounds.min) / (bounds.max - bounds.min)));
+        const fillColor = `rgb(255, ${component}, ${component})`;
+
       return new ol.style.Style({
         stroke: new ol.style.Stroke({
           color: 'gray',
@@ -275,6 +293,18 @@ function createStyleFunction(layerName) {
         }),
         zIndex: 1 // Lower zIndex so polygons appear below points
       });
+    } else {
+          return new ol.style.Style({
+        stroke: new ol.style.Stroke({
+          color: 'gray',
+          width: 1,
+        }),
+        fill: new ol.style.Fill({
+          color: layerColor,
+        }),
+        zIndex: 1 // Lower zIndex so polygons appear below points
+      });
+    }
       
   }  else if (geometryType === 'LineString' || geometryType === 'MultiLineString') {
       if (useGradient && bounds) {  // Apply varying width only if gradientFlags is true and bounds are defined
@@ -387,11 +417,10 @@ function updateLegend(data) {
 
   // Iterate through the vectorLayers and update the legend
   vectorLayers.forEach((layer) => {
-    const key = layer.get("key"); // Get the key property
-    const attributeKey = key.split(".")[0];
+    const layerName = layer.get("key"); // Get the key property
 
     // Check if this layer is in the list of selected layers or if "All Layers" is selected
-    if (selectedLayers.includes(attributeKey) || selectedLayers.includes("all")) {
+    if (selectedLayers.includes(layerName) || selectedLayers.includes("all")) {
       const layerDiv = document.createElement("div");
       layerDiv.style.display = "flex";
       layerDiv.style.alignItems = "center";
@@ -412,10 +441,10 @@ function updateLegend(data) {
       canvas.height = 10;
       const ctx = canvas.getContext("2d");
 
-      const useGradient = gradientFlags[attributeKey];
-      const layerColor = shapefileColors[attributeKey] || 'blue'; // Fetch color from dictionary, or default to blue
-      const attributeName = gradientAttributes[attributeKey];
-      const bounds = attributeBounds[key];
+      const useGradient = layerName in gradientAttributes;
+      const layerColor = shapefileColors[layerName] || 'blue'; // Fetch color from dictionary, or default to blue
+      const attributeName = gradientAttributes[layerName];
+      const bounds = attributeBounds[layerName];
 
       // Add legend entry only for visible layers
       if (isPolygonLayer(layer)) {
@@ -443,7 +472,7 @@ function updateLegend(data) {
           symbolContainer.style.marginRight = "40px";
         } else {
           // Solid color rectangle
-          ctx.fillStyle = "rgb(255, 128, 128)";
+          ctx.fillStyle = layerColor;
           ctx.fillRect(0, 0, 50, 10);
           symbolContainer.appendChild(canvas);
           symbolContainer.style.marginRight = "40px";
@@ -567,7 +596,12 @@ function updateLegend(data) {
       symbolLabelContainer.appendChild(symbolContainer);  // Append symbolContainer to symbolLabelContainer
 
       const title = document.createElement("div");
-      title.innerText = shapefileLabels[attributeKey];
+
+      if (layerName in shapefileLabels) {
+        title.innerText = shapefileLabels[layerName];
+        } else {
+        title.innerText = layerName;
+        }
       title.style.marginLeft = "20px";
 
       layerDiv.appendChild(symbolLabelContainer);  // Append symbolLabelContainer to layerDiv
