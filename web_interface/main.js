@@ -4,39 +4,39 @@ var attributeBounds = {}; // Object to store min and max attribute values for ea
 const pointSizeFactor = 10;
 
 const shapefileLabels = {
-  'mode_truck_commodity_all_origin_all_dest_all': 'Imports+Exports (ton-miles / sq mile)',
-  'electricity_rates_by_state_merged': 'Electricity rate (cents/kWh)',
-  'US_elec': 'DCFC Charging Stations',
-  'highway_assignment_links_single_unit': 'Single-unit Highway Freight Flows (annual tons/link)',
-  'highway_assignment_links_interstate': 'Highway Freight Flows (annual tons/link)',
-  'electrolyzer_operational': 'Operational Electrolyzers',
+  'Truck Imports and Exports': 'Imports+Exports (ton-miles / sq mile)',
+  'Electricity Rates': 'Electricity rate (cents/kWh)',
+  'DCFC Chargers': 'DCFC Charging Stations',
+  'Highway Flows (SU)': 'Single-unit Highway Freight Flows (annual tons/link)',
+  'Highway Flows (Interstate)': 'Highway Freight Flows (annual tons/link)',
+  'Electrolyzers': 'Operational Electrolyzers',
 };
 
 // Key: shapefile name, Value: boolean indicating whether to apply a gradient
 const gradientFlags = {
-  'mode_truck_commodity_all_origin_all_dest_all': true,
-  'electricity_rates_by_state_merged': true,
-  'US_elec': false,
-  'highway_assignment_links_single_unit': true,
-  'highway_assignment_links_interstate': true,
-  'electrolyzer_operational': true,
+  'Truck Imports and Exports': true,
+  'Electricity Rates': true,
+  'DCFC Chargers': false,
+  'Highway Flows (SU)': true,
+  'Highway Flows (Interstate)': true,
+  'Electrolyzers': true,
 };
 
 const gradientAttributes = {
-  'mode_truck_commodity_all_origin_all_dest_all': 'Tmil Tot D',
-  'electricity_rates_by_state_merged': 'Cents_kWh',
-  'highway_assignment_links_single_unit': 'Tot Tons',
-  'highway_assignment_links_interstate': 'Tot Tons',
-  'electrolyzer_operational': 'Power_kW',
+  'Truck Imports and Exports': 'Tmil Tot D',
+  'Electricity Rates': 'Cents_kWh',
+  'Highway Flows (SU)': 'Tot Tons',
+  'Highway Flows (Interstate)': 'Tot Tons',
+  'Electrolyzers': 'Power_kW',
 };
 
 // Key: shapefile name, Value: color to use
 const shapefileColors = {
-  'electricity_rates_by_state_merged': 'red',
-  'US_elec': 'blue',
-  'highway_assignment_links_single_unit': 'cyan',
-  'highway_assignment_links_interstate': 'black',
-  'electrolyzer_operational': 'purple',
+  'Truck Imports and Exports': 'red',
+  'Electricity Rates': 'blue',
+  'Highway Flows (SU)': 'cyan',
+  'Highway Flows (Interstate)': 'black',
+  'Electrolyzers': 'purple',
 };
 
 // Create a mapping between layer keys and drop-down values
@@ -45,7 +45,7 @@ const layerMapping = {};
 // Declare the data variable in a higher scope
 let data;
 
-// Fetch shapefile data from the Flask app
+// Fetch available shapefile names from the Flask app
 fetch('/get_shapefiles')
   .then(response => {
     if (!response.ok) {
@@ -53,64 +53,38 @@ fetch('/get_shapefiles')
     }
     return response.json();
   })
-  .then(dataResponse => {
-    data = dataResponse; // Assign the data to the higher-scoped variable
-
-    console.log('Fetched data:', data); // Debug log to check what's returned
-    let allFeatures = [];
-
-    for (const [key, value] of Object.entries(data)) {
-      const features = new ol.format.GeoJSON().readFeatures(value, {
-        dataProjection: 'EPSG:3857',
-        featureProjection: 'EPSG:3857',
-      });
-
-      const attributeKey = key.split(".")[0];
-      const attributeName = gradientAttributes[attributeKey];
-
-        const minVal = Math.min(...features.map(f => f.get(attributeName) || Infinity));
-        const maxVal = Math.max(...features.map(f => f.get(attributeName) || -Infinity));
-        attributeBounds[attributeKey] = { min: minVal, max: maxVal };
-
-        const vectorLayer = new ol.layer.Vector({
-          source: new ol.source.Vector({
-            features: features,
-          }),
-          style: createStyleFunction(gradientAttributes[key.split(".")[0]], key),
-          key: key.split(".")[0], // Set the key property with the shapefile name without extension
-        });
-
-      vectorLayers.push(vectorLayer);
-
-      // Create a mapping between the layer key and the drop-down value
-      layerMapping[key.split(".")[0]] = key.split(".")[0];
-    }
-
-    // Populate the layer selection drop-down using the mapping
-    populateLayerDropdown(layerMapping);
-
-    // Attach the updateSelectedLayers function to the button click event
-    attachEventListeners();
-
-    initMap();
-
-    // Update the legend after layers have been processed
-    updateLegend(data);
+  .then(shapefileNames => {
+    // Populate the layer selection drop-down with shapefile names
+    populateLayerDropdown(shapefileNames);
+    attachEventListeners(); // Attach event listeners after populating the dropdown
+    initMap(); // Initialize the map after populating the dropdown
   })
   .catch(error => {
     console.log('Fetch Error:', error);
   });
 
+
+
 // Attach the updateSelectedLayers function to the button click event
-function attachEventListeners() {
+async function attachEventListeners() {
+  console.log('In attachEventListeners')
   const applyButton = document.querySelector('button');
-  applyButton.addEventListener('click', () => {
-    updateSelectedLayers();
-    updateLegend(data); // Call updateLegend after updating selected layers
+  applyButton.addEventListener('click', async () => {
+    await updateSelectedLayers(); // Wait for updateSelectedLayers to complete
+    updateLegend(data); // Now, call updateLegend after updateSelectedLayers is done
   });
 }
 
 //attachEventListeners();
+
+function setLayerVisibility(layerName, isVisible) {
+  // Find the layer by its name and update its visibility
+  const layer = vectorLayers.find(layer => layer.get("key").split(".")[0] === layerName);
+
+  if (layer) {
+    layer.setVisible(isVisible);
+  }
+}
 
 // Function to populate the layer selection drop-down using the mapping
 function populateLayerDropdown(mapping) {
@@ -119,55 +93,117 @@ function populateLayerDropdown(mapping) {
   // Clear existing options
   layerDropdown.innerHTML = "";
 
-  // Add an "All Layers" option
-  const allOption = document.createElement("option");
-  allOption.value = "all";
-  allOption.textContent = "All Layers";
-  layerDropdown.appendChild(allOption);
+//  // Add an "All Layers" option
+//  const allOption = document.createElement("option");
+//  allOption.value = "all";
+//  allOption.textContent = "All Layers";
+//  layerDropdown.appendChild(allOption);
 
   // Add options based on the mapping
   for (const key in mapping) {
     const layerOption = document.createElement("option");
-    layerOption.value = key;
-    layerOption.textContent = mapping[key];
+    layerOption.value = mapping[key];
+    layerOption.textContent = key;
     layerDropdown.appendChild(layerOption);
   }
 }
 
 // Function to update the selected layers on the map
-function updateSelectedLayers() {
-  const selectedLayers = [];
-  const layerDropdown = document.getElementById("layer-dropdown");
+async function updateSelectedLayers() {
+  console.log('In updateSelectedLayers()');
+  const selectedLayers = getSelectedLayers();
 
-  // Get selected options from the drop-down
-  for (const option of layerDropdown.options) {
-    if (option.selected) {
-      selectedLayers.push(option.value);
-    }
-  }
+  // Create an array of promises for loading layers
+  const loadingPromises = [];
 
-  // Iterate through the vectorLayers and set visibility
-  vectorLayers.forEach((layer) => {
-    const key = layer.get("key"); // Get the key property
-    if (selectedLayers.includes(key) || selectedLayers.includes("all")) {
-      layer.setVisible(true);
+  // Iterate through the selected layers and set visibility
+  selectedLayers.forEach(layerName => {
+    const attributeKey = layerName.split("/").pop().split(".")[0];
+
+    // Check if the layer is already in the cache; if not, load it
+    if (!layerCache[attributeKey]) {
+      // Push the promise returned by loadLayer into the array
+      loadingPromises.push(loadLayer(layerName));
     } else {
-      layer.setVisible(false);
+      // Layer is in the cache; update its visibility
+      setLayerVisibility(attributeKey, true);
     }
   });
+
+  try {
+    // Wait for all loading promises to complete
+    await Promise.all(loadingPromises);
+
+    // Hide layers that are not in the selectedLayers list
+    Object.keys(layerCache).forEach(attributeKey => {
+      if (!selectedLayers.includes(attributeKey)) {
+        setLayerVisibility(attributeKey, false);
+      }
+    });
+  } catch (error) {
+    // Handle errors if any loading promise fails
+    console.error('Error loading layers:', error);
+  }
 }
 
-function createStyleFunction(attributeName, shapefileName) {
-  return function(feature) {
 
-    const attributeKey = shapefileName.split(".")[0];
+// Function to load a specific layer from the server
+async function loadLayer(layerName) {
+  console.log('in loadLayer');
+  // Construct the URL without the "shapefiles/" prefix
+  const url = `/get_geojson/${layerName}`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const geojsonData = await response.json();
+    const features = new ol.format.GeoJSON().readFeatures(geojsonData, {
+      dataProjection: 'EPSG:3857',
+      featureProjection: 'EPSG:3857',
+    });
+
+    const attributeKey = layerName;
     const attributeName = gradientAttributes[attributeKey];
 
-    const bounds = attributeBounds[attributeKey]; // Get the bounds for this specific shapefile
+    const minVal = Math.min(...features.map(f => f.get(attributeName) || Infinity));
+    const maxVal = Math.max(...features.map(f => f.get(attributeName) || -Infinity));
+
+    attributeBounds[layerName] = { min: minVal, max: maxVal };
+
+    // Create a vector layer for the selected layer and add it to the map
+    const vectorLayer = new ol.layer.Vector({
+      source: new ol.source.Vector({
+        features: features,
+      }),
+      style: createStyleFunction(layerName),
+      key: layerName.split(".")[0], // Set the key property with the shapefile name without extension
+    });
+
+    // Add the layer to the map and cache it
+    console.log('Adding layer to map');
+    map.addLayer(vectorLayer);
+    layerCache[layerName] = vectorLayer;
+    console.log('Saving layer to vectorLayers');
+    vectorLayers.push(vectorLayer);
+  } catch (error) {
+    console.log('Fetch Error:', error);
+    throw error; // Propagate the error
+  }
+}
+
+function createStyleFunction(layerName) {
+  return function(feature) {
+    const attributeKey = layerName;
+    const attributeName = gradientAttributes[layerName];
+
+    const bounds = attributeBounds[layerName]; // Get the bounds for this specific shapefile
     const attributeValue = feature.get(attributeName);
     
-    const useGradient = gradientFlags[shapefileName.split(".")[0]];
-    const layerColor = shapefileColors[attributeKey] || 'blue'; // Fetch color from dictionary, or default to blue
+    const useGradient = gradientFlags[layerName];
+    const layerColor = shapefileColors[layerName] || 'blue'; // Fetch color from dictionary, or default to blue
 
     const geometryType = feature.getGeometry().getType();
 
@@ -279,6 +315,9 @@ function isLineStringLayer(layer) {
   return geometryType === 'LineString' || geometryType === 'MultiLineString';
 }
 
+// Initialize an empty layer cache
+const layerCache = {};
+
 function initMap() {
   map = new ol.Map({
     target: 'map',
@@ -303,6 +342,7 @@ function initMap() {
 }
 
 function updateLegend(data) {
+  console.log('In updateLegend()')
   const legendDiv = document.getElementById("legend");
   legendDiv.style.display = "flex";
   legendDiv.style.flexDirection = "column";
@@ -514,19 +554,18 @@ function updateLegend(data) {
 }
 
 function getSelectedLayers() {
-  const selectedLayers = [];
+  const selectedLayerNames = [];
   const layerDropdown = document.getElementById("layer-dropdown");
 
   // Get selected options from the drop-down
   for (const option of layerDropdown.options) {
     if (option.selected) {
-      selectedLayers.push(option.value);
+      selectedLayerNames.push(option.text); // Push the text of the selected option
     }
   }
 
-  return selectedLayers;
+  return selectedLayerNames;
 }
-
 
 // Update map size when the window is resized
 window.addEventListener('resize', function() {
