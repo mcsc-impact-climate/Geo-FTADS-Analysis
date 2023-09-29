@@ -48,7 +48,8 @@ rm FAF5_network_links.zip
 
 ### FAF5 Highway Network Assignments
 ```bash
-# from https://geodata.bts.gov/datasets/freight-analysis-framework-faf5-highway-network-assignments
+# from https://ops.fhwa.dot.gov/freight/freight_analysis/faf/
+
 mkdir -p FAF5_Highway_Assignment_Results
 cd FAF5_Highway_Assignment_Results
 wget https://ops.fhwa.dot.gov/freight/freight_analysis/faf/faf_highway_assignment_results/FAF5_2017_HighwayAssignmentResults_04_07_2022.zip
