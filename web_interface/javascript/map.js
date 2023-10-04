@@ -1,87 +1,36 @@
+import { createStyleFunction, isPolygonLayer, isPointLayer, isLineStringLayer } from './styles.js';
+import { getSelectedLayers } from './ui.js';
+import { shapefileLabels, gradientAttributes, shapefileColors } from './name_maps.js';
+
 var vectorLayers = [];
 var map;
 var attributeBounds = {}; // Object to store min and max attribute values for each shapefile
-const pointSizeFactor = 10;
-
-const shapefileLabels = {
-  'Truck Imports and Exports': 'Imports+Exports (ton-miles / sq mile)',
-  'Grid Emission Intensity': 'CO2e intensity of power grid (lb/MWh)',
-  'Commercial Electricity Price': 'Electricity rate (cents/kWh)',
-  'Maximum Demand Charge': 'Maximum Demand Charge by Utility ($/kW)',
-  'Highway Flows (Interstate)': 'Highway Freight Flows (annual tons/link)',
-  'Highway Flows (SU)': 'Single-unit Highway Freight Flows (annual tons/link)',
-  'Highway Flows (CU)': 'Combined-unit Highway Freight Flows (annual tons/link)',
-  'Operational Electrolyzers': 'Operational Hydrogen Electrolyzer Facility Capacity (kW)',
-  'Installed Electrolyzers': 'Installed Hydrogen Electrolyzer Facility Capacity (kW)',
-  'Planned Electrolyzers': 'Planned Hydrogen Electrolyzer Facility Capacity (kW)',
-  'Hydrogen from Refineries': 'Hydrogen Production Capacity from Refinery (million standard cubic feet per day)',
-  'State-Level Incentives and Regulations': 'Total Number of Incentives and Regulations',
-};
-
-const gradientAttributes = {
-  'Truck Imports and Exports': 'Tmil Tot D',
-  'Grid Emission Intensity': 'SRC2ERTA',
-  'Commercial Electricity Price': 'Cents_kWh',
-  'Maximum Demand Charge': 'MaxDemCh',
-  'Highway Flows (SU)': 'Tot Tons',
-  'Highway Flows (CU)': 'Tot Tons',
-  'Highway Flows (Interstate)': 'Tot Tons',
-  'Operational Electrolyzers': 'Power_kW',
-  'Installed Electrolyzers': 'Power_kW',
-  'Planned Electrolyzers': 'Power_kW',
-  'Hydrogen from Refineries': 'Cap_MMSCFD',
-  'State-Level Incentives and Regulations': 'all',
-};
-
-// Key: shapefile name, Value: color to use
-const shapefileColors = {
-  'Truck Imports and Exports': 'red',
-  'Commercial Electricity Price': 'blue',
-  'Highway Flows (SU)': 'cyan',
-  'Highway Flows (Interstate)': 'black',
-  'Operational Electrolyzers': 'red',
-  'Installed Electrolyzers': 'blue',
-  'Planned Electrolyzers': 'green',
-  'Hydrogen from Refineries': 'purple',
-  'East Coast ZEV Corridor': 'orange',
-  'Midwest ZEV Corridor': 'purple',
-  'Houston to LA H2 Corridor': 'green',
-  'I-710 EV Corridor': 'pink',
-  'Northeast EV Corridor': 'cyan',
-  'Bay Area EV Roadmap': 'yellow',
-  'Salt Lake City Region EV Plan': 'red',
-  'DCFC Chargers': 'red',
-  'Hydrogen Stations': 'green',
-  'LNG Stations': 'orange',
-  'CNG Stations': 'purple',
-  'LPG Stations': 'cyan',
-};
-
-// Create a mapping between layer keys and drop-down values
-const layerMapping = {};
 
 // Declare the data variable in a higher scope
 let data;
 
-// Fetch available shapefile names from the Flask app
-fetch('/get_shapefiles')
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return response.json();
-  })
-  .then(shapefileNames => {
-    // Populate the layer selection drop-down with shapefile names
-    populateLayerDropdown(shapefileNames);
-    attachEventListeners(); // Attach event listeners after populating the dropdown
-    initMap(); // Initialize the map after populating the dropdown
-  })
-  .catch(error => {
-    console.log('Fetch Error:', error);
+function initMap() {
+  map = new ol.Map({
+    target: 'map',
+    layers: [
+      new ol.layer.Tile({
+        source: new ol.source.OSM(),
+      }),
+      ...vectorLayers.filter(layer => isPolygonLayer(layer)),  // Add polygon layers first
+      ...vectorLayers.filter(layer => isLineStringLayer(layer)), // Add LineString layers next
+      ...vectorLayers.filter(layer => isPointLayer(layer))    // Add point layers last
+    ],
+    view: new ol.View({
+      center: ol.proj.fromLonLat([0, 0]),
+      zoom: 2,
+    }),
   });
 
-
+    // Set the visibility of all vector layers to false initially
+  vectorLayers.forEach((layer) => {
+    layer.setVisible(false);
+  });
+}
 
 // Attach the updateSelectedLayers function to the button click event
 async function attachEventListeners() {
@@ -92,38 +41,8 @@ async function attachEventListeners() {
   });
 }
 
-//attachEventListeners();
-
-function setLayerVisibility(layerName, isVisible) {
-  // Find the layer by its name and update its visibility
-  const layer = vectorLayers.find(layer => layer.get("key").split(".")[0] === layerName);
-
-  if (layer) {
-    layer.setVisible(isVisible);
-  }
-}
-
-// Function to populate the layer selection drop-down using the mapping
-function populateLayerDropdown(mapping) {
-  const layerDropdown = document.getElementById("layer-dropdown");
-
-  // Clear existing options
-  layerDropdown.innerHTML = "";
-
-//  // Add an "All Layers" option
-//  const allOption = document.createElement("option");
-//  allOption.value = "all";
-//  allOption.textContent = "All Layers";
-//  layerDropdown.appendChild(allOption);
-
-  // Add options based on the mapping
-  for (const key in mapping) {
-    const layerOption = document.createElement("option");
-    layerOption.value = mapping[key];
-    layerOption.textContent = key;
-    layerDropdown.appendChild(layerOption);
-  }
-}
+// Initialize an empty layer cache
+const layerCache = {};
 
 // Function to compare two layers based on their geometry types
 function compareLayers(a, b) {
@@ -139,6 +58,58 @@ function compareLayers(a, b) {
     return 1; // layer2 is a point layer, layer1 is not
   } else {
     return 0; // both layers have the same geometry type
+  }
+}
+
+// Function to load a specific layer from the server
+async function loadLayer(layerName) {
+  // Construct the URL without the "shapefiles/" prefix
+  const url = `/get_geojson/${layerName}`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const geojsonData = await response.json();
+    const features = new ol.format.GeoJSON().readFeatures(geojsonData, {
+      dataProjection: 'EPSG:3857',
+      featureProjection: 'EPSG:3857',
+    });
+
+    const attributeKey = layerName;
+    const attributeName = gradientAttributes[attributeKey];
+
+    const minVal = Math.min(...features.map(f => f.get(attributeName) || Infinity));
+    const maxVal = Math.max(...features.map(f => f.get(attributeName) || -Infinity));
+
+    attributeBounds[layerName] = { min: minVal, max: maxVal };
+
+    // Create a vector layer for the selected layer and add it to the map
+    const vectorLayer = new ol.layer.Vector({
+      source: new ol.source.Vector({
+        features: features,
+      }),
+      style: createStyleFunction(layerName),
+      key: layerName.split(".")[0], // Set the key property with the shapefile name without extension
+    });
+
+    // Add the layer to the map and cache it
+    layerCache[layerName] = vectorLayer;
+    vectorLayers.push(vectorLayer);
+  } catch (error) {
+    console.log('Fetch Error:', error);
+    throw error; // Propagate the error
+  }
+}
+
+function setLayerVisibility(layerName, isVisible) {
+  // Find the layer by its name and update its visibility
+  const layer = vectorLayers.find(layer => layer.get("key").split(".")[0] === layerName);
+
+  if (layer) {
+    layer.setVisible(isVisible);
   }
 }
 
@@ -191,209 +162,6 @@ async function updateSelectedLayers() {
   for (const layerName of selectedLayers) {
     map.addLayer(layerCache[layerName]);
   }
-}
-
-
-// Function to load a specific layer from the server
-async function loadLayer(layerName) {
-  // Construct the URL without the "shapefiles/" prefix
-  const url = `/get_geojson/${layerName}`;
-
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    const geojsonData = await response.json();
-    const features = new ol.format.GeoJSON().readFeatures(geojsonData, {
-      dataProjection: 'EPSG:3857',
-      featureProjection: 'EPSG:3857',
-    });
-
-    const attributeKey = layerName;
-    const attributeName = gradientAttributes[attributeKey];
-
-    const minVal = Math.min(...features.map(f => f.get(attributeName) || Infinity));
-    const maxVal = Math.max(...features.map(f => f.get(attributeName) || -Infinity));
-
-    attributeBounds[layerName] = { min: minVal, max: maxVal };
-
-    // Create a vector layer for the selected layer and add it to the map
-    const vectorLayer = new ol.layer.Vector({
-      source: new ol.source.Vector({
-        features: features,
-      }),
-      style: createStyleFunction(layerName),
-      key: layerName.split(".")[0], // Set the key property with the shapefile name without extension
-    });
-
-    // Add the layer to the map and cache it
-    layerCache[layerName] = vectorLayer;
-    vectorLayers.push(vectorLayer);
-  } catch (error) {
-    console.log('Fetch Error:', error);
-    throw error; // Propagate the error
-  }
-}
-
-function createStyleFunction(layerName) {
-  return function(feature) {
-    const attributeKey = layerName;
-    const attributeName = gradientAttributes[layerName];
-
-    const bounds = attributeBounds[layerName]; // Get the bounds for this specific shapefile
-    const attributeValue = feature.get(attributeName);
-    const useGradient = layerName in gradientAttributes;  // Use a gradient if a gradient attribute is specified for the given layer
-    const layerColor = shapefileColors[layerName] || 'blue'; // Fetch color from dictionary, or default to blue
-
-    const geometryType = feature.getGeometry().getType();
-
-    if (geometryType === 'Point' || geometryType === 'MultiPoint') {
-      if (useGradient && bounds) {
-        const minSize = 2; // Minimum point size
-        const maxSize = 10; // Maximum point size
-
-        // Calculate the point size based on the attribute value and bounds
-        const pointSize = minSize + ((maxSize - minSize) * (attributeValue - bounds.min) / (bounds.max - bounds.min));
-
-        return new ol.style.Style({
-          image: new ol.style.Circle({
-            radius: pointSize,
-            fill: new ol.style.Fill({
-              color: layerColor,
-            }),
-          }),
-          zIndex: 10, // Higher zIndex so points appear above polygons
-        });
-      } else {
-        // Use a default point style if no gradient or bounds are available
-        return new ol.style.Style({
-          image: new ol.style.Circle({
-            radius: 2, // Default point size
-            fill: new ol.style.Fill({
-              color: layerColor,
-            }),
-          }),
-          zIndex: 10, // Higher zIndex so points appear above polygons
-        });
-      }
-    } else if (geometryType === 'Polygon' || geometryType === 'MultiPolygon') {
-        if (useGradient && bounds) {
-        const component = Math.floor(255 - (255 * (attributeValue - bounds.min) / (bounds.max - bounds.min)));
-        const fillColor = `rgb(255, ${component}, ${component})`;
-
-      return new ol.style.Style({
-        stroke: new ol.style.Stroke({
-          color: 'gray',
-          width: 1,
-        }),
-        fill: new ol.style.Fill({
-          color: fillColor,
-        }),
-        zIndex: 1 // Lower zIndex so polygons appear below points
-      });
-    } else {
-          return new ol.style.Style({
-        stroke: new ol.style.Stroke({
-          color: 'gray',
-          width: 1,
-        }),
-        fill: new ol.style.Fill({
-          color: layerColor,
-        }),
-        zIndex: 1 // Lower zIndex so polygons appear below points
-      });
-    }
-      
-  }  else if (geometryType === 'LineString' || geometryType === 'MultiLineString') {
-      if (useGradient && bounds) {  // Apply varying width only if gradientFlags is true and bounds are defined
-        // Normalize within range 1 to 10
-        const normalizedWidth = 1 + 9 * ((attributeValue - bounds.min) / (bounds.max - bounds.min));
-
-        return new ol.style.Style({
-          stroke: new ol.style.Stroke({
-            color: layerColor,
-            width: normalizedWidth,
-          }),
-          zIndex: 5  // zIndex between points and polygons
-        });
-      } else {
-        // Add default line styling here if you want
-        return new ol.style.Style({
-          stroke: new ol.style.Stroke({
-            color: layerColor,
-            width: 1,
-          }),
-          zIndex: 5  // zIndex between points and polygons
-        });
-      }
-       }
-
-    if (attributeValue === null || attributeValue === undefined) {
-      return null;  // Skip features with undefined or null values
-    }
-
-    // For any other geometry type, use default styling
-    return null;
-  };
-}
-
-function isPolygonLayer(layer) {
-  const source = layer.getSource();
-  let features = source.getFeatures();
-  if (features.length === 0) return false;  // Empty layer
-  
-  // Check the first feature as a sample to determine the type of layer.
-  // This assumes that all features in the layer have the same geometry type.
-  const geometryType = features[0].getGeometry().getType();
-  return geometryType === 'Polygon' || geometryType === 'MultiPolygon';
-}
-
-function isPointLayer(layer) {
-  const source = layer.getSource();
-  let features = source.getFeatures();
-  if (features.length === 0) return false;  // Empty layer
-
-  // Check the first feature as a sample to determine the type of layer.
-  // This assumes that all features in the layer have the same geometry type.
-  const geometryType = features[0].getGeometry().getType();
-  return geometryType === 'Point' || geometryType === 'MultiPoint';
-}
-
-function isLineStringLayer(layer) {
-  const source = layer.getSource();
-  let features = source.getFeatures();
-  if (features.length === 0) return false;
-
-  const geometryType = features[0].getGeometry().getType();
-  return geometryType === 'LineString' || geometryType === 'MultiLineString';
-}
-
-// Initialize an empty layer cache
-const layerCache = {};
-
-function initMap() {
-  map = new ol.Map({
-    target: 'map',
-    layers: [
-      new ol.layer.Tile({
-        source: new ol.source.OSM(),
-      }),
-      ...vectorLayers.filter(layer => isPolygonLayer(layer)),  // Add polygon layers first
-      ...vectorLayers.filter(layer => isLineStringLayer(layer)), // Add LineString layers next
-      ...vectorLayers.filter(layer => isPointLayer(layer))    // Add point layers last
-    ],
-    view: new ol.View({
-      center: ol.proj.fromLonLat([0, 0]),
-      zoom: 2,
-    }),
-  });
-
-    // Set the visibility of all vector layers to false initially
-  vectorLayers.forEach((layer) => {
-    layer.setVisible(false);
-  });
 }
 
 function updateLegend(data) {
@@ -611,21 +379,4 @@ function updateLegend(data) {
   });
 }
 
-function getSelectedLayers() {
-  const selectedLayerNames = [];
-  const layerDropdown = document.getElementById("layer-dropdown");
-
-  // Get selected options from the drop-down
-  for (const option of layerDropdown.options) {
-    if (option.selected) {
-      selectedLayerNames.push(option.text); // Push the text of the selected option
-    }
-  }
-
-  return selectedLayerNames;
-}
-
-// Update map size when the window is resized
-window.addEventListener('resize', function() {
-  map.updateSize();
-});
+export { initMap, updateSelectedLayers, updateLegend, attachEventListeners, attributeBounds };
