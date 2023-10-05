@@ -46,8 +46,8 @@ const layerCache = {};
 
 // Function to compare two layers based on their geometry types
 function compareLayers(a, b) {
-  layer1 = layerCache[a]
-  layer2 = layerCache[b]
+  const layer1 = layerCache[a]
+  const layer2 = layerCache[b]
   if (isPolygonLayer(layer1) && !isPolygonLayer(layer2)) {
     return -1; // layer1 is a polygon layer, layer2 is not
   } else if (!isPolygonLayer(layer1) && isPolygonLayer(layer2)) {

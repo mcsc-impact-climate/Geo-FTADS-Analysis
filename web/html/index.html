@@ -18,13 +18,26 @@
   <div id="legend" style="position: absolute; bottom: 20px; left: 20px; background: rgba(255, 255, 255, 0.8); padding: 10px;">
     <h3><b>Legend</b></h3>
   </div>
-  <div id="layer-selection" style="position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.8); padding: 10px;">
-  <h3>Select Layers</h3>
-  <select id="layer-dropdown" multiple>
-    <!-- Add options dynamically using JavaScript -->
+<div id="layer-selection" style="position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.8); padding: 10px;">
+  <h3>Area Feature (Choose one)</h3>
+  <select id="area-layer-dropdown">
+    <!-- Add options for area layers -->
   </select>
-  <button onclick="">Apply</button>
 
+  <h3>Highway Features (Choose multiple)</h3>
+  <div id="highway-layer-checkboxes">
+    <!-- Add checkboxes for highway layers -->
+  </div>
+
+  <h3>Point Features (Choose multiple)</h3>
+  <div id="point-layer-checkboxes">
+    <!-- Add checkboxes for point layers -->
+  </div>
+
+  <button id="apply-button">Apply</button>
+</div>
+
+  <button onclick="">Apply</button>
 </div>
   <script type="module"  src="../javascript/main.js"></script>
 </body>

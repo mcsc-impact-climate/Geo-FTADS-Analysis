@@ -51,3 +51,11 @@ export const shapefileColors = {
   'CNG Stations': 'purple',
   'LPG Stations': 'cyan',
 };
+
+// Key: shapefile name, Value: color to use
+export const shapefileTypes = {
+  'Commercial Electricity Price': 'area',
+  'Highway Flows (SU)': 'highway',
+  'Operational Electrolyzers': 'point',
+  'DCFC Chargers': 'point',
+};
