@@ -34,7 +34,7 @@ function initMap() {
 
 // Attach the updateSelectedLayers function to the button click event
 async function attachEventListeners() {
-  const applyButton = document.querySelector('button');
+  const applyButton = document.getElementById("apply-button");
   applyButton.addEventListener('click', async () => {
     await updateSelectedLayers(); // Wait for updateSelectedLayers to complete
     updateLegend(data); // Now, call updateLegend after updateSelectedLayers is done
@@ -46,12 +46,17 @@ const layerCache = {};
 
 // Function to compare two layers based on their geometry types
 function compareLayers(a, b) {
-  const layer1 = layerCache[a]
-  const layer2 = layerCache[b]
+  const layer1 = layerCache[a];
+  const layer2 = layerCache[b];
+
   if (isPolygonLayer(layer1) && !isPolygonLayer(layer2)) {
     return -1; // layer1 is a polygon layer, layer2 is not
   } else if (!isPolygonLayer(layer1) && isPolygonLayer(layer2)) {
     return 1; // layer2 is a polygon layer, layer1 is not
+  } else if (isLineStringLayer(layer1) && !isLineStringLayer(layer2)) {
+    return -1; // layer1 is a line layer, layer2 is not
+  } else if (!isLineStringLayer(layer1) && isLineStringLayer(layer2)) {
+    return 1; // layer2 is a line layer, layer1 is not
   } else if (isPointLayer(layer1) && !isPointLayer(layer2)) {
     return -1; // layer1 is a point layer, layer2 is not
   } else if (!isPointLayer(layer1) && isPointLayer(layer2)) {
@@ -123,8 +128,12 @@ async function updateSelectedLayers() {
   // Iterate through the selected layers
   for (const layerName of selectedLayers) {
     if (!layerCache[layerName]) {
-      // Push the promise returned by loadLayer into the array
-      loadingPromises.push(loadLayer(layerName));
+      // Push the promise returned by loadLayer into the array, unless it's None
+      if (layerName !== 'None') {
+        console.log('Loading layer ', layerName)
+        loadingPromises.push(loadLayer(layerName));
+    }
+
     } else {
       // Layer is in the cache; update its visibility
       setLayerVisibility(layerName, true);
@@ -160,7 +169,9 @@ async function updateSelectedLayers() {
 
   // Add the selected layers to the map
   for (const layerName of selectedLayers) {
-    map.addLayer(layerCache[layerName]);
+    if (layerName !== 'None') {
+        map.addLayer(layerCache[layerName]);
+    }
   }
 }
 

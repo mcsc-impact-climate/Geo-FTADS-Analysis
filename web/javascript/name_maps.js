@@ -55,6 +55,7 @@ export const shapefileColors = {
 // Key: shapefile name, Value: color to use
 export const shapefileTypes = {
   'Commercial Electricity Price': 'area',
+  'Truck Imports and Exports': 'area',
   'Highway Flows (SU)': 'highway',
   'Operational Electrolyzers': 'point',
   'DCFC Chargers': 'point',

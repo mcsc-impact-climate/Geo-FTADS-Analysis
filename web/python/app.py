@@ -17,6 +17,10 @@ app = Flask(__name__, static_url_path='', static_folder='')
 def index():
     return send_from_directory(os.path.abspath(os.path.join(os.path.dirname(__file__), '../html')), 'index.html')
 
+@app.route('/style/<path:filename>')
+def serve_css(filename):
+    return send_from_directory(os.path.abspath(os.path.join(os.path.dirname(__file__), '../style')), filename)
+
 # Serve main.js from the directory one level above the current directory
 @app.route('/javascript/<path:filename>')
 def serve_js(filename):
@@ -27,8 +31,8 @@ shapefile_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '.
 # Create an ordered dictionary to maintain the order of items
 shapefiles = OrderedDict()
 
-# # Total domestic Imports and Exports
-# shapefiles['Truck Imports and Exports'] = os.path.join("../../data/Point2Point_outputs/mode_truck_commodity_all_origin_all_dest_all.shp")
+# Total domestic Imports and Exports
+shapefiles['Truck Imports and Exports'] = os.path.join("../../data/Point2Point_outputs/mode_truck_commodity_all_origin_all_dest_all.shp")
 #
 # # Grid emission intensity
 # shapefiles['Grid Emission Intensity'] = os.path.join("../../data/egrid2020_subregions_merged/egrid2020_subregions_merged.shp")

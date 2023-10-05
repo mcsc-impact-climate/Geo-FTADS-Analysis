@@ -1,0 +1,10 @@
+/* Style for the Apply button */
+.apply-button {
+  display: block; /* Always on its own line */
+  background-color: blue; /* Blue background color */
+  color: white; /* White text color */
+  padding: 10px 20px; /* Padding to make it bigger */
+  font-size: 16px; /* Font size */
+  border: none; /* Remove border */
+  cursor: pointer; /* Add a pointer cursor on hover */
+}

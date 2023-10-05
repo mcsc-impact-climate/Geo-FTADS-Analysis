@@ -3,6 +3,7 @@
 <head>
   <title>OpenLayers Shapefile Visualization</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.5.0/css/ol.css" type="text/css">
+  <link rel="stylesheet" href="../style/style.css" type="text/css">
   <style>
     body, html, #map {
       margin: 0;
@@ -18,23 +19,27 @@
   <div id="legend" style="position: absolute; bottom: 20px; left: 20px; background: rgba(255, 255, 255, 0.8); padding: 10px;">
     <h3><b>Legend</b></h3>
   </div>
+
 <div id="layer-selection" style="position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.8); padding: 10px;">
   <h3>Area Feature (Choose one)</h3>
   <select id="area-layer-dropdown">
+    <option value="">Select Area Feature</option>
     <!-- Add options for area layers -->
   </select>
 
   <h3>Highway Features (Choose multiple)</h3>
-  <div id="highway-layer-checkboxes">
+  <button class="toggle-button" data-target="highway-layer-checkboxes">Show Highway Features</button>
+  <div id="highway-layer-checkboxes" style="display: none;">
     <!-- Add checkboxes for highway layers -->
   </div>
 
   <h3>Point Features (Choose multiple)</h3>
-  <div id="point-layer-checkboxes">
+  <button class="toggle-button" data-target="point-layer-checkboxes">Show Point Features</button>
+  <div id="point-layer-checkboxes" style="display: none;">
     <!-- Add checkboxes for point layers -->
   </div>
 
-  <button id="apply-button">Apply</button>
+  <button id="apply-button" class="apply-button">Apply</button>
 </div>
 
   <button onclick="">Apply</button>

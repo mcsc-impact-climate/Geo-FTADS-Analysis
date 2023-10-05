@@ -10,6 +10,12 @@ function populateLayerDropdown(mapping) {
   highwayLayerContainer.innerHTML = "";
   pointLayerContainer.innerHTML = "";
 
+  // Make a 'None' option for area feature in case the user doesn't want one
+  const option = document.createElement("option");
+  option.value = 'None';
+  option.textContent = 'None';
+  areaLayerDropdown.appendChild(option);
+
   // Add options for area layers
   for (const key in mapping) {
     if (shapefileTypes[key] === "area") {
@@ -43,15 +49,15 @@ function addLayerCheckbox(key, value, container) {
   container.appendChild(checkboxContainer);
 }
 
-// Add an event listener to the "Apply" button
-document.getElementById("apply-button").addEventListener("click", applySelection);
-
-function applySelection() {
-  const selectedLayerNames = getSelectedLayers();
-  console.log(selectedLayerNames);
-}
+//// Add an event listener to the "Apply" button
+//document.getElementById("apply-button").addEventListener("click", applySelection);
+//
+//function applySelection() {
+//  const selectedLayerNames = getSelectedLayers();
+//}
 
 function getSelectedLayers() {
+  console.log('in getSelectedLayers')
   const selectedLayerNames = [];
   const checkboxes = document.querySelectorAll('input[type="checkbox"]');
 
@@ -69,8 +75,21 @@ function getSelectedLayers() {
       selectedLayerNames.push(option.text); // Push the text of the selected option
     }
   }
-
   return selectedLayerNames;
 }
+
+// Add event listener to the parent element of the buttons
+document.getElementById("layer-selection").addEventListener("click", function (event) {
+  if (event.target.classList.contains("toggle-button")) {
+    const targetId = event.target.getAttribute("data-target");
+    const target = document.getElementById(targetId);
+
+    if (target.style.display === "none") {
+      target.style.display = "block";
+    } else {
+      target.style.display = "none";
+    }
+  }
+});
 
 export { populateLayerDropdown, getSelectedLayers };
