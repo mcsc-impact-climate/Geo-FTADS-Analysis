@@ -2,12 +2,14 @@ import { shapefileTypes } from './name_maps.js';
 
 function populateLayerDropdown(mapping) {
   const areaLayerDropdown = document.getElementById("area-layer-dropdown");
-  const highwayLayerContainer = document.getElementById("highway-layer-checkboxes");
+  const highwayFlowContainer = document.getElementById("highway-flow-checkboxes");
+  const highwayInfraContainer = document.getElementById("highway-infra-checkboxes");
   const pointLayerContainer = document.getElementById("point-layer-checkboxes");
 
   // Clear existing options and checkboxes
   areaLayerDropdown.innerHTML = "";
-  highwayLayerContainer.innerHTML = "";
+  highwayFlowContainer.innerHTML = "";
+  highwayInfraContainer.innerHTML = "";
   pointLayerContainer.innerHTML = "";
 
   // Make a 'None' option for area feature in case the user doesn't want one
@@ -23,9 +25,14 @@ function populateLayerDropdown(mapping) {
       option.value = mapping[key];
       option.textContent = key;
       areaLayerDropdown.appendChild(option);
-    } else if (shapefileTypes[key] === "highway") {
+    } else if (shapefileTypes[key][0] === "highway") {
       // Add checkboxes for highway layers
-      addLayerCheckbox(key, mapping[key], highwayLayerContainer);
+      if (shapefileTypes[key][1] === "flow") {
+      addLayerCheckbox(key, mapping[key], highwayFlowContainer);
+      }
+      else if (shapefileTypes[key][1] === "infra") {
+      addLayerCheckbox(key, mapping[key], highwayInfraContainer);
+      }
     } else if (shapefileTypes[key] === "point") {
       // Add checkboxes for point layers
       addLayerCheckbox(key, mapping[key], pointLayerContainer);
