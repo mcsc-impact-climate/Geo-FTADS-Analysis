@@ -57,7 +57,6 @@ function addLayerCheckbox(key, value, container) {
 //}
 
 function getSelectedLayers() {
-  console.log('in getSelectedLayers')
   const selectedLayerNames = [];
   const checkboxes = document.querySelectorAll('input[type="checkbox"]');
 
@@ -71,7 +70,7 @@ function getSelectedLayers() {
   // Get the selected area layer from the dropdown
   const areaLayerDropdown = document.getElementById("area-layer-dropdown");
  for (const option of areaLayerDropdown.options) {
-    if (option.selected) {
+    if (option.selected && option.text !== 'None') {
       selectedLayerNames.push(option.text); // Push the text of the selected option
     }
   }

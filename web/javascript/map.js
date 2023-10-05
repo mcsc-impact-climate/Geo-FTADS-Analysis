@@ -21,8 +21,8 @@ function initMap() {
       ...vectorLayers.filter(layer => isPointLayer(layer))    // Add point layers last
     ],
     view: new ol.View({
-      center: ol.proj.fromLonLat([0, 0]),
-      zoom: 2,
+      center: ol.proj.fromLonLat([-98, 39]), // Centered on the US
+      zoom: 4.5,
     }),
   });
 
@@ -128,11 +128,8 @@ async function updateSelectedLayers() {
   // Iterate through the selected layers
   for (const layerName of selectedLayers) {
     if (!layerCache[layerName]) {
-      // Push the promise returned by loadLayer into the array, unless it's None
-      if (layerName !== 'None') {
-        console.log('Loading layer ', layerName)
+      // Push the promise returned by loadLayer into the array
         loadingPromises.push(loadLayer(layerName));
-    }
 
     } else {
       // Layer is in the cache; update its visibility
@@ -169,9 +166,7 @@ async function updateSelectedLayers() {
 
   // Add the selected layers to the map
   for (const layerName of selectedLayers) {
-    if (layerName !== 'None') {
         map.addLayer(layerCache[layerName]);
-    }
   }
 }
 
