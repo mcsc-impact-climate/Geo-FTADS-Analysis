@@ -21,5 +21,7 @@ fetch('/get_shapefiles')
 
 // Update map size when the window is resized
 window.addEventListener('resize', function() {
+  if (map) {
   map.updateSize();
+  }
 });

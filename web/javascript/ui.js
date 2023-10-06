@@ -4,13 +4,17 @@ function populateLayerDropdown(mapping) {
   const areaLayerDropdown = document.getElementById("area-layer-dropdown");
   const highwayFlowContainer = document.getElementById("highway-flow-checkboxes");
   const highwayInfraContainer = document.getElementById("highway-infra-checkboxes");
-  const pointLayerContainer = document.getElementById("point-layer-checkboxes");
+  const pointH2prodContainer = document.getElementById("point-h2prod-checkboxes");
+  const pointRefuelContainer = document.getElementById("point-refuel-checkboxes");
+  const pointOtherContainer = document.getElementById("point-other-checkboxes");
 
   // Clear existing options and checkboxes
   areaLayerDropdown.innerHTML = "";
   highwayFlowContainer.innerHTML = "";
   highwayInfraContainer.innerHTML = "";
-  pointLayerContainer.innerHTML = "";
+  pointH2prodContainer.innerHTML = "";
+  pointRefuelContainer.innerHTML = "";
+  pointOtherContainer.innerHTML = "";
 
   // Make a 'None' option for area feature in case the user doesn't want one
   const option = document.createElement("option");
@@ -33,9 +37,17 @@ function populateLayerDropdown(mapping) {
       else if (shapefileTypes[key][1] === "infra") {
       addLayerCheckbox(key, mapping[key], highwayInfraContainer);
       }
-    } else if (shapefileTypes[key] === "point") {
+    } else if (shapefileTypes[key][0] === "point") {
       // Add checkboxes for point layers
-      addLayerCheckbox(key, mapping[key], pointLayerContainer);
+      if (shapefileTypes[key][1] === "refuel") {
+        addLayerCheckbox(key, mapping[key], pointRefuelContainer);
+      }
+      else if (shapefileTypes[key][1] === "h2prod") {
+      addLayerCheckbox(key, mapping[key], pointH2prodContainer);
+      }
+      else if (shapefileTypes[key][1] === "other") {
+      addLayerCheckbox(key, mapping[key], pointOtherContainer);
+      }
     }
   }
 }
