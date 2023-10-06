@@ -385,4 +385,33 @@ function updateLegend(data) {
   });
 }
 
+// Add event listener to the "Clear" button
+document.getElementById("clear-button").addEventListener("click", function () {
+  // Clear all vector layers (excluding the base layer)
+  const mapLayers = map.getLayers().getArray();
+  mapLayers.forEach(layer => {
+    if (layer instanceof ol.layer.Vector && !layer.get("baseLayer")) {
+      map.removeLayer(layer);
+    }
+  });
+
+  // Optionally, clear any selected checkboxes or dropdown selections
+  clearLayerSelections();
+});
+
+function clearLayerSelections() {
+  console.log('In clearLayerSelections')
+  // Clear selected checkboxes
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  checkboxes.forEach(checkbox => {
+    checkbox.checked = false;
+  });
+
+  // Clear selected option in the area layer dropdown
+  const areaLayerDropdown = document.getElementById("area-layer-dropdown");
+  areaLayerDropdown.selectedIndex = 0; // Assuming the first option is "Select Area Feature"
+  updateSelectedLayers();
+  updateLegend(data);
+}
+
 export { initMap, updateSelectedLayers, updateLegend, attachEventListeners, attributeBounds };
