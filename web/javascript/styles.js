@@ -1,4 +1,4 @@
-import { shapefileLabels, gradientAttributes, shapefileColors } from './name_maps.js';
+import { geojsonLabels, gradientAttributes, geojsonColors } from './name_maps.js';
 import { attributeBounds } from './map.js'
 
 function createStyleFunction(layerName) {
@@ -6,10 +6,10 @@ function createStyleFunction(layerName) {
     const attributeKey = layerName;
     const attributeName = gradientAttributes[layerName];
 
-    const bounds = attributeBounds[layerName]; // Get the bounds for this specific shapefile
+    const bounds = attributeBounds[layerName]; // Get the bounds for this specific geojson
     const attributeValue = feature.get(attributeName);
     const useGradient = layerName in gradientAttributes;  // Use a gradient if a gradient attribute is specified for the given layer
-    const layerColor = shapefileColors[layerName] || 'blue'; // Fetch color from dictionary, or default to blue
+    const layerColor = geojsonColors[layerName] || 'blue'; // Fetch color from dictionary, or default to blue
 
     const geometryType = feature.getGeometry().getType();
 

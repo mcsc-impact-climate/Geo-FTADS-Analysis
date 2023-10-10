@@ -1,4 +1,4 @@
-export const shapefileLabels = {
+export const geojsonLabels = {
   'Truck Imports and Exports': 'Imports+Exports (ton-miles / sq mile)',
   'Grid Emission Intensity': 'CO2e intensity of power grid (lb/MWh)',
   'Commercial Electricity Price': 'Electricity rate (cents/kWh)',
@@ -28,8 +28,8 @@ export const gradientAttributes = {
   'State-Level Incentives and Regulations': 'all',
 };
 
-// Key: shapefile name, Value: color to use
-export const shapefileColors = {
+// Key: geojson name, Value: color to use
+export const geojsonColors = {
   'Truck Imports and Exports': 'red',
   'Commercial Electricity Price': 'blue',
   'Highway Flows (SU)': 'cyan',
@@ -52,8 +52,8 @@ export const shapefileColors = {
   'LPG Stations': 'cyan',
 };
 
-// Key: shapefile name, Value: color to use
-export const shapefileTypes = {
+// Key: geojson name, Value: color to use
+export const geojsonTypes = {
   'Truck Imports and Exports': 'area',
   'Grid Emission Intensity': 'area',
   'Commercial Electricity Price': 'area',

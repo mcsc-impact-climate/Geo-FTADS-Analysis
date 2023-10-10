@@ -1,4 +1,4 @@
-import { shapefileTypes } from './name_maps.js';
+import { geojsonTypes } from './name_maps.js';
 
 function populateLayerDropdown(mapping) {
   const areaLayerDropdown = document.getElementById("area-layer-dropdown");
@@ -24,28 +24,28 @@ function populateLayerDropdown(mapping) {
 
   // Add options for area layers
   for (const key in mapping) {
-    if (shapefileTypes[key] === "area") {
+    if (geojsonTypes[key] === "area") {
       const option = document.createElement("option");
       option.value = mapping[key];
       option.textContent = key;
       areaLayerDropdown.appendChild(option);
-    } else if (shapefileTypes[key][0] === "highway") {
+    } else if (geojsonTypes[key][0] === "highway") {
       // Add checkboxes for highway layers
-      if (shapefileTypes[key][1] === "flow") {
+      if (geojsonTypes[key][1] === "flow") {
       addLayerCheckbox(key, mapping[key], highwayFlowContainer);
       }
-      else if (shapefileTypes[key][1] === "infra") {
+      else if (geojsonTypes[key][1] === "infra") {
       addLayerCheckbox(key, mapping[key], highwayInfraContainer);
       }
-    } else if (shapefileTypes[key][0] === "point") {
+    } else if (geojsonTypes[key][0] === "point") {
       // Add checkboxes for point layers
-      if (shapefileTypes[key][1] === "refuel") {
+      if (geojsonTypes[key][1] === "refuel") {
         addLayerCheckbox(key, mapping[key], pointRefuelContainer);
       }
-      else if (shapefileTypes[key][1] === "h2prod") {
+      else if (geojsonTypes[key][1] === "h2prod") {
       addLayerCheckbox(key, mapping[key], pointH2prodContainer);
       }
-      else if (shapefileTypes[key][1] === "other") {
+      else if (geojsonTypes[key][1] === "other") {
       addLayerCheckbox(key, mapping[key], pointOtherContainer);
       }
     }

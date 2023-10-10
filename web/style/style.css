@@ -1,0 +1,30 @@
+/* Style for the Apply button */
+.apply-button {
+  display: block; /* Always on its own line */
+  background-color: green; /* background color */
+  color: white; /* White text color */
+  padding: 10px 10px; /* Padding to make it bigger */
+  font-size: 16px; /* Font size */
+  border: 2px solid black; /* Remove border */
+  cursor: pointer; /* Add a pointer cursor on hover */
+  margin-top: 20px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between; /* Space between the buttons */
+  align-items: center; /* Align buttons vertically */
+  margin-top: 10px; /* Adjust the margin to separate buttons from other elements */
+}
+
+/* Additional styles for the "Clear" button (you can customize these styles) */
+#clear-button {
+  display: block; /* Always on its own line */
+  background-color: red; /* background color */
+  color: white; /* White text color */
+  padding: 5px 5px; /* Padding to make it bigger */
+  font-size: 14px; /* Font size */
+  border: 2px solid black; /* Remove border */
+  cursor: pointer; /* Add a pointer cursor on hover */
+  margin-top: 20px;
+}

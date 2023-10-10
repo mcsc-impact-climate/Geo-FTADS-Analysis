@@ -1,10 +1,10 @@
 import { createStyleFunction, isPolygonLayer, isPointLayer, isLineStringLayer } from './styles.js';
 import { getSelectedLayers } from './ui.js';
-import { shapefileLabels, gradientAttributes, shapefileColors } from './name_maps.js';
+import { geojsonLabels, gradientAttributes, geojsonColors } from './name_maps.js';
 
 var vectorLayers = [];
 var map;
-var attributeBounds = {}; // Object to store min and max attribute values for each shapefile
+var attributeBounds = {}; // Object to store min and max attribute values for each geojson
 
 // Declare the data variable in a higher scope
 let data;
@@ -68,7 +68,7 @@ function compareLayers(a, b) {
 
 // Function to load a specific layer from the server
 async function loadLayer(layerName) {
-  // Construct the URL without the "shapefiles/" prefix
+  // Construct the URL without the "geojsons/" prefix
   const url = `/get_geojson/${layerName}`;
 
   try {
@@ -97,7 +97,7 @@ async function loadLayer(layerName) {
         features: features,
       }),
       style: createStyleFunction(layerName),
-      key: layerName.split(".")[0], // Set the key property with the shapefile name without extension
+      key: layerName.split(".")[0], // Set the key property with the geojson name without extension
     });
 
     // Add the layer to the map and cache it
@@ -216,7 +216,7 @@ function updateLegend(data) {
       const ctx = canvas.getContext("2d");
 
       const useGradient = layerName in gradientAttributes;
-      const layerColor = shapefileColors[layerName] || 'blue'; // Fetch color from dictionary, or default to blue
+      const layerColor = geojsonColors[layerName] || 'blue'; // Fetch color from dictionary, or default to blue
       const attributeName = gradientAttributes[layerName];
       const bounds = attributeBounds[layerName];
 
@@ -371,8 +371,8 @@ function updateLegend(data) {
 
       const title = document.createElement("div");
 
-      if (layerName in shapefileLabels) {
-        title.innerText = shapefileLabels[layerName];
+      if (layerName in geojsonLabels) {
+        title.innerText = geojsonLabels[layerName];
         } else {
         title.innerText = layerName;
         }
