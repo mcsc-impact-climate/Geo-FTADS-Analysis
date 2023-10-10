@@ -1,14 +1,7 @@
 from flask import Flask, jsonify, send_from_directory
-from flask_cors import CORS
-import geopandas as gpd
 import json
 import os
 from collections import OrderedDict
-from shapely.geometry import shape, mapping
-from shapely.geometry.polygon import Polygon
-from shapely.geometry.multipolygon import MultiPolygon
-from shapely.geometry.linestring import LineString
-from shapely.geometry.multilinestring import MultiLineString
 
 app = Flask(__name__, static_url_path='', static_folder='')
 
