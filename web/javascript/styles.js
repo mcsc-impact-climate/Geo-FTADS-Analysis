@@ -4,44 +4,66 @@ import { attributeBounds } from './map.js'
 function createStyleFunction(layerName) {
   return function(feature) {
     const attributeKey = layerName;
-    const attributeName = gradientAttributes[layerName];
+    const useGradient = layerName in gradientAttributes;
+    let attributeName = '';
+    let gradientType = '';
+    let attributeValue = '';
+    if (useGradient) {
+        attributeName = gradientAttributes[layerName][0];
+        gradientType = gradientAttributes[layerName][1];
+        attributeValue = feature.get(attributeName);
+    }
 
     const bounds = attributeBounds[layerName]; // Get the bounds for this specific geojson
-    const attributeValue = feature.get(attributeName);
-    const useGradient = layerName in gradientAttributes;  // Use a gradient if a gradient attribute is specified for the given layer
     const layerColor = geojsonColors[layerName] || 'blue'; // Fetch color from dictionary, or default to blue
-
     const geometryType = feature.getGeometry().getType();
 
     if (geometryType === 'Point' || geometryType === 'MultiPoint') {
       if (useGradient && bounds) {
-        const minSize = 2; // Minimum point size
-        const maxSize = 10; // Maximum point size
+        if (gradientType === 'size') {
+            const minSize = 2; // Minimum point size
+            const maxSize = 10; // Maximum point size
 
-        // Calculate the point size based on the attribute value and bounds
-        const pointSize = minSize + ((maxSize - minSize) * (attributeValue - bounds.min) / (bounds.max - bounds.min));
+            // Calculate the point size based on the attribute value and bounds
+            const pointSize = minSize + ((maxSize - minSize) * (attributeValue - bounds.min) / (bounds.max - bounds.min));
 
-        return new ol.style.Style({
-          image: new ol.style.Circle({
-            radius: pointSize,
-            fill: new ol.style.Fill({
-              color: layerColor,
-            }),
-          }),
-          zIndex: 10, // Higher zIndex so points appear above polygons
-        });
-      } else {
-        // Use a default point style if no gradient or bounds are available
-        return new ol.style.Style({
-          image: new ol.style.Circle({
-            radius: 2, // Default point size
-            fill: new ol.style.Fill({
-              color: layerColor,
-            }),
-          }),
-          zIndex: 10, // Higher zIndex so points appear above polygons
-        });
+            return new ol.style.Style({
+              image: new ol.style.Circle({
+                radius: pointSize,
+                fill: new ol.style.Fill({
+                  color: layerColor,
+                }),
+              }),
+              zIndex: 10, // Higher zIndex so points appear above polygons
+            });
+          }
+        else if (gradientType === 'color') {
+            const component = Math.floor(255 * (attributeValue - bounds.min) / (bounds.max - bounds.min));
+            const pointColor = `rgb(${component}, 0, ${255 - component})`;
+
+           return new ol.style.Style({
+              image: new ol.style.Circle({
+                radius: 3,
+                fill: new ol.style.Fill({
+                  color: pointColor,
+                }),
+              }),
+              zIndex: 10, // Higher zIndex so points appear above polygons
+            });
+        }
       }
+      else {
+            // Use a default point style if no gradient or bounds are available
+            return new ol.style.Style({
+              image: new ol.style.Circle({
+                radius: 3, // Default point size
+                fill: new ol.style.Fill({
+                  color: layerColor,
+                }),
+              }),
+              zIndex: 10, // Higher zIndex so points appear above polygons
+            });
+          }
     } else if (geometryType === 'Polygon' || geometryType === 'MultiPolygon') {
         if (useGradient && bounds) {
         const component = Math.floor(255 - (255 * (attributeValue - bounds.min) / (bounds.max - bounds.min)));

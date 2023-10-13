@@ -84,12 +84,14 @@ async function loadLayer(layerName) {
     });
 
     const attributeKey = layerName;
-    const attributeName = gradientAttributes[attributeKey];
+    let attributeName = '';
+    if (layerName in gradientAttributes) {
+        attributeName = gradientAttributes[attributeKey][0];
+        const minVal = Math.min(...features.map(f => f.get(attributeName) || Infinity));
+        const maxVal = Math.max(...features.map(f => f.get(attributeName) || -Infinity));
 
-    const minVal = Math.min(...features.map(f => f.get(attributeName) || Infinity));
-    const maxVal = Math.max(...features.map(f => f.get(attributeName) || -Infinity));
-
-    attributeBounds[layerName] = { min: minVal, max: maxVal };
+        attributeBounds[layerName] = { min: minVal, max: maxVal };
+    }
 
     // Create a vector layer for the selected layer and add it to the map
     const vectorLayer = new ol.layer.Vector({
@@ -217,12 +219,17 @@ function updateLegend(data) {
 
       const useGradient = layerName in gradientAttributes;
       const layerColor = geojsonColors[layerName] || 'blue'; // Fetch color from dictionary, or default to blue
-      const attributeName = gradientAttributes[layerName];
+      let attributeName = '';
+      let gradientType = '';
+      if (useGradient) {
+          attributeName = gradientAttributes[layerName][0];
+          gradientType = gradientAttributes[layerName][1];
+      }
       const bounds = attributeBounds[layerName];
 
       // Add legend entry only for visible layers
       if (isPolygonLayer(layer)) {
-        if (useGradient) {
+        if (useGradient ) {
           const minVal = bounds.min < 0.01 ? bounds.min.toExponential(1) : (bounds.min > 100 ? bounds.min.toExponential(1) : bounds.min.toFixed(1));
           const minDiv = document.createElement("div");
           minDiv.innerText = minVal.toString();
@@ -311,47 +318,92 @@ function updateLegend(data) {
       } else if (isPointLayer(layer)) { // this block is for point-like geometries
         // check if gradient should be used for points
         if (useGradient && bounds) {
-          // Minimum value and minimum point size
-          const minVal = bounds.min < 0.01 ? bounds.min.toExponential(1) : (bounds.min > 100 ? bounds.min.toExponential(1) : bounds.min.toFixed(1));
-          const minDiv = document.createElement("div");
-          minDiv.innerText = minVal.toString();
-          minDiv.style.marginRight = "5px";
-          symbolContainer.appendChild(minDiv);
+          if (gradientType === 'size') {
+              // Minimum value and minimum point size
+              const minVal = bounds.min < 0.01 ? bounds.min.toExponential(1) : (bounds.min > 100 ? bounds.min.toExponential(1) : bounds.min.toFixed(1));
+              const minDiv = document.createElement("div");
+              minDiv.innerText = minVal.toString();
+              minDiv.style.marginRight = "5px";
+              symbolContainer.appendChild(minDiv);
 
-          // Canvas to draw points
-          const minPointSize = 3;  // Minimum size (can set according to your needs)
-          const maxPointSize = 10; // Maximum size (can set according to your needs)
+              // Canvas to draw points
+              const minPointSize = 2;  // Minimum size (can set according to your needs)
+              const maxPointSize = 10; // Maximum size (can set according to your needs)
 
-          // Create canvas for the minimum point size
-          const minPointCanvas = document.createElement("canvas");
-          minPointCanvas.width = 20;
-          minPointCanvas.height = 20;
-          const minCtx = minPointCanvas.getContext("2d");
+              // Create canvas for the minimum point size
+              const minPointCanvas = document.createElement("canvas");
+              minPointCanvas.width = 20;
+              minPointCanvas.height = 20;
+              const minCtx = minPointCanvas.getContext("2d");
 
-          minCtx.fillStyle = layerColor;
-          minCtx.beginPath();
-          minCtx.arc(10, 10, minPointSize, 0, Math.PI * 2);
-          minCtx.fill();
-          symbolContainer.appendChild(minPointCanvas);
+              minCtx.fillStyle = layerColor;
+              minCtx.beginPath();
+              minCtx.arc(10, 10, minPointSize, 0, Math.PI * 2);
+              minCtx.fill();
+              symbolContainer.appendChild(minPointCanvas);
 
-          // Create canvas for the maximum point size
-          const maxPointCanvas = document.createElement("canvas");
-          maxPointCanvas.width = 20;
-          maxPointCanvas.height = 20;
-          const maxCtx = maxPointCanvas.getContext("2d");
+              // Create canvas for the maximum point size
+              const maxPointCanvas = document.createElement("canvas");
+              maxPointCanvas.width = 20;
+              maxPointCanvas.height = 20;
+              const maxCtx = maxPointCanvas.getContext("2d");
 
-          maxCtx.fillStyle = layerColor;
-          maxCtx.beginPath();
-          maxCtx.arc(10, 10, maxPointSize, 0, Math.PI * 2);
-          maxCtx.fill();
-          symbolContainer.appendChild(maxPointCanvas);
+              maxCtx.fillStyle = layerColor;
+              maxCtx.beginPath();
+              maxCtx.arc(10, 10, maxPointSize, 0, Math.PI * 2);
+              maxCtx.fill();
+              symbolContainer.appendChild(maxPointCanvas);
 
-          // Maximum value
-          const maxVal = bounds.max < 0.01 ? bounds.max.toExponential(1) : (bounds.max > 100 ? bounds.max.toExponential(1) : bounds.max.toFixed(1));
-          const maxDiv = document.createElement("div");
-          maxDiv.innerText = maxVal.toString();
-          maxDiv.style.marginLeft = "5px";
-          symbolContainer.appendChild(maxDiv);
+              // Maximum value
+              const maxVal = bounds.max < 0.01 ? bounds.max.toExponential(1) : (bounds.max > 100 ? bounds.max.toExponential(1) : bounds.max.toFixed(1));
+              const maxDiv = document.createElement("div");
+              maxDiv.innerText = maxVal.toString();
+              maxDiv.style.marginLeft = "5px";
+              symbolContainer.appendChild(maxDiv);
+          }
+          else if (gradientType === 'color') {
+              // Minimum value and minimum point size
+              const minVal = bounds.min < 0.01 ? bounds.min.toExponential(1) : (bounds.min > 100 ? bounds.min.toExponential(1) : bounds.min.toFixed(1));
+              const minDiv = document.createElement("div");
+              minDiv.innerText = minVal.toString();
+              minDiv.style.marginRight = "5px";
+              symbolContainer.appendChild(minDiv);
+
+              // Canvas to draw points
+              const minPointColor = 'blue';  // Color for minimum value
+              const maxPointColor = 'red'; // Color for maximum value
+
+              // Create canvas for the minimum point size
+              const minPointCanvas = document.createElement("canvas");
+              minPointCanvas.width = 20;
+              minPointCanvas.height = 20;
+              const minCtx = minPointCanvas.getContext("2d");
+
+              minCtx.fillStyle = minPointColor;
+              minCtx.beginPath();
+              minCtx.arc(10, 10, 3, 0, Math.PI * 2);
+              minCtx.fill();
+              symbolContainer.appendChild(minPointCanvas);
+
+              // Create canvas for the maximum point size
+              const maxPointCanvas = document.createElement("canvas");
+              maxPointCanvas.width = 20;
+              maxPointCanvas.height = 20;
+              const maxCtx = maxPointCanvas.getContext("2d");
+
+              maxCtx.fillStyle = maxPointColor;
+              maxCtx.beginPath();
+              maxCtx.arc(10, 10, 3, 0, Math.PI * 2);
+              maxCtx.fill();
+              symbolContainer.appendChild(maxPointCanvas);
+
+              // Maximum value
+              const maxVal = bounds.max < 0.01 ? bounds.max.toExponential(1) : (bounds.max > 100 ? bounds.max.toExponential(1) : bounds.max.toFixed(1));
+              const maxDiv = document.createElement("div");
+              maxDiv.innerText = maxVal.toString();
+              maxDiv.style.marginLeft = "5px";
+              symbolContainer.appendChild(maxDiv);
+          }
         } else {
           // code for constant size points
           ctx.fillStyle = layerColor;

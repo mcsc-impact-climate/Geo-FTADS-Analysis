@@ -11,21 +11,23 @@ export const geojsonLabels = {
   'Planned Electrolyzers': 'Planned Hydrogen Electrolyzer Facility Capacity (kW)',
   'Hydrogen from Refineries': 'Hydrogen Production Capacity from Refinery (million standard cubic feet per day)',
   'State-Level Incentives and Regulations': 'Total Number of Incentives and Regulations',
+  'Truck Stop Charging': 'Truck charges/day (full fleet)'
 };
 
 export const gradientAttributes = {
-  'Truck Imports and Exports': 'Tmil Tot D',
-  'Grid Emission Intensity': 'SRC2ERTA',
-  'Commercial Electricity Price': 'Cents_kWh',
-  'Maximum Demand Charge': 'MaxDemCh',
-  'Highway Flows (SU)': 'Tot Tons',
-  'Highway Flows (CU)': 'Tot Tons',
-  'Highway Flows (Interstate)': 'Tot Tons',
-  'Operational Electrolyzers': 'Power_kW',
-  'Installed Electrolyzers': 'Power_kW',
-  'Planned Electrolyzers': 'Power_kW',
-  'Hydrogen from Refineries': 'Cap_MMSCFD',
-  'State-Level Incentives and Regulations': 'all',
+  'Truck Imports and Exports': ['Tmil Tot D', 'color'],
+  'Grid Emission Intensity': ['SRC2ERTA', 'color'],
+  'Commercial Electricity Price': ['Cents_kWh', 'color'],
+  'Maximum Demand Charge': ['MaxDemCh', 'color'],
+  'Highway Flows (SU)': ['Tot Tons', 'size'],
+  'Highway Flows (CU)': ['Tot Tons', 'size'],
+  'Highway Flows (Interstate)': ['Tot Tons', 'size'],
+  'Operational Electrolyzers': ['Power_kW', 'size'],
+  'Installed Electrolyzers': ['Power_kW', 'size'],
+  'Planned Electrolyzers': ['Power_kW', 'size'],
+  'Hydrogen from Refineries': ['Cap_MMSCFD', 'size'],
+  'State-Level Incentives and Regulations': ['all', 'color'],
+  'Truck Stop Charging': ['CPD', 'color'],
 };
 
 // Key: geojson name, Value: color to use
@@ -50,6 +52,7 @@ export const geojsonColors = {
   'LNG Stations': 'orange',
   'CNG Stations': 'purple',
   'LPG Stations': 'cyan',
+  'Truck Stop Charging': 'purple',
 };
 
 // Key: geojson name, Value: color to use
@@ -79,5 +82,6 @@ export const geojsonTypes = {
   'Bay Area EV Roadmap': 'area',
   'Salt Lake City Region EV Plan': 'area',
   'Truck Stop Locations': ['point', 'other'],
-  'Principal Ports': ['point', 'other']
+  'Principal Ports': ['point', 'other'],
+  'Truck Stop Charging': ['point', 'other']
 };
