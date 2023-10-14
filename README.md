@@ -285,7 +285,7 @@ This should produce shapefiles for zipcode-level and state-level electricity pri
 
 ## Analyzing VIUS data
 
-The script [AnalyzeVius.py] produces distributions of GREET vehicle class, fuel type, age, and payload from the VIUS data. To run:
+The script [AnalyzeVius.py](./source/AnalyzeVius.py) produces distributions of GREET vehicle class, fuel type, age, and payload from the VIUS data. To run:
 
 ```bash
 python source/AnalyzeVius.py
