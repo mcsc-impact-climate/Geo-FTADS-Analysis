@@ -1,16 +1,16 @@
-import { geojsonLabels, gradientAttributes, geojsonColors } from './name_maps.js';
+import { geojsonLabels, selectedGradientAttributes, geojsonColors } from './name_maps.js';
 import { attributeBounds } from './map.js'
 
 function createStyleFunction(layerName) {
   return function(feature) {
     const attributeKey = layerName;
-    const useGradient = layerName in gradientAttributes;
+    const useGradient = layerName in selectedGradientAttributes;
     let attributeName = '';
     let gradientType = '';
     let attributeValue = '';
     if (useGradient) {
-        attributeName = gradientAttributes[layerName][0];
-        gradientType = gradientAttributes[layerName][1];
+        attributeName = selectedGradientAttributes[layerName];
+        gradientType = selectedGradientTypes[layerName];
         attributeValue = feature.get(attributeName);
     }
 

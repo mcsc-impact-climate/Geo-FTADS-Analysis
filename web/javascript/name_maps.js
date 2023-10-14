@@ -14,20 +14,52 @@ export const geojsonLabels = {
   'Truck Stop Charging': 'Truck charges/day (full fleet)'
 };
 
-export const gradientAttributes = {
-  'Truck Imports and Exports': ['Tmil Tot D', 'color'],
-  'Grid Emission Intensity': ['SRC2ERTA', 'color'],
-  'Commercial Electricity Price': ['Cents_kWh', 'color'],
-  'Maximum Demand Charge': ['MaxDemCh', 'color'],
-  'Highway Flows (SU)': ['Tot Tons', 'size'],
-  'Highway Flows (CU)': ['Tot Tons', 'size'],
-  'Highway Flows (Interstate)': ['Tot Tons', 'size'],
-  'Operational Electrolyzers': ['Power_kW', 'size'],
-  'Installed Electrolyzers': ['Power_kW', 'size'],
-  'Planned Electrolyzers': ['Power_kW', 'size'],
-  'Hydrogen from Refineries': ['Cap_MMSCFD', 'size'],
-  'State-Level Incentives and Regulations': ['all', 'color'],
-  'Truck Stop Charging': ['CPD', 'color'],
+export const selectedGradientAttributes = {
+  'Truck Imports and Exports': 'Tmil Tot D',
+  'Grid Emission Intensity': 'SRC2ERTA',
+  'Commercial Electricity Price': 'Cents_kWh',
+  'Maximum Demand Charge': 'MaxDemCh',
+  'Highway Flows (SU)': 'Tot Tons',
+  'Highway Flows (CU)': 'Tot Tons',
+  'Highway Flows (Interstate)': 'Tot Tons',
+  'Operational Electrolyzers': 'Power_kW',
+  'Installed Electrolyzers': 'Power_kW',
+  'Planned Electrolyzers': 'Power_kW',
+  'Hydrogen from Refineries': 'Cap_MMSCFD',
+  'State-Level Incentives and Regulations': 'all',
+  'Truck Stop Charging': 'CPD',
+};
+
+export const selectedGradientTypes = {
+  'Truck Imports and Exports': 'color',
+  'Grid Emission Intensity': 'color',
+  'Commercial Electricity Price': 'color',
+  'Maximum Demand Charge': 'color',
+  'Highway Flows (SU)': 'size',
+  'Highway Flows (CU)': 'size',
+  'Highway Flows (Interstate)': 'size',
+  'Operational Electrolyzers': 'size',
+  'Installed Electrolyzers': 'size',
+  'Planned Electrolyzers': 'size',
+  'Hydrogen from Refineries': 'size',
+  'State-Level Incentives and Regulations': 'color',
+  'Truck Stop Charging': 'color',
+}
+
+export const availableGradientAttributes = {
+  'Truck Imports and Exports': ['Tmil Tot D'],
+  'Grid Emission Intensity': ['SRC2ERTA'],
+  'Commercial Electricity Price': ['Cents_kWh'],
+  'Maximum Demand Charge': ['MaxDemCh'],
+  'Highway Flows (SU)': ['Tot Tons'],
+  'Highway Flows (CU)': ['Tot Tons'],
+  'Highway Flows (Interstate)': ['Tot Tons'],
+  'Operational Electrolyzers': ['Power_kW'],
+  'Installed Electrolyzers': ['Power_kW'],
+  'Planned Electrolyzers': ['Power_kW'],
+  'Hydrogen from Refineries': ['Cap_MMSCFD'],
+  'State-Level Incentives and Regulations': ['all'],
+  'Truck Stop Charging': ['CPD'],
 };
 
 // Key: geojson name, Value: color to use

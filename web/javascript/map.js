@@ -1,6 +1,6 @@
 import { createStyleFunction, isPolygonLayer, isPointLayer, isLineStringLayer } from './styles.js';
 import { getSelectedLayers } from './ui.js';
-import { geojsonLabels, gradientAttributes, geojsonColors } from './name_maps.js';
+import { geojsonLabels, selectedGradientAttributes, geojsonColors } from './name_maps.js';
 
 var vectorLayers = [];
 var map;
@@ -85,8 +85,8 @@ async function loadLayer(layerName) {
 
     const attributeKey = layerName;
     let attributeName = '';
-    if (layerName in gradientAttributes) {
-        attributeName = gradientAttributes[attributeKey][0];
+    if (layerName in selectedGradientAttributes) {
+        attributeName = selectedGradientAttributes[attributeKey];
         const minVal = Math.min(...features.map(f => f.get(attributeName) || Infinity));
         const maxVal = Math.max(...features.map(f => f.get(attributeName) || -Infinity));
 
@@ -217,13 +217,13 @@ function updateLegend(data) {
       canvas.height = 10;
       const ctx = canvas.getContext("2d");
 
-      const useGradient = layerName in gradientAttributes;
+      const useGradient = layerName in selectedGradientAttributes;
       const layerColor = geojsonColors[layerName] || 'blue'; // Fetch color from dictionary, or default to blue
       let attributeName = '';
       let gradientType = '';
       if (useGradient) {
-          attributeName = gradientAttributes[layerName][0];
-          gradientType = gradientAttributes[layerName][1];
+          attributeName = selectedGradientAttributes[layerName];
+          gradientType = selectedGradientTypes[layerName];
       }
       const bounds = attributeBounds[layerName];
 

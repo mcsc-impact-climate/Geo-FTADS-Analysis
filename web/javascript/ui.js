@@ -1,4 +1,4 @@
-import { geojsonTypes } from './name_maps.js';
+import { geojsonTypes, availableGradientAttributes } from './name_maps.js';
 
 function populateLayerDropdown(mapping) {
   const areaLayerDropdown = document.getElementById("area-layer-dropdown");
@@ -54,6 +54,8 @@ function populateLayerDropdown(mapping) {
 
 function addLayerCheckbox(key, value, container) {
   const checkboxContainer = document.createElement("div");
+  checkboxContainer.classList.add("checkbox-container"); // Add this line
+
   const checkbox = document.createElement("input");
   checkbox.type = "checkbox";
   checkbox.value = value;
@@ -66,6 +68,13 @@ function addLayerCheckbox(key, value, container) {
   checkboxContainer.appendChild(label);
 
   container.appendChild(checkboxContainer);
+
+  // New button creation
+  const detailsButton = document.createElement("button");
+  detailsButton.textContent = "Details";
+  detailsButton.setAttribute("data-key", key);
+  detailsButton.classList.add("details-btn");
+  checkboxContainer.appendChild(detailsButton);
 }
 
 //// Add an event listener to the "Apply" button
@@ -109,5 +118,68 @@ document.getElementById("layer-selection").addEventListener("click", function (e
     }
   }
 });
+
+document.body.addEventListener('click', function(event) {
+  // Check if a details button was clicked
+  if (event.target.classList.contains("details-btn")) {
+    const key = event.target.getAttribute("data-key");
+
+    // Fetch details based on key or prepare details text in some other way
+    document.getElementById('details-content').innerText = getDetails(key);
+    document.getElementById('details-title').innerText = `${key} Details`;
+
+    // Show the modal
+    document.getElementById('details-modal').style.display = 'flex';
+
+      // Populate the dropdown menu with attribute names
+    const attributeDropdown = document.getElementById("attribute-dropdown");
+    attributeDropdown.innerHTML = "";
+
+    // Assuming you have an array of attribute names for the current feature
+    const attributeNames = getAttributeNamesForFeature(key);
+
+    // Create and add options to the dropdown
+    attributeNames.forEach((attributeName) => {
+      const option = document.createElement("option");
+      option.value = attributeName;
+      option.text = attributeName;
+      attributeDropdown.appendChild(option);
+    });
+
+    // Add an event listener to the dropdown to handle attribute selection
+    attributeDropdown.addEventListener("change", function () {
+      const selectedAttribute = attributeDropdown.value;
+      // Call a function to update the plot and legend with the selected attribute
+      updatePlotAndLegend(selectedAttribute);
+    });
+  }
+
+  // Check if the close button of the modal was clicked
+  if (event.target.classList.contains("close-btn")) {
+    document.getElementById('details-modal').style.display = 'none';
+  }
+});
+
+
+function getAttributeNamesForFeature(layerName) {
+  // Check if the layerName exists in availableGradientAttributes
+  if (layerName in availableGradientAttributes) {
+    return availableGradientAttributes[layerName];
+  } else {
+    return []; // Return an empty array if the layerName is not found
+  }
+}
+
+function updatePlotAndLegend() {
+  // This is a placeholder function that does nothing.
+  // You can add your actual code here to update the plot and legend as needed.
+}
+
+// Sample implementation of getDetails function
+function getDetails(key) {
+  // Fetch or compute details related to the 'key'.
+  // For the simplicity of this example, returning a static text.
+  return `Details about ${key}. Implement your logic to fetch or compute the real details.`;
+}
 
 export { populateLayerDropdown, getSelectedLayers };
