@@ -192,6 +192,19 @@ You can now cd back out of the data directory
 cd ..
 ```
 
+### Truck stop parking data
+```bash
+# from https://geodata.bts.gov/datasets/usdot::truck-stop-parking
+wget --no-check-certificate -O Truck_Stop_Parking.zip "https://opendata.arcgis.com/api/v3/datasets/0849b1bd4a5e4b4e831877b7c25d6062_0/downloads/data?format=shp&spatialRefId=3857&where=1%3D1"
+unzip Truck_Stop_Parking.zip -d Truck_Stop_Parking
+rm Truck_Stop_Parking.zip
+```
+
+You can now cd back out of the data directory
+```bash
+cd ..
+```
+
 ## How to run python scripts
 
 Python scripts to encode analysis steps are stored in the [source](./source) directory. 
