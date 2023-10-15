@@ -4,6 +4,7 @@ import os
 from collections import OrderedDict
 
 app = Flask(__name__, static_url_path='', static_folder='')
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 # Serve index.html from the directory one level above the current directory
 @app.route('/')

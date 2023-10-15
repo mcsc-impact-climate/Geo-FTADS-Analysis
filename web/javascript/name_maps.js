@@ -11,7 +11,7 @@ export const geojsonLabels = {
   'Planned Electrolyzers': 'Planned Hydrogen Electrolyzer Facility Capacity (kW)',
   'Hydrogen from Refineries': 'Hydrogen Production Capacity from Refinery (million standard cubic feet per day)',
   'State-Level Incentives and Regulations': 'Total Number of Incentives and Regulations',
-  'Truck Stop Charging': 'Truck charges/day (full fleet)'
+  'Truck Stop Charging': 'Trucks Passing Per Day'
 };
 
 export const selectedGradientAttributes = {
@@ -27,7 +27,7 @@ export const selectedGradientAttributes = {
   'Planned Electrolyzers': 'Power_kW',
   'Hydrogen from Refineries': 'Cap_MMSCFD',
   'State-Level Incentives and Regulations': 'all',
-  'Truck Stop Charging': 'CPD',
+  'Truck Stop Charging': 'Tot Trips',
 };
 
 export const selectedGradientTypes = {
@@ -47,19 +47,19 @@ export const selectedGradientTypes = {
 }
 
 export const availableGradientAttributes = {
-  'Truck Imports and Exports': ['Tmil Tot D'],
+  'Truck Imports and Exports': ['Tmil Tot D', 'Tmil Imp D', 'Tmil Exp D', 'E Tot Den', 'E Imp Den', 'E Exp Den'],
   'Grid Emission Intensity': ['SRC2ERTA'],
   'Commercial Electricity Price': ['Cents_kWh'],
   'Maximum Demand Charge': ['MaxDemCh'],
-  'Highway Flows (SU)': ['Tot Tons'],
-  'Highway Flows (CU)': ['Tot Tons'],
-  'Highway Flows (Interstate)': ['Tot Tons'],
+  'Highway Flows (SU)': ['Tot Tons', 'Tot Trips'],
+  'Highway Flows (CU)': ['Tot Tons', 'Tot Trips'],
+  'Highway Flows (Interstate)': ['Tot Tons', 'Tot Trips'],
   'Operational Electrolyzers': ['Power_kW'],
   'Installed Electrolyzers': ['Power_kW'],
   'Planned Electrolyzers': ['Power_kW'],
   'Hydrogen from Refineries': ['Cap_MMSCFD'],
-  'State-Level Incentives and Regulations': ['all'],
-  'Truck Stop Charging': ['CPD'],
+  'State-Level Incentives and Regulations': ['all', 'Biodiesel', 'Ethanol', 'Electricit', 'Hydrogen', 'Natural Ga', 'Propane', 'Renewable', 'Emissions'],
+  'Truck Stop Charging': ['Tot Trips', 'CPD', 'Half_CPD', 'Min_Charge', 'Half_Charg', 'Half_Ratio', 'Col_Save'],
 };
 
 // Key: geojson name, Value: color to use

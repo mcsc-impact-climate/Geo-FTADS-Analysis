@@ -1,6 +1,6 @@
 import { createStyleFunction, isPolygonLayer, isPointLayer, isLineStringLayer } from './styles.js';
 import { getSelectedLayers } from './ui.js';
-import { geojsonLabels, selectedGradientAttributes, geojsonColors } from './name_maps.js';
+import { geojsonLabels, selectedGradientAttributes, geojsonColors, selectedGradientTypes } from './name_maps.js';
 
 var vectorLayers = [];
 var map;
@@ -452,7 +452,6 @@ document.getElementById("clear-button").addEventListener("click", function () {
 });
 
 function clearLayerSelections() {
-  console.log('In clearLayerSelections')
   // Clear selected checkboxes
   const checkboxes = document.querySelectorAll('input[type="checkbox"]');
   checkboxes.forEach(checkbox => {
