@@ -352,9 +352,17 @@ bash source/run_all_Point2Point.sh
 
 WARNING: This may take several hours to run in full, and the shapefiles and csv files produced will take up ~100 GB. To reduce this, you can comment out items that you don't want in the COMMODITIES, REGIONS and MODES variables.
 
+## Creating shapefiles for hydrogen production facilities
+
+The script [PrepareHydrogenHubs.py](./source/PrepareHydrogenHubs.py) combines locations and information about operating and planned hydrogen production facilities and the U.S. and Canada into shapefiles located in `data/hydrogen_hubs/shapefiles`. To run:
+
+```bash
+python source/PrepareHydrogenHubs.py
+```
+
 ## Identifying truck stops and hydrogen production facilities within a given radius
 
-The script [IdentifyFacilitiesInRadius.py](./source/IdentifyFacilitiesInRadius.py) 
+The script [IdentifyFacilitiesInRadius.py](./source/IdentifyFacilitiesInRadius.py) identifies truck stops and hydrogen production facilities within a user-provided radius and central location (33N, 97W) and 600 miles by default. It p
 
 ## Visualizing layers with QGIS
 
@@ -378,11 +386,25 @@ python source/ProcessElectricityPrices.py
 ```
 
 as well as `python source/Point2PointFAF.py [arguments]` for any freight flow and emission intensity layers you'd like to visualize (more detailed instructions [above](./README.md#producing-shapefiles-to-visualize-freight-flows-and-emission-intensities)). Note that these layers currently need to be read in manually. 
+as well as `python source/Point2PointFAF.py [arguments]` for any freight flow and emission intensity layers you'd like to visualize (more detailed instructions [above](./README.md#producing-shapefiles-to-visualize-freight-flows-and-emission-intensities)). Note that these layers currently need to be read in manually. 
 
 <!-- Executing [PlotWithQGIS.py](./PlotWithQGIS.py) in the QGIS GUI (after first running [Point2PointFAF.py](./source/Point2PointFAF.py)) should produce output PDF files in the [layouts](./layouts) directory, which look something like: -->
 
 ![Total domestic exports](./images/highway_and_total_flows.png "Total Domestic Exports")
 
+## Analyze potential infrastructure investment savings from collective investment in truck stop charging
+
+The script [AnalyzeTruckStopCharging.py](./source/AnalyzeTruckStopCharging.py) is designed to quantify the charging demand at truck stops separated by 100 miles on average and at least 50 miles, and estimate the potential difference in infrastructure costs needed if the entire electrified trucking fleet were to electrify and either:
+* The full electrified fleet shared the investment and usage of charging infrastructure, or
+* The fleet was divided in half, and each half invested in and used their respective charging infrastructure separately. 
+
+The idea of this exercise is to understand the potential infrastructure savings from trucking fleets pooling infrastructure investments in charging infrastructure based on real-world freight flow data. 
+
+To run:
+
+```bash
+python source/AnalyzeTruckStopCharging.py
+```
 
 ## Visualizing Shapefiles with a Web Interface
 
