@@ -1,4 +1,4 @@
-import { geojsonLabels, selectedGradientAttributes, geojsonColors, selectedGradientTypes } from './name_maps.js';
+import { selectedGradientAttributes, geojsonColors, selectedGradientTypes } from './name_maps.js';
 import { attributeBounds } from './map.js'
 
 function createStyleFunction(layerName) {

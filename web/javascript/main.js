@@ -19,9 +19,9 @@ fetch('/get_geojsons')
     console.log('Fetch Error:', error);
   });
 
-// Update map size when the window is resized
-window.addEventListener('resize', function() {
-  if (map) {
-  map.updateSize();
-  }
-});
+//// Update map size when the window is resized
+//window.addEventListener('resize', function() {
+//  if (map) {
+//  map.updateSize();
+//  }
+//});

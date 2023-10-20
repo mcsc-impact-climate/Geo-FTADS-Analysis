@@ -1,6 +1,6 @@
 import { createStyleFunction, isPolygonLayer, isPointLayer, isLineStringLayer } from './styles.js';
 import { getSelectedLayers } from './ui.js';
-import { geojsonLabels, selectedGradientAttributes, geojsonColors, selectedGradientTypes } from './name_maps.js';
+import { legendLabels, selectedGradientAttributes, geojsonColors, selectedGradientTypes } from './name_maps.js';
 
 var vectorLayers = [];
 var map;
@@ -68,6 +68,7 @@ function compareLayers(a, b) {
 
 // Function to load a specific layer from the server
 async function loadLayer(layerName) {
+
   // Construct the URL without the "geojsons/" prefix
   const url = `/get_geojson/${layerName}`;
 
@@ -109,6 +110,28 @@ async function loadLayer(layerName) {
     console.log('Fetch Error:', error);
     throw error; // Propagate the error
   }
+}
+
+// Function to update a specific layer with a new attributeName
+async function updateLayer(layerName, attributeName) {
+  // Check if the layerName is cached
+  if (!layerCache[layerName]) {
+    // If the layer is not in the cache, load it using loadLayer
+    await loadLayer(layerName);
+  }
+
+  // Update the attributeName and style for the layer
+  const vectorLayer = layerCache[layerName];
+  vectorLayer.setStyle(createStyleFunction(layerName, attributeName)); // Pass the new attributeName
+
+  // Update the attributeBounds for the layer if needed
+  const attributeKey = layerName;
+  if (layerName in selectedGradientAttributes) {
+    const minVal = Math.min(...vectorLayer.getSource().getFeatures().map(f => f.get(attributeName) || Infinity));
+    const maxVal = Math.max(...vectorLayer.getSource().getFeatures().map(f => f.get(attributeName) || -Infinity));
+    attributeBounds[layerName] = { min: minVal, max: maxVal };
+  }
+
 }
 
 function setLayerVisibility(layerName, isVisible) {
@@ -423,8 +446,13 @@ function updateLegend(data) {
 
       const title = document.createElement("div");
 
-      if (layerName in geojsonLabels) {
-        title.innerText = geojsonLabels[layerName];
+      if (layerName in legendLabels) {
+        if (typeof legendLabels[layerName] === 'string') {
+          title.innerText = legendLabels[layerName];
+        }
+        else if (isDictionary(legendLabels[layerName])) {
+          title.innerText = legendLabels[layerName][selectedGradientAttributes[layerName]];
+        }
         } else {
         title.innerText = layerName;
         }
@@ -435,6 +463,22 @@ function updateLegend(data) {
       legendDiv.appendChild(layerDiv);
     }
   });
+}
+
+function isDictionary(obj) {
+  // Check if it's an object
+  if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
+    return false;
+  }
+
+  // Check if it has properties (key-value pairs)
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 // Add event listener to the "Clear" button
@@ -465,4 +509,4 @@ function clearLayerSelections() {
   updateLegend(data);
 }
 
-export { initMap, updateSelectedLayers, updateLegend, attachEventListeners, attributeBounds };
+export { initMap, updateSelectedLayers, updateLegend, attachEventListeners, updateLayer, attributeBounds, data };

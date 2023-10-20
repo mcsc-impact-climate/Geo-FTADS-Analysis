@@ -1,4 +1,5 @@
-import { geojsonTypes, availableGradientAttributes } from './name_maps.js';
+import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels } from './name_maps.js';
+import { updateSelectedLayers, updateLegend, updateLayer, data } from './map.js'
 
 function populateLayerDropdown(mapping) {
   const areaLayerDropdown = document.getElementById("area-layer-dropdown");
@@ -131,7 +132,7 @@ document.body.addEventListener('click', function(event) {
     // Show the modal
     document.getElementById('details-modal').style.display = 'flex';
 
-      // Populate the dropdown menu with attribute names
+    // Populate the dropdown menu with attribute names
     const attributeDropdown = document.getElementById("attribute-dropdown");
     attributeDropdown.innerHTML = "";
 
@@ -142,15 +143,18 @@ document.body.addEventListener('click', function(event) {
     attributeNames.forEach((attributeName) => {
       const option = document.createElement("option");
       option.value = attributeName;
-      option.text = attributeName;
+      option.text = legendLabels[key][attributeName];
+      if (selectedGradientAttributes[key] === attributeName) {
+        option.selected = true;
+      }
       attributeDropdown.appendChild(option);
     });
 
     // Add an event listener to the dropdown to handle attribute selection
     attributeDropdown.addEventListener("change", function () {
-      const selectedAttribute = attributeDropdown.value;
+      selectedGradientAttributes[key] = attributeDropdown.value;
       // Call a function to update the plot and legend with the selected attribute
-      updatePlotAndLegend(selectedAttribute);
+      updatePlotAndLegend(key);
     });
   }
 
@@ -170,9 +174,9 @@ function getAttributeNamesForFeature(layerName) {
   }
 }
 
-function updatePlotAndLegend() {
-  // This is a placeholder function that does nothing.
-  // You can add your actual code here to update the plot and legend as needed.
+function updatePlotAndLegend(key) {
+  updateLayer(key, selectedGradientAttributes[key]);
+  updateLegend(data);
 }
 
 // Sample implementation of getDetails function

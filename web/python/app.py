@@ -39,8 +39,8 @@ geojsons['Maximum Demand Charge'] = os.path.join(geojson_directory, "demand_char
 
 # Highway flows
 geojsons['Highway Flows (Interstate)'] = os.path.join(geojson_directory, "highway_assignment_links_interstate.geojson")
-geojsons['Highway Flows (SU)'] = os.path.join(geojson_directory, "highway_assignment_links_single_unit.geojson")
-geojsons['Highway Flows (CU)'] = os.path.join(geojson_directory, "highway_assignment_links_combined_unit.geojson")
+# geojsons['Highway Flows (SU)'] = os.path.join(geojson_directory, "highway_assignment_links_single_unit.geojson")
+# geojsons['Highway Flows (CU)'] = os.path.join(geojson_directory, "highway_assignment_links_combined_unit.geojson")
 
 # Alternative fueling stations along highway corridors
 geojsons['DCFC Chargers'] = os.path.join(geojson_directory, "US_elec.geojson")

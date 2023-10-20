@@ -1,36 +1,4 @@
-export const geojsonLabels = {
-  'Truck Imports and Exports': 'Imports+Exports (ton-miles / sq mile)',
-  'Grid Emission Intensity': 'CO2e intensity of power grid (lb/MWh)',
-  'Commercial Electricity Price': 'Electricity rate (cents/kWh)',
-  'Maximum Demand Charge': 'Maximum Demand Charge by Utility ($/kW)',
-  'Highway Flows (Interstate)': 'Highway Freight Flows (annual tons/link)',
-  'Highway Flows (SU)': 'Single-unit Highway Freight Flows (annual tons/link)',
-  'Highway Flows (CU)': 'Combined-unit Highway Freight Flows (annual tons/link)',
-  'Operational Electrolyzers': 'Operational Hydrogen Electrolyzer Facility Capacity (kW)',
-  'Installed Electrolyzers': 'Installed Hydrogen Electrolyzer Facility Capacity (kW)',
-  'Planned Electrolyzers': 'Planned Hydrogen Electrolyzer Facility Capacity (kW)',
-  'Hydrogen from Refineries': 'Hydrogen Production Capacity from Refinery (million standard cubic feet per day)',
-  'State-Level Incentives and Regulations': 'Total Number of Incentives and Regulations',
-  'Truck Stop Charging': 'Trucks Passing Per Day'
-};
-
-export const selectedGradientAttributes = {
-  'Truck Imports and Exports': 'Tmil Tot D',
-  'Grid Emission Intensity': 'SRC2ERTA',
-  'Commercial Electricity Price': 'Cents_kWh',
-  'Maximum Demand Charge': 'MaxDemCh',
-  'Highway Flows (SU)': 'Tot Tons',
-  'Highway Flows (CU)': 'Tot Tons',
-  'Highway Flows (Interstate)': 'Tot Tons',
-  'Operational Electrolyzers': 'Power_kW',
-  'Installed Electrolyzers': 'Power_kW',
-  'Planned Electrolyzers': 'Power_kW',
-  'Hydrogen from Refineries': 'Cap_MMSCFD',
-  'State-Level Incentives and Regulations': 'all',
-  'Truck Stop Charging': 'Tot Trips',
-};
-
-export const selectedGradientTypes = {
+export let selectedGradientTypes = {
   'Truck Imports and Exports': 'color',
   'Grid Emission Intensity': 'color',
   'Commercial Electricity Price': 'color',
@@ -43,7 +11,7 @@ export const selectedGradientTypes = {
   'Planned Electrolyzers': 'size',
   'Hydrogen from Refineries': 'size',
   'State-Level Incentives and Regulations': 'color',
-  'Truck Stop Charging': 'color',
+  'Truck Stop Charging': 'size',
 }
 
 export const availableGradientAttributes = {
@@ -59,7 +27,68 @@ export const availableGradientAttributes = {
   'Planned Electrolyzers': ['Power_kW'],
   'Hydrogen from Refineries': ['Cap_MMSCFD'],
   'State-Level Incentives and Regulations': ['all', 'Biodiesel', 'Ethanol', 'Electricit', 'Hydrogen', 'Natural Ga', 'Propane', 'Renewable', 'Emissions'],
-  'Truck Stop Charging': ['Tot Trips', 'CPD', 'Half_CPD', 'Min_Charge', 'Half_Charg', 'Half_Ratio', 'Col_Save'],
+  'Truck Stop Charging': ['Tot Trips', 'CPD', 'Half_CPD', 'Min_Charge', 'Half_Charg', 'Min_Ratio', 'Half_Ratio', 'Col_Save'],
+};
+
+export let selectedGradientAttributes = {
+  'Truck Imports and Exports': 'Tmil Tot D',
+  'Grid Emission Intensity': 'SRC2ERTA',
+  'Commercial Electricity Price': 'Cents_kWh',
+  'Maximum Demand Charge': 'MaxDemCh',
+  'Highway Flows (SU)': 'Tot Tons',
+  'Highway Flows (CU)': 'Tot Tons',
+  'Highway Flows (Interstate)': 'Tot Tons',
+  'Operational Electrolyzers': 'Power_kW',
+  'Installed Electrolyzers': 'Power_kW',
+  'Planned Electrolyzers': 'Power_kW',
+  'Hydrogen from Refineries': 'Cap_MMSCFD',
+  'State-Level Incentives and Regulations': 'all',
+  'Truck Stop Charging': 'Tot Trips',
+};
+
+export const legendLabels = {
+  'Truck Imports and Exports': {
+    'Tmil Tot D': 'Imports+Exports (ton-miles / sq mile)',
+    'Tmil Imp D': 'Imports (ton-miles / sq mile)',
+    'Tmil Exp D': 'Exports (ton-miles / sq mile)',
+    'E Tot Den': 'Import+Export Emissions (tons CO2 / sq mile)',
+    'E Imp Den': 'Import Emissions (tons CO2 / sq mile)',
+    'E Exp Den': 'Export Emissions (tons CO2 / sq mile)'},
+  'Grid Emission Intensity': 'CO2e intensity of power grid (lb/MWh)',
+  'Commercial Electricity Price': 'Electricity rate (cents/kWh)',
+  'Maximum Demand Charge': 'Maximum Demand Charge by Utility ($/kW)',
+  'Highway Flows (Interstate)': {
+    'Tot Tons': 'Highway Freight Flows (annual tons/link)',
+    'Tot Trips': 'Highway Freight Flows (annual trips/link)'},
+  'Highway Flows (SU)': {
+    'Tot Tons': 'Single-unit Highway Freight Flows (annual tons/link)',
+    'Tot Trips': 'Single-unit Highway Freight Flows (annual trips/link)'},
+  'Highway Flows (CU)': {
+    'Tot Tons': 'Combined-unit Highway Freight Flows (annual tons/link)',
+    'Tot Trips': 'Combined-unit Highway Freight Flows (annual trips/link)'},
+  'Operational Electrolyzers': 'Operational Hydrogen Electrolyzer Facility Capacity (kW)',
+  'Installed Electrolyzers': 'Installed Hydrogen Electrolyzer Facility Capacity (kW)',
+  'Planned Electrolyzers': 'Planned Hydrogen Electrolyzer Facility Capacity (kW)',
+  'Hydrogen from Refineries': 'Hydrogen Production Capacity from Refinery (million standard cubic feet per day)',
+  'State-Level Incentives and Regulations': {
+    'all': 'Number of Incentives and Regulations (all fuels)',
+    'Biodiesel': 'Number of Incentives and Regulations (Biodiesel)',
+    'Ethanol': 'Number of Incentives and Regulations (Ethanol)',
+    'Electricit': 'Number of Incentives and Regulations (Electricity)',
+    'Hydrogen': 'Number of Incentives and Regulations (Hydrogen)',
+    'Natural Ga': 'Number of Incentives and Regulations (Natural Gas)',
+    'Propane': 'Number of Incentives and Regulations (Propane)',
+    'Renewable': 'Number of Incentives and Regulations (Renewable Diesel)',
+    'Emissions': 'Number of Incentives and Regulations (Emissions)'},
+  'Truck Stop Charging': {
+    'Tot Trips': 'Trucks Passing Per Day',
+    'CPD': 'Truck Charges Per Day (Full Fleet)',
+    'Half_CPD': 'Truck Charges Per Day (Half Fleet)',
+    'Min_Charge': 'Min Chargers (Full Fleet)',
+    'Half_Charg': 'Min Chargers (Half Fleet)',
+    'Min_Ratio': 'Min Charger-to-truck Ratio (Full Fleet)',
+    'Half_Ratio': 'Min Charger-to-truck Ratio (Half Fleet)',
+    'Col_Save': 'Infra Savings from Collective Investment (%)'},
 };
 
 // Key: geojson name, Value: color to use
