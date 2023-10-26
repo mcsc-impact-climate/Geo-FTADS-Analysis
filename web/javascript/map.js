@@ -37,7 +37,7 @@ async function attachEventListeners() {
   const applyButton = document.getElementById("apply-button");
   applyButton.addEventListener('click', async () => {
     await updateSelectedLayers(); // Wait for updateSelectedLayers to complete
-    updateLegend(data); // Now, call updateLegend after updateSelectedLayers is done
+    updateLegend(); // Now, call updateLegend after updateSelectedLayers is done
   });
 }
 
@@ -67,10 +67,11 @@ function compareLayers(a, b) {
 }
 
 // Function to load a specific layer from the server
-async function loadLayer(layerName) {
+async function loadLayer(layerName, filename='') {
 
   // Construct the URL without the "geojsons/" prefix
-  const url = `/get_geojson/${layerName}`;
+  //const url = `/get_geojson/${layerName}`;
+  const url = `/get_geojson?geojson_name=${layerName}&filename=${filename}`;
 
   try {
     const response = await fetch(url);
@@ -112,8 +113,25 @@ async function loadLayer(layerName) {
   }
 }
 
+function removeLayer(layerName) {
+  // Find the layer by its name
+  const layerIndex = vectorLayers.findIndex(layer => layer.get("key").split(".")[0] === layerName);
+
+  if (layerIndex !== -1) {
+    // Remove the layer from the map
+    map.removeLayer(vectorLayers[layerIndex]);
+
+    // Remove the layer from the vectorLayers array
+    vectorLayers.splice(layerIndex, 1);
+
+    // Remove the layer from the cache
+    delete layerCache[layerName];
+  }
+}
+
 // Function to update a specific layer with a new attributeName
 async function updateLayer(layerName, attributeName) {
+
   // Check if the layerName is cached
   if (!layerCache[layerName]) {
     // If the layer is not in the cache, load it using loadLayer
@@ -195,7 +213,7 @@ async function updateSelectedLayers() {
   }
 }
 
-function updateLegend(data) {
+function updateLegend() {
   const legendDiv = document.getElementById("legend");
   legendDiv.style.display = "flex";
   legendDiv.style.flexDirection = "column";
@@ -506,7 +524,7 @@ function clearLayerSelections() {
   const areaLayerDropdown = document.getElementById("area-layer-dropdown");
   areaLayerDropdown.selectedIndex = 0; // Assuming the first option is "Select Area Feature"
   updateSelectedLayers();
-  updateLegend(data);
+  updateLegend();
 }
 
-export { initMap, updateSelectedLayers, updateLegend, attachEventListeners, updateLayer, attributeBounds, data };
+export { initMap, updateSelectedLayers, updateLegend, attachEventListeners, updateLayer, attributeBounds, data, removeLayer, loadLayer };

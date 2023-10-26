@@ -1,5 +1,5 @@
-import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions } from './name_maps.js';
-import { updateSelectedLayers, updateLegend, updateLayer, data } from './map.js'
+import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions, selectedTruckChargingOptions } from './name_maps.js';
+import { updateSelectedLayers, updateLegend, updateLayer, data, removeLayer, loadLayer } from './map.js'
 
 function populateLayerDropdown(mapping) {
   const areaLayerDropdown = document.getElementById("area-layer-dropdown");
@@ -194,26 +194,28 @@ for (const this_option in options) {
   return {label: label, dropdown: dropdown, dropdownContainer: dropdownContainer};
 }
 
-function createChargingDropdowns(key) {
-  const rangeDropdownResult = createGenericDropdown('range', 'Truck Range: ', truckChargingOptions['Range']);
-  const rangeDropdown = rangeDropdownResult.dropdown;
-  const rangeDropdownContainer = rangeDropdownResult.dropdownContainer;
-  const rangeLabel = rangeDropdownResult.label;
-
+function populateChargingDropdown(key, option, dropdown, dropdownContainer, label) {
     // Add an event listener to the dropdown to handle attribute selection
-  rangeDropdown.addEventListener("change", function () {
-//    selectedGradientAttributes[key] = attributeDropdown.value;
-//    // Call a function to update the plot and legend with the selected attribute
-//    updatePlotAndLegend(key);
+  dropdown.addEventListener("change", async function () {
+    selectedTruckChargingOptions[option] = dropdown.value;
+    await removeLayer(key);
+    await loadLayer(key, "Truck_Stop_Parking_Along_Interstate_with_min_chargers_range_" + selectedTruckChargingOptions['Range'] + "_chargingtime_" + selectedTruckChargingOptions['Charging Time'] + "_maxwait_" + selectedTruckChargingOptions['Max Allowed Wait Time'] + ".geojson");
+    await updateSelectedLayers();
+    await updateLegend();
   });
 
   // Append the label and dropdown to the container
-  rangeDropdownContainer.appendChild(rangeLabel);
-  rangeDropdownContainer.appendChild(rangeDropdown);
+  dropdownContainer.appendChild(label);
+  dropdownContainer.appendChild(dropdown);
 
   // Append the container to the modal content
   const modalContent = document.querySelector(".modal-content");
-  modalContent.appendChild(rangeDropdownContainer);
+  modalContent.appendChild(dropdownContainer);
+}
+
+function createChargingDropdowns(key) {
+  const rangeDropdownResult = createGenericDropdown("range", "Truck Range: ", truckChargingOptions["Range"]);
+  populateChargingDropdown(key, "Range", rangeDropdownResult.dropdown, rangeDropdownResult.dropdownContainer, rangeDropdownResult.label)
 }
 
 document.body.addEventListener('click', function(event) {
@@ -253,7 +255,7 @@ function getAttributeNamesForFeature(layerName) {
 
 function updatePlotAndLegend(key) {
   updateLayer(key, selectedGradientAttributes[key]);
-  updateLegend(data);
+  updateLegend();
 }
 
 // Sample implementation of getDetails function

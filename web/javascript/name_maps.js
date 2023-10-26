@@ -46,6 +46,12 @@ export let selectedGradientAttributes = {
   'Truck Stop Charging': 'Tot Trips',
 };
 
+export let selectedTruckChargingOptions = {
+    'Range': '200.0',
+    'Charging Time': '1.0',
+    'Max Allowed Wait Time': '0.5'
+};
+
 export const legendLabels = {
   'Truck Imports and Exports': {
     'Tmil Tot D': 'Imports+Exports (ton-miles / sq mile)',

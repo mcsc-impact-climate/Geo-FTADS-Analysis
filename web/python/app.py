@@ -2,6 +2,7 @@ from flask import Flask, jsonify, send_from_directory
 import json
 import os
 from collections import OrderedDict
+from flask import request
 
 app = Flask(__name__, static_url_path='', static_folder='')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -81,11 +82,18 @@ def get_geojsons():
     json_str = json.dumps(geojsons, sort_keys=False)
     return json_str
 
-@app.route('/get_geojson/<geojson_name>')
-def get_geojson(geojson_name):
+@app.route('/get_geojson')
+def get_geojson():
+    # Get the 'geojson_name' and 'str_add' parameters from the query string
+    geojson_name = request.args.get('geojson_name', '')
+    filename = request.args.get('filename', '')
+
     geojson_path = geojsons[geojson_name]
     geojson_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '../geojsons_simplified'))
-    geojson_filename = os.path.join(geojson_directory, os.path.splitext(os.path.basename(geojson_path))[0] + '.geojson')
+    if filename == '':
+        geojson_filename = os.path.join(geojson_directory, os.path.splitext(os.path.basename(geojson_path))[0] + '.geojson')
+    else:
+        geojson_filename = os.path.join(geojson_directory, filename)
 
     # Create the directory to contain geojsons if it doesn't exist
     if not os.path.exists(geojson_directory):
