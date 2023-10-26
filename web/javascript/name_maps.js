@@ -66,10 +66,10 @@ export const legendLabels = {
   'Highway Flows (CU)': {
     'Tot Tons': 'Combined-unit Highway Freight Flows (annual tons/link)',
     'Tot Trips': 'Combined-unit Highway Freight Flows (annual trips/link)'},
-  'Operational Electrolyzers': 'Operational Hydrogen Electrolyzer Facility Capacity (kW)',
-  'Installed Electrolyzers': 'Installed Hydrogen Electrolyzer Facility Capacity (kW)',
-  'Planned Electrolyzers': 'Planned Hydrogen Electrolyzer Facility Capacity (kW)',
-  'Hydrogen from Refineries': 'Hydrogen Production Capacity from Refinery (million standard cubic feet per day)',
+  'Operational Electrolyzers': {'Power_kW': 'Operational Hydrogen Electrolyzer Facility Capacity (kW)'},
+  'Installed Electrolyzers': {'Power_kW': 'Installed Hydrogen Electrolyzer Facility Capacity (kW)'},
+  'Planned Electrolyzers': {'Power_kW': 'Planned Hydrogen Electrolyzer Facility Capacity (kW)'},
+  'Hydrogen from Refineries': {'Cap_MMSCFD': 'Hydrogen Production Capacity from Refinery (million standard cubic feet per day)'},
   'State-Level Incentives and Regulations': {
     'all': 'Number of Incentives and Regulations (all fuels)',
     'Biodiesel': 'Number of Incentives and Regulations (Biodiesel)',
@@ -90,6 +90,27 @@ export const legendLabels = {
     'Half_Ratio': 'Min Charger-to-truck Ratio (Half Fleet)',
     'Col_Save': 'Infra Savings from Collective Investment (%)'},
 };
+
+export const truckChargingOptions = {
+  'Range (miles)': {
+    '100.0': '100',
+    '200.0': '200',
+    '300.0': '300',
+    '400.0': '400'
+  },
+  'Charging Time': {
+    '0.5': '30 minutes',
+    '1.0': '1 hour',
+    '2.0': '2 hours',
+    '4.0': '4 hours'
+    },
+   'Max Allowed Wait Time': {
+     '0.25': '15 minutes',
+     '0.5': '30 minutes',
+     '1.0': '1 hour',
+     '2.0': '2 hours'
+   }
+}
 
 // Key: geojson name, Value: color to use
 export const geojsonColors = {
@@ -113,7 +134,7 @@ export const geojsonColors = {
   'LNG Stations': 'orange',
   'CNG Stations': 'purple',
   'LPG Stations': 'cyan',
-  'Truck Stop Charging': 'purple',
+  'Truck Stop Charging': 'red',
 };
 
 // Key: geojson name, Value: color to use

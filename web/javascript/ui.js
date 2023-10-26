@@ -1,4 +1,4 @@
-import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels } from './name_maps.js';
+import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions } from './name_maps.js';
 import { updateSelectedLayers, updateLegend, updateLayer, data } from './map.js'
 
 function populateLayerDropdown(mapping) {
@@ -72,7 +72,7 @@ function addLayerCheckbox(key, value, container) {
 
   // New button creation
   const detailsButton = document.createElement("button");
-  detailsButton.textContent = "Details";
+  detailsButton.textContent = "More";
   detailsButton.setAttribute("data-key", key);
   detailsButton.classList.add("details-btn");
   checkboxContainer.appendChild(detailsButton);
@@ -120,6 +120,84 @@ document.getElementById("layer-selection").addEventListener("click", function (e
   }
 });
 
+function createAttributeDropdown(key) {
+  // Check if the attribute-dropdown already exists
+  if (document.getElementById("attribute-dropdown")) {
+    return; // Exit the function if it already exists
+  }
+
+  const attributeDropdownContainer = document.createElement("div");
+  attributeDropdownContainer.classList.add("attribute-dropdown-container");
+
+  const label = document.createElement("label");
+  label.setAttribute("for", "attribute-dropdown");
+  label.textContent = "Gradient Attribute: ";
+
+  const attributeDropdown = document.createElement("select");
+  attributeDropdown.id = "attribute-dropdown";
+
+  // Assuming you have an array of attribute names for the current feature
+  const attributeNames = getAttributeNamesForFeature(key);
+
+  // Create and add options to the dropdown
+  attributeNames.forEach((attributeName) => {
+    const option = document.createElement("option");
+    option.value = attributeName;
+    option.text = legendLabels[key][attributeName];
+    if (selectedGradientAttributes[key] === attributeName) {
+      option.selected = true;
+    }
+    attributeDropdown.appendChild(option);
+  });
+
+  // Add an event listener to the dropdown to handle attribute selection
+  attributeDropdown.addEventListener("change", function () {
+    selectedGradientAttributes[key] = attributeDropdown.value;
+    // Call a function to update the plot and legend with the selected attribute
+    updatePlotAndLegend(key);
+  });
+
+  // Append the label and dropdown to the container
+  attributeDropdownContainer.appendChild(label);
+  attributeDropdownContainer.appendChild(attributeDropdown);
+
+  // Append the container to the modal content
+  const modalContent = document.querySelector(".modal-content");
+  modalContent.appendChild(attributeDropdownContainer);
+}
+
+function createChargingDropdowns(key) {
+  // Check if the range-dropdown already exists
+  if (document.getElementById("range-dropdown")) {
+    return; // Exit the function if it already exists
+  }
+
+  const rangeDropdownContainer = document.createElement("div");
+  rangeDropdownContainer.classList.add("range-dropdown-container");
+
+  const label = document.createElement("label");
+  label.setAttribute("for", "range-dropdown");
+  label.textContent = "Truck Range: ";
+
+  const rangeDropdown = document.createElement("select");
+  rangeDropdown.id = "range-dropdown";
+
+    // Add an event listener to the dropdown to handle attribute selection
+  rangeDropdown.addEventListener("change", function () {
+//    selectedGradientAttributes[key] = attributeDropdown.value;
+//    // Call a function to update the plot and legend with the selected attribute
+//    updatePlotAndLegend(key);
+  });
+
+  // Append the label and dropdown to the container
+  rangeDropdownContainer.appendChild(label);
+  rangeDropdownContainer.appendChild(rangeDropdown);
+
+  // Append the container to the modal content
+  const modalContent = document.querySelector(".modal-content");
+  modalContent.appendChild(rangeDropdownContainer);
+}
+
 document.body.addEventListener('click', function(event) {
   // Check if a details button was clicked
   if (event.target.classList.contains("details-btn")) {
@@ -132,30 +210,9 @@ document.body.addEventListener('click', function(event) {
     // Show the modal
     document.getElementById('details-modal').style.display = 'flex';
 
-    // Populate the dropdown menu with attribute names
-    const attributeDropdown = document.getElementById("attribute-dropdown");
-    attributeDropdown.innerHTML = "";
-
-    // Assuming you have an array of attribute names for the current feature
-    const attributeNames = getAttributeNamesForFeature(key);
-
-    // Create and add options to the dropdown
-    attributeNames.forEach((attributeName) => {
-      const option = document.createElement("option");
-      option.value = attributeName;
-      option.text = legendLabels[key][attributeName];
-      if (selectedGradientAttributes[key] === attributeName) {
-        option.selected = true;
-      }
-      attributeDropdown.appendChild(option);
-    });
-
-    // Add an event listener to the dropdown to handle attribute selection
-    attributeDropdown.addEventListener("change", function () {
-      selectedGradientAttributes[key] = attributeDropdown.value;
-      // Call a function to update the plot and legend with the selected attribute
-      updatePlotAndLegend(key);
-    });
+    // Create a dropdown menu to choose the gradient attribute
+    createAttributeDropdown(key);
+    createChargingDropdowns(key);
   }
 
   // Check if the close button of the modal was clicked
@@ -183,7 +240,7 @@ function updatePlotAndLegend(key) {
 function getDetails(key) {
   // Fetch or compute details related to the 'key'.
   // For the simplicity of this example, returning a static text.
-  return `Details about ${key}. Implement your logic to fetch or compute the real details.`;
+  return `Details about ${key}`;
 }
 
 export { populateLayerDropdown, getSelectedLayers };
