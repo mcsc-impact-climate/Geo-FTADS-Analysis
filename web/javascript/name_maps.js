@@ -92,25 +92,25 @@ export const legendLabels = {
 };
 
 export const truckChargingOptions = {
-  'Range (miles)': {
-    '100.0': '100',
-    '200.0': '200',
-    '300.0': '300',
-    '400.0': '400'
-  },
+  'Range': {
+    '100 miles': '100.0',
+    '200 miles': '200.0',
+    '300 miles': '300.0',
+    '400 miles': '400.0'
+    },
   'Charging Time': {
-    '0.5': '30 minutes',
-    '1.0': '1 hour',
-    '2.0': '2 hours',
-    '4.0': '4 hours'
+    '30 minutes': '0.5',
+    '1 hour': '1.0',
+    '2 hours': '2.0',
+    '4 hours': '4.0'
     },
    'Max Allowed Wait Time': {
-     '0.25': '15 minutes',
-     '0.5': '30 minutes',
-     '1.0': '1 hour',
-     '2.0': '2 hours'
-   }
-}
+     '15 minutes': '0.25',
+     '30 minutes': '0.5',
+     '1 hour': '1.0',
+     '2 hours': '2.0'
+    }
+};
 
 // Key: geojson name, Value: color to use
 export const geojsonColors = {

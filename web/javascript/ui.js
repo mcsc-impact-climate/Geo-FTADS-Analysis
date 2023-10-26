@@ -166,21 +166,39 @@ function createAttributeDropdown(key) {
   modalContent.appendChild(attributeDropdownContainer);
 }
 
-function createChargingDropdowns(key) {
-  // Check if the range-dropdown already exists
-  if (document.getElementById("range-dropdown")) {
+function createGenericDropdown(name, dropdown_label, options) {
+  // Check if the dropdown already exists
+  if (document.getElementById(name + "-dropdown")) {
     return; // Exit the function if it already exists
   }
 
-  const rangeDropdownContainer = document.createElement("div");
-  rangeDropdownContainer.classList.add("range-dropdown-container");
+  const dropdownContainer = document.createElement("div");
+  dropdownContainer.classList.add(name + "-dropdown-container");
 
   const label = document.createElement("label");
-  label.setAttribute("for", "range-dropdown");
-  label.textContent = "Truck Range: ";
+  label.setAttribute("for", name + "-dropdown");
+  label.textContent = dropdown_label;
 
-  const rangeDropdown = document.createElement("select");
-  rangeDropdown.id = "range-dropdown";
+  const dropdown = document.createElement("select");
+  dropdown.id = name + "-dropdown";
+
+  // Create and add options to the dropdown
+for (const this_option in options) {
+  if (options.hasOwnProperty(this_option)) {
+    const option = document.createElement("option");
+    option.value = options[this_option]; // Use the key as the value
+    option.text = this_option; // Use the corresponding value as the text
+    dropdown.appendChild(option);
+    }
+  }
+  return {label: label, dropdown: dropdown, dropdownContainer: dropdownContainer};
+}
+
+function createChargingDropdowns(key) {
+  const rangeDropdownResult = createGenericDropdown('range', 'Truck Range: ', truckChargingOptions['Range']);
+  const rangeDropdown = rangeDropdownResult.dropdown;
+  const rangeDropdownContainer = rangeDropdownResult.dropdownContainer;
+  const rangeLabel = rangeDropdownResult.label;
 
     // Add an event listener to the dropdown to handle attribute selection
   rangeDropdown.addEventListener("change", function () {
@@ -190,7 +208,7 @@ function createChargingDropdowns(key) {
   });
 
   // Append the label and dropdown to the container
-  rangeDropdownContainer.appendChild(label);
+  rangeDropdownContainer.appendChild(rangeLabel);
   rangeDropdownContainer.appendChild(rangeDropdown);
 
   // Append the container to the modal content
@@ -212,6 +230,8 @@ document.body.addEventListener('click', function(event) {
 
     // Create a dropdown menu to choose the gradient attribute
     createAttributeDropdown(key);
+
+    // Create additional dropdown menus for the truck charging layer
     createChargingDropdowns(key);
   }
 
