@@ -48,7 +48,7 @@ export let selectedGradientAttributes = {
 
 export let selectedTruckChargingOptions = {
     'Range': '200.0',
-    'Charging Time': '1.0',
+    'Charging Time': '4.0',
     'Max Allowed Wait Time': '0.5'
 };
 

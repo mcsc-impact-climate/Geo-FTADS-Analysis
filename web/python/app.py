@@ -75,7 +75,7 @@ geojsons['Principal Ports'] = os.path.join(geojson_directory, "Principal_Port.ge
 geojsons['State-Level Incentives and Regulations'] = os.path.join(geojson_directory, "all_incentives_and_regulations.geojson")
 
 # Truck charger layers
-geojsons['Truck Stop Charging'] = os.path.join(geojson_directory, "Truck_Stop_Parking_Along_Interstate_with_min_chargers.geojson")
+geojsons['Truck Stop Charging'] = os.path.join(geojson_directory, "Truck_Stop_Parking_Along_Interstate_with_min_chargers_range_200.0_chargingtime_4.0_maxwait_0.5.geojson")
 
 @app.route('/get_geojsons')
 def get_geojsons():

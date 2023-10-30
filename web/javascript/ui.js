@@ -166,7 +166,8 @@ function createAttributeDropdown(key) {
   modalContent.appendChild(attributeDropdownContainer);
 }
 
-function createGenericDropdown(name, dropdown_label, options) {
+function createTruckChargingDropdown(name, parameter, dropdown_label, key) {
+  const options = truckChargingOptions[parameter]
   // Check if the dropdown already exists
   if (document.getElementById(name + "-dropdown")) {
     return; // Exit the function if it already exists
@@ -183,21 +184,21 @@ function createGenericDropdown(name, dropdown_label, options) {
   dropdown.id = name + "-dropdown";
 
   // Create and add options to the dropdown
-for (const this_option in options) {
-  if (options.hasOwnProperty(this_option)) {
-    const option = document.createElement("option");
-    option.value = options[this_option]; // Use the key as the value
-    option.text = this_option; // Use the corresponding value as the text
-    dropdown.appendChild(option);
+  for (const this_option in options) {
+    if (options.hasOwnProperty(this_option)) {
+        const option = document.createElement("option");
+        option.value = options[this_option]; // Use the key as the value
+        option.text = this_option; // Use the corresponding value as the text
+        if (selectedTruckChargingOptions[parameter] === option.value) {
+            option.selected = true;
+        }
+        dropdown.appendChild(option);
     }
   }
-  return {label: label, dropdown: dropdown, dropdownContainer: dropdownContainer};
-}
 
-function populateChargingDropdown(key, option, dropdown, dropdownContainer, label) {
-    // Add an event listener to the dropdown to handle attribute selection
+  // Add an event listener to the dropdown to handle attribute selection
   dropdown.addEventListener("change", async function () {
-    selectedTruckChargingOptions[option] = dropdown.value;
+    selectedTruckChargingOptions[parameter] = dropdown.value;
     await removeLayer(key);
     await loadLayer(key, "Truck_Stop_Parking_Along_Interstate_with_min_chargers_range_" + selectedTruckChargingOptions['Range'] + "_chargingtime_" + selectedTruckChargingOptions['Charging Time'] + "_maxwait_" + selectedTruckChargingOptions['Max Allowed Wait Time'] + ".geojson");
     await updateSelectedLayers();
@@ -214,14 +215,18 @@ function populateChargingDropdown(key, option, dropdown, dropdownContainer, labe
 }
 
 function createChargingDropdowns(key) {
-  const rangeDropdownResult = createGenericDropdown("range", "Truck Range: ", truckChargingOptions["Range"]);
-  populateChargingDropdown(key, "Range", rangeDropdownResult.dropdown, rangeDropdownResult.dropdownContainer, rangeDropdownResult.label)
+  const rangeDropdownResult = createTruckChargingDropdown("range", "Range", "Truck Range: ", key);
+  const chargingTimeDropdownResult = createTruckChargingDropdown("chargingTime", "Charging Time", "Charging Time: ", key);
+  const maxWaitTimeDropdownResult = createTruckChargingDropdown("maxWaitTime", "Max Allowed Wait Time", "Max Allowed Wait Time: ", key);
 }
 
 document.body.addEventListener('click', function(event) {
   // Check if a details button was clicked
   if (event.target.classList.contains("details-btn")) {
     const key = event.target.getAttribute("data-key");
+
+    // Reset the content of the modal
+    resetModalContent();
 
     // Fetch details based on key or prepare details text in some other way
     document.getElementById('details-content').innerText = getDetails(key);
@@ -234,7 +239,9 @@ document.body.addEventListener('click', function(event) {
     createAttributeDropdown(key);
 
     // Create additional dropdown menus for the truck charging layer
-    createChargingDropdowns(key);
+    if(key === "Truck Stop Charging") {
+        createChargingDropdowns(key);
+    }
   }
 
   // Check if the close button of the modal was clicked
@@ -262,7 +269,36 @@ function updatePlotAndLegend(key) {
 function getDetails(key) {
   // Fetch or compute details related to the 'key'.
   // For the simplicity of this example, returning a static text.
-  return `Details about ${key}`;
+  //return `Details about ${key}`;
+  return '';
+}
+
+function resetModalContent() {
+  const modalContent = document.querySelector(".modal-content");
+
+  // Remove attribute-dropdown-container if it exists
+  const attributeDropdownContainer = document.querySelector(".attribute-dropdown-container");
+  if (attributeDropdownContainer) {
+    modalContent.removeChild(attributeDropdownContainer);
+  }
+
+  // Remove range-dropdown-container if it exists
+  const rangeDropdownContainer = document.querySelector(".range-dropdown-container");
+  if (rangeDropdownContainer) {
+    modalContent.removeChild(rangeDropdownContainer);
+  }
+
+  // Remove chargingTime-dropdown-container if it exists
+  const chargingTimeDropdownContainer = document.querySelector(".chargingTime-dropdown-container");
+  if (chargingTimeDropdownContainer) {
+    modalContent.removeChild(chargingTimeDropdownContainer);
+  }
+
+  // Remove maxWaitTime-dropdown-container if it exists
+  const maxWaitTimeDropdownContainer = document.querySelector(".maxWaitTime-dropdown-container");
+  if (maxWaitTimeDropdownContainer) {
+    modalContent.removeChild(maxWaitTimeDropdownContainer);
+  }
 }
 
 export { populateLayerDropdown, getSelectedLayers };
