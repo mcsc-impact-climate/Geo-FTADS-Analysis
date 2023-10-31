@@ -67,11 +67,20 @@ function compareLayers(a, b) {
 }
 
 // Function to load a specific layer from the server
-async function loadLayer(layerName, layerMap=getSelectedLayersValues()) {
+async function loadLayer(layerName, filename='') {
+  const layerMap=getSelectedLayersValues();
 
   // Construct the URL without the "geojsons/" prefix
   //const url = `/get_geojson/${layerName}`;
-  const url = `${STORAGE_URL}${layerMap.get(layerName)}`
+  let url = `${STORAGE_URL}${layerMap.get(layerName)}`
+
+  // If needed, update the filename in the url
+  if (filename !== '') {
+    const lastSlashIndex = url.lastIndexOf('/');
+    const dir = url.substring(0, lastSlashIndex + 1);
+    url = dir + filename;
+  }
+
   let spinner = document.getElementById('lds-spinner')
 
   try {
