@@ -65,13 +65,13 @@ export const legendLabels = {
   'Maximum Demand Charge': 'Maximum Demand Charge by Utility ($/kW)',
   'Highway Flows (Interstate)': {
     'Tot Tons': 'Highway Freight Flows (annual tons/link)',
-    'Tot Trips': 'Highway Freight Flows (annual trips/link)'},
+    'Tot Trips': 'Highway Freight Flows (daily trips/link)'},
   'Highway Flows (SU)': {
     'Tot Tons': 'Single-unit Highway Freight Flows (annual tons/link)',
-    'Tot Trips': 'Single-unit Highway Freight Flows (annual trips/link)'},
+    'Tot Trips': 'Single-unit Highway Freight Flows (daily trips/link)'},
   'Highway Flows (CU)': {
     'Tot Tons': 'Combined-unit Highway Freight Flows (annual tons/link)',
-    'Tot Trips': 'Combined-unit Highway Freight Flows (annual trips/link)'},
+    'Tot Trips': 'Combined-unit Highway Freight Flows (daily trips/link)'},
   'Operational Electrolyzers': {'Power_kW': 'Operational Hydrogen Electrolyzer Facility Capacity (kW)'},
   'Installed Electrolyzers': {'Power_kW': 'Installed Hydrogen Electrolyzer Facility Capacity (kW)'},
   'Planned Electrolyzers': {'Power_kW': 'Planned Hydrogen Electrolyzer Facility Capacity (kW)'},
@@ -99,10 +99,10 @@ export const legendLabels = {
 
 export const truckChargingOptions = {
   'Range': {
-    '100 miles': '100.0',
-    '200 miles': '200.0',
-    '300 miles': '300.0',
-    '400 miles': '400.0'
+    '150 miles': '100.0',
+    '250 miles': '200.0',
+    '350 miles': '300.0',
+    '450 miles': '400.0'
     },
   'Charging Time': {
     '30 minutes': '0.5',
