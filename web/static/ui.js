@@ -106,6 +106,27 @@ function getSelectedLayers() {
   return selectedLayerNames;
 }
 
+function getSelectedLayersValues() {
+  const selectedLayerValues = new Map();
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+
+  // Get selected checkboxes
+  checkboxes.forEach((checkbox) => {
+    if (checkbox.checked) {
+      // print(checkbox)
+      selectedLayerValues.set(checkbox.nextSibling.textContent, checkbox.value); // Get the label text
+    }
+  });
+
+  // Get the selected area layer from the dropdown
+  const areaLayerDropdown = document.getElementById("area-layer-dropdown");
+ for (const option of areaLayerDropdown.options) {
+    if (option.selected && option.text !== 'None') {
+      selectedLayerValues.set(option.text, option.value); // Push the text of the selected option
+    }
+  }
+  return selectedLayerValues;
+}
 // Add event listener to the parent element of the buttons
 document.getElementById("layer-selection").addEventListener("click", function (event) {
   if (event.target.classList.contains("toggle-button")) {
@@ -301,4 +322,4 @@ function resetModalContent() {
   }
 }
 
-export { populateLayerDropdown, getSelectedLayers };
+export { populateLayerDropdown, getSelectedLayers, getSelectedLayersValues};
