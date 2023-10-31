@@ -1,5 +1,5 @@
 import { createStyleFunction, isPolygonLayer, isPointLayer, isLineStringLayer } from './styles.js';
-import { getSelectedLayers } from './ui.js';
+import { getSelectedLayers, getSelectedLayersValues} from './ui.js';
 import { legendLabels, selectedGradientAttributes, geojsonColors, selectedGradientTypes } from './name_maps.js';
 
 var vectorLayers = [];
@@ -68,14 +68,26 @@ function compareLayers(a, b) {
 
 // Function to load a specific layer from the server
 async function loadLayer(layerName, filename='') {
+  const layerMap=getSelectedLayersValues();
 
   // Construct the URL without the "geojsons/" prefix
   //const url = `/get_geojson/${layerName}`;
-  const url = `/get_geojson?geojson_name=${layerName}&filename=${filename}`;
+  let url = `${STORAGE_URL}${layerMap.get(layerName)}`
+
+  // If needed, update the filename in the url
+  if (filename !== '') {
+    const lastSlashIndex = url.lastIndexOf('/');
+    const dir = url.substring(0, lastSlashIndex + 1);
+    url = dir + filename;
+  }
+
+  let spinner = document.getElementById('lds-spinner')
 
   try {
+    spinner.style.visibility= "visible"
     const response = await fetch(url);
     if (!response.ok) {
+      spinner.style.visibility= "hidden"
       throw new Error('Network response was not ok');
     }
 
@@ -107,8 +119,10 @@ async function loadLayer(layerName, filename='') {
     // Add the layer to the map and cache it
     layerCache[layerName] = vectorLayer;
     vectorLayers.push(vectorLayer);
+    spinner.style.visibility= "hidden"
   } catch (error) {
     console.log('Fetch Error:', error);
+    spinner.style.visibility= "hidden"
     throw error; // Propagate the error
   }
 }

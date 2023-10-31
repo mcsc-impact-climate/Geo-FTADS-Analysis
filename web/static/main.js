@@ -2,7 +2,7 @@ import { initMap, updateSelectedLayers, updateLegend, attachEventListeners } fro
 import { populateLayerDropdown, getSelectedLayers } from './ui.js';
 
 // Fetch available geojson names from the Flask app
-fetch('/get_geojsons')
+fetch(GET_GEOJSONS)
   .then(response => {
     if (!response.ok) {
       throw new Error('Network response was not ok');
@@ -19,9 +19,9 @@ fetch('/get_geojsons')
     console.log('Fetch Error:', error);
   });
 
-//// Update map size when the window is resized
-//window.addEventListener('resize', function() {
-//  if (map) {
-//  map.updateSize();
-//  }
-//});
+// Update map size when the window is resized
+// window.addEventListener('resize', function() {
+//   if (map) {
+//   map.updateSize();
+//   }
+// });
