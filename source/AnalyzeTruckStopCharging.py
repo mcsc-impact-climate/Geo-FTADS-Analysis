@@ -545,12 +545,6 @@ if __name__ == '__main__':
 #  # Call the function to count truck stops within the radius and add the count as an attribute
 #  truck_stops_gdf = count_truck_stops_within_radius(truck_stops_gdf, args.range_miles)
 #
-#  # Specify the number of processes to use for parallelization
-#  num_processes = multiprocessing.cpu_count()  # Use all available CPU cores
-#
-#  # Call the parallel function to count truck stops within the radius and add the count as an attribute
-#  truck_stops_gdf = count_truck_stops_within_radius_parallel(truck_stops_gdf, args.radius_miles, num_processes)
-#
 #  # Save the augmented truck_stops_gdf as a shapefile
 #  saveShapefile(truck_stops_gdf, f'{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_Tot_Trips_and_Stops_Within_200mi.shp')
 
@@ -572,5 +566,3 @@ if __name__ == '__main__':
   truck_stops_gdf['Col_Save'] = 100.*(1.-truck_stops_gdf['Min_Ratio']/truck_stops_gdf['Half_Ratio'])
 
   saveShapefile(truck_stops_gdf, f'{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_min_chargers_range_{args.range_miles}_chargingtime_{args.charging_time}_maxwait_{args.max_wait_time}.shp')
-
-#main()

@@ -60,7 +60,7 @@ shapefiles = OrderedDict()
 #shapefiles['State-Level Incentives and Regulations'] = os.path.join("data/incentives_and_regulations_merged/all_incentives_and_regulations.shp")
 
 # Truck charger infrastructure savings
-truck_ranges = ['400.0', '300.0'] # , 200, 100
+truck_ranges = ['400.0', '300.0', '200.0', '100.0']
 max_wait_times = ['0.25', '0.5', '1.0', '2.0']
 charging_times = ['0.5', '1.0', '2.0', '4.0']
 for truck_range in truck_ranges:
