@@ -8,12 +8,15 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.files.storage import default_storage, FileSystemStorage
 from django.http import HttpResponse
+from django.shortcuts import render
 from storages.backends.s3boto3 import S3Boto3Storage
 from shapely.geometry import shape, mapping
 from shapely.geometry.polygon import Polygon
 from shapely.geometry.multipolygon import MultiPolygon
 from shapely.geometry.linestring import LineString
 from shapely.geometry.multilinestring import MultiLineString
+
+INDEX_TEMPLATE = 'local.html' if __package__ == 'web' else 'index_main.html'
 
 
 # Create an ordered dictionary to maintain the order of items
@@ -82,6 +85,10 @@ def auth_required(function):
 
     return decorator
 
+
+@auth_required
+def index(request):
+    return render(request, INDEX_TEMPLATE)
 
 @auth_required
 def get_geojsons(request):
