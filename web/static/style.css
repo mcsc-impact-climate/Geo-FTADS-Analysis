@@ -114,6 +114,12 @@ body {
   width: 100%;
 }
 
+.checkbox-container input[type="checkbox"],
+.checkbox-container label {
+    margin: 2px;
+    vertical-align: middle; /* this can help with inline elements like inline-block */
+}
+
 /* Style for the 'Details' button */
 
 .details-btn {
