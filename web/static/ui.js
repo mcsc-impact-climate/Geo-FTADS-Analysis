@@ -266,7 +266,7 @@ document.body.addEventListener('click', function(event) {
   }
 
   // Check if the close button of the modal was clicked
-  if (event.target.classList.contains("close-btn")) {
+  if (event.target.classList.contains("close-btn") || event.target.parentElement.tagName === 'SELECT') {
     document.getElementById('details-modal').style.display = 'none';
   }
 });
