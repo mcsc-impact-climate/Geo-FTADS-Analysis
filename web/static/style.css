@@ -1,3 +1,51 @@
+.header {
+  display: none;
+}
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+    font-family: Arial, sans-serif !important;
+}
+
+body {
+    font-weight: normal;
+    font-size: 14px;
+}
+
+#legend h3 {
+  font-weight: normal;
+  font-size: 16px;
+}
+
+#layer-selection h3 {
+  font-weight: bold;
+  font-size: 16px;
+  padding-top: 20px;
+}
+
+#details-modal h2 {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.toggle-button {
+  font-weight: normal;
+  font-size: 14px;
+  padding-right: 5px;
+  padding-left: 5px;
+}
+
 /* Style for the Apply button */
 .apply-button {
   display: block; /* Always on its own line */
@@ -30,6 +78,7 @@
 }
 
 .modal {
+  font-size: 12px;
   display: none;
   position: fixed;
   top: 0;
@@ -42,6 +91,7 @@
 }
 
 .modal-content {
+  font-size: 12px;
   background-color: #f4f4f4;
   padding: 20px;
   border-radius: 5px;
@@ -57,9 +107,10 @@
 }
 
 .checkbox-container {
+  font-size: 14px;
   display: flex;
-  justify-content: space-between;
-  align-items: left;
+  justify-content: flex-start;
+  align-items: center;
   width: 100%;
 }
 
@@ -70,18 +121,27 @@
   color: #fff;  /* White color for the text on the button */
   font-size: 12px; /* Font size */
   border: 1px solid black; /* Remove any default border */
-  padding: none; /* Add some padding around the text */
+  padding-left: 5px; /* Add some padding around the text */
+  padding-right: 5px; /* Add some padding around the text */
+  padding-top: 0px;
+  padding-bottom: 0px;
   margin-left: 5px; /* Add some space to the left of the button */
   cursor: pointer; /* Change the cursor on hover over the button */
   flex-shrink: 0;  /* prevent shrinking */
+  margin-left: auto;
 }
 
 .details-btn:hover {
   background-color: #0056b3; /* Darker blue on hover */
 }
 
+.details-title {
+    font-size: 14px;
+}
+
 /* Style for the attribute dropdown container */
 .attribute-dropdown-container {
+  font-size: 12px;
   display: flex;
   justify-content: left; /* Center the content horizontally */
   align-items: center; /* Center the content vertically */
@@ -90,6 +150,7 @@
 
 /* Style for the label */
 .attribute-dropdown-container label {
+  font-size: 14px;
   margin-right: 10px; /* Add right margin for spacing */
 }
 
