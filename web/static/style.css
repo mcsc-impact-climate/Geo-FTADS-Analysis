@@ -78,7 +78,7 @@ body {
 }
 
 .modal {
-  font-size: 12px;
+  font-size: 14px;
   display: none;
   position: fixed;
   top: 0;
@@ -91,7 +91,7 @@ body {
 }
 
 .modal-content {
-  font-size: 12px;
+  font-size: 14px;
   background-color: #f4f4f4;
   padding: 20px;
   border-radius: 5px;
@@ -125,7 +125,7 @@ body {
 .details-btn {
   background-color: #007bff; /* Blue color for the button */
   color: #fff;  /* White color for the text on the button */
-  font-size: 12px; /* Font size */
+  font-size: 14px; /* Font size */
   border: 1px solid black; /* Remove any default border */
   padding-left: 5px; /* Add some padding around the text */
   padding-right: 5px; /* Add some padding around the text */
@@ -147,7 +147,7 @@ body {
 
 /* Style for the attribute dropdown container */
 .attribute-dropdown-container {
-  font-size: 12px;
+  font-size: 14px;
   display: flex;
   justify-content: left; /* Center the content horizontally */
   align-items: center; /* Center the content vertically */
@@ -162,7 +162,7 @@ body {
 
 /* Style for the "Select Attribute" dropdown */
 #attribute-dropdown {
-  width: 80%; /* Make the dropdown fill the available width */
+  width: 60%; /* Make the dropdown fill the available width */
   padding: 5px; /* Add some padding to the dropdown */
   font-size: 14px; /* Adjust the font size as needed */
 }
@@ -182,7 +182,7 @@ body {
 
 /* Style for the "Select Attribute" dropdown */
 #range-dropdown {
-  width: 80%; /* Make the dropdown fill the available width */
+  width: 60%; /* Make the dropdown fill the available width */
   padding: 5px; /* Add some padding to the dropdown */
   font-size: 14px; /* Adjust the font size as needed */
 }
@@ -202,7 +202,7 @@ body {
 
 /* Style for the "Select Attribute" dropdown */
 #chargingTime-dropdown {
-  width: 80%; /* Make the dropdown fill the available width */
+  width: 60%; /* Make the dropdown fill the available width */
   padding: 5px; /* Add some padding to the dropdown */
   font-size: 14px; /* Adjust the font size as needed */
 }
@@ -222,7 +222,7 @@ body {
 
 /* Style for the "Select Attribute" dropdown */
 #maxWaitTime-dropdown {
-  width: 80%; /* Make the dropdown fill the available width */
+  width: 60%; /* Make the dropdown fill the available width */
   padding: 5px; /* Add some padding to the dropdown */
   font-size: 14px; /* Adjust the font size as needed */
 }
