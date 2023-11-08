@@ -141,6 +141,47 @@ document.getElementById("layer-selection").addEventListener("click", function (e
   }
 });
 
+document.getElementById("area-details-button").addEventListener("click", function () {
+  const areaLayerDropdown = document.getElementById("area-layer-dropdown");
+  const selectedAreaLayer = areaLayerDropdown.value;
+
+  if (selectedAreaLayer !== "") {
+    // Fetch details based on the selected area layer
+    const selectedAreaLayerName = getAreaLayerName(selectedAreaLayer);
+
+    const details = getAreaLayerDetails(selectedAreaLayer);
+
+    // Reset the content of the modal
+    resetModalContent();
+
+    // Fetch details based on key or prepare details text in some other way
+    document.getElementById('details-content').innerText = '';   // DMM: Replace with actual details about the data source
+    document.getElementById('details-title').innerText = `${selectedAreaLayerName} Details`;
+
+    // Show the modal
+    document.getElementById('details-modal').style.display = 'flex';
+
+    // Create a dropdown menu to choose attributes for the area layer
+    createAttributeDropdown(selectedAreaLayerName);
+  }
+});
+
+// Function to get the selected area layer's name based on its value
+function getAreaLayerName(selectedValue) {
+  const areaLayerDropdown = document.getElementById("area-layer-dropdown");
+  const selectedOption = Array.from(areaLayerDropdown.options).find((option) => option.value === selectedValue);
+
+  return selectedOption ? selectedOption.textContent : "";
+}
+
+
+function getAreaLayerDetails(layerName) {
+  // Fetch or compute details related to the 'layerName'.
+  // Replace this with your logic to get area layer details.
+  // For example, you can fetch data from an API or a database.
+  return `Details about ${layerName}`;
+}
+
 function createAttributeDropdown(key) {
   // Check if the attribute-dropdown already exists
   if (document.getElementById("attribute-dropdown")) {
@@ -243,7 +284,7 @@ function createChargingDropdowns(key) {
 
 document.body.addEventListener('click', function(event) {
   // Check if a details button was clicked
-  if (event.target.classList.contains("details-btn")) {
+  if (event.target.classList.contains("details-btn") && event.target.hasAttribute("data-key")) {
     const key = event.target.getAttribute("data-key");
 
     // Reset the content of the modal

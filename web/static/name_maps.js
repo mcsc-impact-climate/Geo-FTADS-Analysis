@@ -124,10 +124,10 @@ export const geojsonColors = {
   'Commercial Electricity Price': 'blue',
   'Highway Flows (SU)': 'cyan',
   'Highway Flows (Interstate)': 'black',
-  'Operational Electrolyzers': 'red',
-  'Installed Electrolyzers': 'blue',
-  'Planned Electrolyzers': 'green',
-  'Hydrogen from Refineries': 'purple',
+  'Operational Electrolyzers': 'DarkGreen',
+  'Installed Electrolyzers': 'LimeGreen',
+  'Planned Electrolyzers': 'GreenYellow',
+  'Hydrogen from Refineries': 'grey',
   'East Coast ZEV Corridor': 'orange',
   'Midwest ZEV Corridor': 'purple',
   'Houston to LA H2 Corridor': 'green',
@@ -141,6 +141,7 @@ export const geojsonColors = {
   'CNG Stations': 'purple',
   'LPG Stations': 'cyan',
   'Truck Stop Charging': 'red',
+  'Principal Ports': 'purple',
 };
 
 // Key: geojson name, Value: color to use
