@@ -89,7 +89,7 @@ export const legendLabels = {
     'Half_Charg': 'Min Chargers (Half Fleet)',
     'Min_Ratio': 'Min Charger-to-truck Ratio (Full Fleet)',
     'Half_Ratio': 'Min Charger-to-truck Ratio (Half Fleet)',
-    'Col_Save': 'Infra Savings from Collective Investment (%)'},
+    'Col_Save': 'Infra Savings from Pooled Investment (%)'},
 };
 
 export const fuelLabels = {
