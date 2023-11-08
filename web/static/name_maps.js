@@ -26,7 +26,7 @@ export const availableGradientAttributes = {
   'Installed Electrolyzers': ['Power_kW'],
   'Planned Electrolyzers': ['Power_kW'],
   'Hydrogen from Refineries': ['Cap_MMSCFD'],
-  'State-Level Incentives and Regulations': ['all', 'Biodiesel', 'Ethanol', 'Electricit', 'Hydrogen', 'Natural Ga', 'Propane', 'Renewable', 'Emissions'],
+  'State-Level Incentives and Regulations': ['all', 'Biodiesel', 'Ethanol', 'Electricit', 'Hydrogen', 'Natural Ga', 'Propane', 'Renewable'],// 'Emissions'],
   'Truck Stop Charging': ['Tot Trips', 'CPD', 'Half_CPD', 'Min_Charge', 'Half_Charg', 'Min_Ratio', 'Half_Ratio', 'Col_Save'],
 };
 
@@ -46,12 +46,6 @@ export let selectedGradientAttributes = {
   'Truck Stop Charging': 'Tot Trips',
 };
 
-export let selectedTruckChargingOptions = {
-    'Range': '200.0',
-    'Charging Time': '4.0',
-    'Max Allowed Wait Time': '0.5'
-};
-
 export const legendLabels = {
   'Truck Imports and Exports': {
     'Tmil Tot D': 'Imports+Exports (ton-miles / sq mile)',
@@ -60,9 +54,9 @@ export const legendLabels = {
     'E Tot Den': 'Import+Export Emissions (tons CO2 / sq mile)',
     'E Imp Den': 'Import Emissions (tons CO2 / sq mile)',
     'E Exp Den': 'Export Emissions (tons CO2 / sq mile)'},
-  'Grid Emission Intensity': 'CO2e intensity of power grid (lb/MWh)',
-  'Commercial Electricity Price': 'Electricity rate (cents/kWh)',
-  'Maximum Demand Charge': 'Maximum Demand Charge by Utility ($/kW)',
+  'Grid Emission Intensity': {'SRC2ERTA': 'CO2e intensity of power grid (lb/MWh)'},
+  'Commercial Electricity Price': {'Cents_kWh': 'Electricity rate (cents/kWh)'},
+  'Maximum Demand Charge': {'MaxDemCh': 'Maximum Demand Charge by Utility ($/kW)'},
   'Highway Flows (Interstate)': {
     'Tot Tons': 'Highway Freight Flows (annual tons/link)',
     'Tot Trips': 'Highway Freight Flows (daily trips/link)'},
@@ -77,15 +71,16 @@ export const legendLabels = {
   'Planned Electrolyzers': {'Power_kW': 'Planned Hydrogen Electrolyzer Facility Capacity (kW)'},
   'Hydrogen from Refineries': {'Cap_MMSCFD': 'Hydrogen Production Capacity from Refinery (million standard cubic feet per day)'},
   'State-Level Incentives and Regulations': {
-    'all': 'Number of Incentives and Regulations (all fuels)',
-    'Biodiesel': 'Number of Incentives and Regulations (Biodiesel)',
-    'Ethanol': 'Number of Incentives and Regulations (Ethanol)',
-    'Electricit': 'Number of Incentives and Regulations (Electricity)',
-    'Hydrogen': 'Number of Incentives and Regulations (Hydrogen)',
-    'Natural Ga': 'Number of Incentives and Regulations (Natural Gas)',
-    'Propane': 'Number of Incentives and Regulations (Propane)',
-    'Renewable': 'Number of Incentives and Regulations (Renewable Diesel)',
-    'Emissions': 'Number of Incentives and Regulations (Emissions)'},
+    'all': 'Incentives and Regulations (All Fuels)',
+    'Biodiesel': 'Incentives and Regulations (Biodiesel)',
+    'Ethanol': 'Incentives and Regulations (Ethanol)',
+    'Electricit': 'Incentives and Regulations (Electricity)',
+    'Hydrogen': 'Incentives and Regulations (Hydrogen)',
+    'Natural Ga': 'Incentives and Regulations (Natural Gas)',
+    'Propane': 'Incentives and Regulations (Propane)',
+    'Renewable': 'Incentives and Regulations (Renewable Diesel)',
+//    'Emissions': 'Incentives and Regulations (Emissions)',
+ },
   'Truck Stop Charging': {
     'Tot Trips': 'Trucks Passing Per Day',
     'CPD': 'Truck Charges Per Day (Full Fleet)',
@@ -96,6 +91,18 @@ export const legendLabels = {
     'Half_Ratio': 'Min Charger-to-truck Ratio (Half Fleet)',
     'Col_Save': 'Infra Savings from Collective Investment (%)'},
 };
+
+export const fuelLabels = {
+    'all': 'All Fuels',
+    'Biodiesel': 'Biodiesel',
+    'Ethanol': 'Ethanol',
+    'Electricit': 'Electricity',
+    'Hydrogen': 'Hydrogen',
+    'Natural Ga': 'Natural Gas',
+    'Propane': 'Propane',
+    'Renewable': 'Renewable Diesel',
+    'Emissions': 'Emissions',
+}
 
 export const truckChargingOptions = {
   'Range': {
@@ -116,6 +123,32 @@ export const truckChargingOptions = {
      '1 hour': '1.0',
      '2 hours': '2.0'
     }
+};
+
+export let selectedTruckChargingOptions = {
+    'Range': '200.0',
+    'Charging Time': '4.0',
+    'Max Allowed Wait Time': '0.5'
+};
+
+export const stateSupportOptions = {
+  'Support Type': {
+    'Incentives and Regulations': 'incentives_and_regulations',
+    'Incentives only': 'incentives',
+    'Regulations only': 'regulations'
+    },
+  'Support Target': {
+    'All Targets': 'all',
+//    'Emissions only': 'emissions',
+    'Fuel use only': 'fuel_use',
+    'Infrastructure only': 'infrastructure',
+    'Vehicle purchase only': 'vehicle_purchase'
+    },
+};
+
+export let selectedStateSupportOptions = {
+    'Support Type': 'incentives_and_regulations',
+    'Support Target': 'all'
 };
 
 // Key: geojson name, Value: color to use

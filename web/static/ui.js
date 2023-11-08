@@ -1,4 +1,4 @@
-import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions, selectedTruckChargingOptions } from './name_maps.js';
+import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions, selectedTruckChargingOptions, stateSupportOptions, selectedStateSupportOptions, fuelLabels } from './name_maps.js';
 import { updateSelectedLayers, updateLegend, updateLayer, data, removeLayer, loadLayer } from './map.js'
 
 function populateLayerDropdown(mapping) {
@@ -141,31 +141,6 @@ document.getElementById("layer-selection").addEventListener("click", function (e
   }
 });
 
-document.getElementById("area-details-button").addEventListener("click", function () {
-  const areaLayerDropdown = document.getElementById("area-layer-dropdown");
-  const selectedAreaLayer = areaLayerDropdown.value;
-
-  if (selectedAreaLayer !== "") {
-    // Fetch details based on the selected area layer
-    const selectedAreaLayerName = getAreaLayerName(selectedAreaLayer);
-
-    const details = getAreaLayerDetails(selectedAreaLayer);
-
-    // Reset the content of the modal
-    resetModalContent();
-
-    // Fetch details based on key or prepare details text in some other way
-    document.getElementById('details-content').innerText = '';   // DMM: Replace with actual details about the data source
-    document.getElementById('details-title').innerText = `${selectedAreaLayerName} Details`;
-
-    // Show the modal
-    document.getElementById('details-modal').style.display = 'flex';
-
-    // Create a dropdown menu to choose attributes for the area layer
-    createAttributeDropdown(selectedAreaLayerName);
-  }
-});
-
 // Function to get the selected area layer's name based on its value
 function getAreaLayerName(selectedValue) {
   const areaLayerDropdown = document.getElementById("area-layer-dropdown");
@@ -228,8 +203,8 @@ function createAttributeDropdown(key) {
   modalContent.appendChild(attributeDropdownContainer);
 }
 
-function createTruckChargingDropdown(name, parameter, dropdown_label, key) {
-  const options = truckChargingOptions[parameter]
+function createDropdown(name, parameter, dropdown_label, key, options_list, selected_options_list, filename_creation_function) {
+  const options = options_list[parameter]
   // Check if the dropdown already exists
   if (document.getElementById(name + "-dropdown")) {
     return; // Exit the function if it already exists
@@ -251,7 +226,7 @@ function createTruckChargingDropdown(name, parameter, dropdown_label, key) {
         const option = document.createElement("option");
         option.value = options[this_option]; // Use the key as the value
         option.text = this_option; // Use the corresponding value as the text
-        if (selectedTruckChargingOptions[parameter] === option.value) {
+        if (selected_options_list[parameter] === option.value) {
             option.selected = true;
         }
         dropdown.appendChild(option);
@@ -260,10 +235,15 @@ function createTruckChargingDropdown(name, parameter, dropdown_label, key) {
 
   // Add an event listener to the dropdown to handle attribute selection
   dropdown.addEventListener("change", async function () {
-    selectedTruckChargingOptions[parameter] = dropdown.value;
+    selected_options_list[parameter] = dropdown.value;
     await removeLayer(key);
-    await loadLayer(key, "Truck_Stop_Parking_Along_Interstate_with_min_chargers_range_" + selectedTruckChargingOptions['Range'] + "_chargingtime_" + selectedTruckChargingOptions['Charging Time'] + "_maxwait_" + selectedTruckChargingOptions['Max Allowed Wait Time'] + ".geojson");
+    await loadLayer(key, filename_creation_function(selected_options_list));
     await updateSelectedLayers();
+    if (key === "State-Level Incentives and Regulations") {
+        for (const fuel_type in legendLabels[key]) {
+        legendLabels[key][fuel_type] = convertToTitleCase(selectedStateSupportOptions['Support Target']) + ' ' + convertToTitleCase(selectedStateSupportOptions['Support Type']) + ' (' + fuelLabels[fuel_type] + ')';
+        }
+    }
     await updateLegend();
   });
 
@@ -276,10 +256,31 @@ function createTruckChargingDropdown(name, parameter, dropdown_label, key) {
   modalContent.appendChild(dropdownContainer);
 }
 
+function convertToTitleCase(str) {
+  const words = str.split('_');
+  const capitalizedWords = words.map(word => word.charAt(0).toUpperCase() + word.slice(1));
+  const titleCaseString = capitalizedWords.join(' ');
+  return titleCaseString;
+}
+
+
+function createTruckChargingFilename(selected_options_list) {
+  return "Truck_Stop_Parking_Along_Interstate_with_min_chargers_range_" + selected_options_list['Range'] + "_chargingtime_" + selected_options_list['Charging Time'] + "_maxwait_" + selected_options_list['Max Allowed Wait Time'] + ".geojson";
+}
+
+function createStateSupportFilename(selected_options_list) {
+  return selected_options_list['Support Target'] + "_" + selected_options_list['Support Type'] + ".geojson";
+}
+
 function createChargingDropdowns(key) {
-  const rangeDropdownResult = createTruckChargingDropdown("range", "Range", "Truck Range: ", key);
-  const chargingTimeDropdownResult = createTruckChargingDropdown("chargingTime", "Charging Time", "Charging Time: ", key);
-  const maxWaitTimeDropdownResult = createTruckChargingDropdown("maxWaitTime", "Max Allowed Wait Time", "Max Allowed Wait Time: ", key);
+  const rangeDropdownResult = createDropdown("range", "Range", "Truck Range: ", key, truckChargingOptions, selectedTruckChargingOptions, createTruckChargingFilename);
+  const chargingTimeDropdownResult = createDropdown("chargingTime", "Charging Time", "Charging Time: ", key, truckChargingOptions, selectedTruckChargingOptions, createTruckChargingFilename);
+  const maxWaitTimeDropdownResult = createDropdown("maxWaitTime", "Max Allowed Wait Time", "Max Allowed Wait Time: ", key, truckChargingOptions, selectedTruckChargingOptions, createTruckChargingFilename);
+}
+
+function createStateSupportDropdowns(key) {
+  const supportTypeDropdownResult = createDropdown("support-type", "Support Type", "Support type: ", key, stateSupportOptions, selectedStateSupportOptions, createStateSupportFilename);
+  const supportTargetDropdownResult = createDropdown("support-target", "Support Target", "Support target: ", key, stateSupportOptions, selectedStateSupportOptions, createStateSupportFilename);
 }
 
 document.body.addEventListener('click', function(event) {
@@ -309,6 +310,37 @@ document.body.addEventListener('click', function(event) {
   // Check if the close button of the modal was clicked
   if (event.target.classList.contains("close-btn") || event.target.parentElement.tagName === 'SELECT') {
     document.getElementById('details-modal').style.display = 'none';
+  }
+});
+
+
+document.getElementById("area-details-button").addEventListener("click", function () {
+  const areaLayerDropdown = document.getElementById("area-layer-dropdown");
+  const selectedAreaLayer = areaLayerDropdown.value;
+
+  if (selectedAreaLayer !== "") {
+    // Fetch details based on the selected area layer
+    const selectedAreaLayerName = getAreaLayerName(selectedAreaLayer);
+
+    const details = getAreaLayerDetails(selectedAreaLayer);
+
+    // Reset the content of the modal
+    resetModalContent();
+
+    // Fetch details based on key or prepare details text in some other way
+    document.getElementById('details-content').innerText = '';   // DMM: Replace with actual details about the data source
+    document.getElementById('details-title').innerText = `${selectedAreaLayerName} Details`;
+
+    // Show the modal
+    document.getElementById('details-modal').style.display = 'flex';
+
+    // Create a dropdown menu to choose attributes for the area layer
+    createAttributeDropdown(selectedAreaLayerName);
+
+    // Create a dropdown if needed for state-level incentives and support
+    if (selectedAreaLayerName === 'State-Level Incentives and Regulations') {
+        createStateSupportDropdowns(selectedAreaLayerName)
+    }
   }
 });
 
@@ -360,6 +392,18 @@ function resetModalContent() {
   const maxWaitTimeDropdownContainer = document.querySelector(".maxWaitTime-dropdown-container");
   if (maxWaitTimeDropdownContainer) {
     modalContent.removeChild(maxWaitTimeDropdownContainer);
+  }
+
+   // Remove support-type-dropdown-container if it exists
+  const supportTypeDropdownContainer = document.querySelector(".support-type-dropdown-container");
+  if (supportTypeDropdownContainer) {
+    modalContent.removeChild(supportTypeDropdownContainer);
+  }
+
+  // Remove support-target-dropdown-container if it exists
+  const supportTargetDropdownContainer = document.querySelector(".support-target-dropdown-container");
+  if (supportTargetDropdownContainer) {
+    modalContent.removeChild(supportTargetDropdownContainer);
   }
 }
 

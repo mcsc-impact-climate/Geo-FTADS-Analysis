@@ -135,7 +135,6 @@ def add_aggregated_data(data_dict):
     '''
     
     # Combine rows separately for incentives and regulations
-    
     for support_type in ['incentives', 'regulations']:
     
         # Initialize a dataframe to contain the aggregated incentives or regulations
@@ -180,6 +179,10 @@ def add_aggregated_data(data_dict):
         
     # Now, make a dataframe containing both incentives and regulations
     data_dict['all_incentives_and_regulations'] = pd.concat([data_dict['all_incentives'], data_dict['all_regulations']], ignore_index=True)
+    data_dict['fuel_use_incentives_and_regulations'] = pd.concat([data_dict['fuel_use_incentives'], data_dict['fuel_use_regulations']], ignore_index=True)
+    data_dict['infrastructure_incentives_and_regulations'] = pd.concat([data_dict['infrastructure_incentives'], data_dict['infrastructure_regulations']], ignore_index=True)
+    data_dict['vehicle_purchase_incentives_and_regulations'] = pd.concat([data_dict['vehicle_purchase_incentives'], data_dict['vehicle_purchase_regulations']], ignore_index=True)
+    data_dict['emissions_incentives_and_regulations'] = pd.concat([data_dict['emissions_incentives'], data_dict['emissions_regulations']], ignore_index=True)
     
     return data_dict
     

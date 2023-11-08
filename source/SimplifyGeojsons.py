@@ -56,19 +56,23 @@ shapefiles = OrderedDict()
 ## Principal ports
 #shapefiles['Principal Ports'] = os.path.join("data/Principal_Ports/Principal_Port.shp")
 #
-## Regional Incentives
-#shapefiles['State-Level Incentives and Regulations'] = os.path.join("data/incentives_and_regulations_merged/all_incentives_and_regulations.shp")
+## Truck charger infrastructure savings
+#truck_ranges = ['400.0', '300.0', '200.0', '100.0']
+#max_wait_times = ['0.25', '0.5', '1.0', '2.0']
+#charging_times = ['0.5', '1.0', '2.0', '4.0']
+#for truck_range in truck_ranges:
+#    for max_wait_time in max_wait_times:
+#        for charging_time in charging_times:
+#            shapefiles['Truck charging (%s_%s_%s)'%(truck_range, charging_time, max_wait_time)] = os.path.join("data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_min_chargers_range_%s_chargingtime_%s_maxwait_%s.shp"%(truck_range, charging_time, max_wait_time))
+#
+#shapefiles['Truck charging'] = os.path.join("data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_min_chargers.shp")
 
-# Truck charger infrastructure savings
-truck_ranges = ['400.0', '300.0', '200.0', '100.0']
-max_wait_times = ['0.25', '0.5', '1.0', '2.0']
-charging_times = ['0.5', '1.0', '2.0', '4.0']
-for truck_range in truck_ranges:
-    for max_wait_time in max_wait_times:
-        for charging_time in charging_times:
-            shapefiles['Truck charging (%s_%s_%s)'%(truck_range, charging_time, max_wait_time)] = os.path.join("data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_min_chargers_range_%s_chargingtime_%s_maxwait_%s.shp"%(truck_range, charging_time, max_wait_time))
-
-shapefiles['Truck charging'] = os.path.join("data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_min_chargers.shp")
+# State-level support
+support_types = ['incentives_and_regulations', 'incentives', 'regulations']
+support_targets = ['all', 'emissions', 'fuel_use', 'infrastructure', 'vehicle_purchase']
+for support_type in support_types:
+    for support_target in support_targets:
+        shapefiles['State-Level Support (%s_%s)'%(support_target, support_type)] = os.path.join(f"data/incentives_and_regulations_merged/{support_target}_{support_type}.shp")
 
 geojson_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '../web/geojsons_simplified'))
 
