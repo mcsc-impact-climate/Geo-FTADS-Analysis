@@ -109,7 +109,7 @@ function createStyleFunction(layerName) {
         return new ol.style.Style({
           stroke: new ol.style.Stroke({
             color: layerColor,
-            width: 1,
+            width: 3,
           }),
           zIndex: 5  // zIndex between points and polygons
         });

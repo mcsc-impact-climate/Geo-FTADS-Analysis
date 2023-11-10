@@ -360,7 +360,7 @@ function updateLegend() {
           const constantCtx = constantCanvas.getContext("2d");
 
           constantCtx.strokeStyle = layerColor;
-          constantCtx.lineWidth = 1;
+          constantCtx.lineWidth = 3;
 
           constantCtx.beginPath();
           constantCtx.moveTo(0, 5);

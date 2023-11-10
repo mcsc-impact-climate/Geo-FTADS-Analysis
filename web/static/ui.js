@@ -1,4 +1,4 @@
-import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions, selectedTruckChargingOptions, stateSupportOptions, selectedStateSupportOptions, fuelLabels } from './name_maps.js';
+import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions, selectedTruckChargingOptions, stateSupportOptions, selectedStateSupportOptions, fuelLabels, dataInfo } from './name_maps.js';
 import { updateSelectedLayers, updateLegend, updateLayer, data, removeLayer, loadLayer } from './map.js'
 
 function populateLayerDropdown(mapping) {
@@ -78,14 +78,8 @@ function addLayerCheckbox(key, value, container) {
   checkboxContainer.appendChild(detailsButton);
 }
 
-//// Add an event listener to the "Apply" button
-//document.getElementById("apply-button").addEventListener("click", applySelection);
-//
-//function applySelection() {
-//  const selectedLayerNames = getSelectedLayers();
-//}
-
 function getSelectedLayers() {
+  console.log('In getSelectedLayers()')
   const selectedLayerNames = [];
   const checkboxes = document.querySelectorAll('input[type="checkbox"]');
 
@@ -105,6 +99,17 @@ function getSelectedLayers() {
   }
   return selectedLayerNames;
 }
+
+const areaLayerDropdown = document.getElementById("area-layer-dropdown");
+const details_button = document.getElementById("area-details-button");
+
+areaLayerDropdown.addEventListener('change', function() {
+  if (this.value === 'None') {
+    details_button.style.visibility = "hidden";
+  } else {
+    details_button.style.visibility = "visible";
+  }
+});
 
 function getSelectedLayersValues() {
   const selectedLayerValues = new Map();
@@ -292,7 +297,7 @@ document.body.addEventListener('click', function(event) {
     resetModalContent();
 
     // Fetch details based on key or prepare details text in some other way
-    document.getElementById('details-content').innerText = getDetails(key);
+    document.getElementById('details-content').innerHTML = dataInfo[key];
     document.getElementById('details-title').innerText = `${key} Details`;
 
     // Show the modal
@@ -328,7 +333,7 @@ document.getElementById("area-details-button").addEventListener("click", functio
     resetModalContent();
 
     // Fetch details based on key or prepare details text in some other way
-    document.getElementById('details-content').innerText = '';   // DMM: Replace with actual details about the data source
+    document.getElementById('details-content').innerHTML = dataInfo[selectedAreaLayerName];   // DMM: Replace with actual details about the data source
     document.getElementById('details-title').innerText = `${selectedAreaLayerName} Details`;
 
     // Show the modal
