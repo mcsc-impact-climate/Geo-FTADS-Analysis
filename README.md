@@ -406,13 +406,17 @@ To run:
 python source/AnalyzeTruckStopCharging.py
 ```
 
-## Visualizing Shapefiles with a Web Interface
+## Running the geospatial mapping tool
 
 The code and shapefiles in [web_interface](./web_interface) represent an initial skeleton for functionality to visualize shapefiles interactively on a web interface. The code can be executed as follows:
 
+```bash
+# Install python requirements if needed
+install -r requirements.txt
+```
+
 ```bash 
-cd web_interface
-python app.py
+python manage.py runserver
 ```
 
 If that executes without issue, you should be able to view the map in your browser at http://127.0.0.1:5000/. It currently looks something like this:
