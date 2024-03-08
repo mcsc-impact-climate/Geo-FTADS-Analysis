@@ -32,7 +32,7 @@ def mergeShapefile(dest, shapefile_path, min_tonnage=None, road_class=None):
     merged_Dataframe (pd.DataFrame): Joined dataframe
     '''
     
-    shapefile = gpd.read_file(shapefile_path, include_fields=['ID', 'LENGTH', 'ShapeSTLen', 'geometry', 'Class'])
+    shapefile = gpd.read_file(shapefile_path, include_fields=['ID', 'geometry', 'Class'])
     cClass = np.ones(len(shapefile), dtype=bool)
     if not (road_class is None):
         cClass = cClass & (~(shapefile['Class'].isna())) & (shapefile['Class'] == road_class)
@@ -47,7 +47,7 @@ def mergeShapefile(dest, shapefile_path, min_tonnage=None, road_class=None):
     cFilter = np.ones(len(merged_dataframe), dtype=bool)
     if not (min_tonnage is None):
         cFilter = cFilter & (~(merged_dataframe['Tot Tons'].isna())) & (merged_dataframe['Tot Tons'] > min_tonnage)
-    merged_dataframe = merged_dataframe[cFilter]
+    merged_dataframe = merged_dataframe[cFilter].drop(columns=['ID', 'Class'])
     
     #print(merged_dataframe)
     

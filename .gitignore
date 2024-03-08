@@ -5,3 +5,10 @@ data/*
 *~
 plots/*
 interactive_map
+*.geojson
+
+*.log
+*.pot
+*.pyc
+__pycache__
+.venv

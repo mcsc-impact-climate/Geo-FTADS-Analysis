@@ -48,16 +48,29 @@ rm FAF5_network_links.zip
 
 ### FAF5 Highway Network Assignments
 ```bash
-# from https://geodata.bts.gov/datasets/freight-analysis-framework-faf5-highway-network-assignments
-wget "https://ago-item-storage.s3.us-east-1.amazonaws.com/9343414b46794fb8be9867db2d1ccb75/FAF5_Highway_Assignment_Results.zip?X-Amz-Security-Token=IQoJb3JpZ2luX2VjEEQaCXVzLWVhc3QtMSJHMEUCIQCrLGO%2Fr8PJ8cc6BE8YSFaX2P%2BDADNbx2rW1%2FaT8vdmRQIgWAhElFIzmozsOQo8Tko1%2FJikKnI9oAJE2Ix9XYAUNUMq1QQI3f%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2MDQ3NTgxMDI2NjUiDMfFqnbDfa8xOds7VSqpBFhDUITvXbPjoi0ha9ITvWXqhF%2Bb191Cz9c9Fv96aF8BBU4rw0WGZOUNZrKddpZxtJQx%2Ffz6EllAAhksvmtsv9Sf%2Ba1beFEIz6rqTOwceSC71CEQUKgd5JItSUFHMAbtXJyIB9MBG0van3zGyYl5JtW60ulv3KuPpkAnG8k8RhELLPix8qtp8DW%2BxY1Dapw2rfvETVRa9dPxsi8HYFeaVEBRuUCDQuE522qnKJOZoCj01z0rAArG1q4OyEFGXOrD6WiWuLGW0EuaGmLjxK9fd05tWfn5A7Oa7Y78gQsTQs8AKqyVCjIl8aExUq%2BTjdUDrNi3qBvtb51WM%2BMKXfmka4CCMPwpIlnAgPnoIxe1k1aXZpJgzyRS7ay6kOp7DVzrY49lciBZnMdxYbjlJMyEyyxlCgvtxJudBsI%2BMpcLV6lY520k9G7fDk%2BnPBqEzpMuIND8mT3RGU6y3w9SAbL21bGWaAOfFp1QS8FXVm6SN74UAo4GR1ISxZiLjao3jo7sMfDxyfVDF8n953L9HvS8tltjtlnG4jaJI4tXfiKT7kEU4FlN%2B6jgKqE6yQJ%2FeeUsZiHlBggYBkr1ei%2By4Kyl0kTDOMDaI9LGjJs%2FCkdttTiNI7zDfFGP9MYmDSrKFG7GJyQ3oJ6SeMJ39KcIuq36boE2jHvfUruOOMJL6IQFC6ez8hpjlLTach87aEXA56JEUNMASIc4vLBgz4njE6Z4tX4xMwliujd6CE8wj%2BnZnwY6qQEvi%2FemViSkkfkN8WsJH2nnwk4ZPxSNdiRzyFbMO67BF8z9Jvx7b5IuJ7%2Bi2h4Vdxx3yfxL%2BDQ5ipnbxSEPSyvzh%2BaRf14Lh32ey33oB8dxAgl%2F2Qba68wGYiq4JE%2F%2BuZleD5aECW9UzcfUVaTJ8Nm7JNAlv9ZS%2FSB2jQp%2Fkdc%2BdbfwCMJA4r0poC6k8uSGUpBqOqiWZiY11D3xfxkBzJNF6Xj56PBsTvtY&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20230222T204330Z&X-Amz-SignedHeaders=host&X-Amz-Expires=300&X-Amz-Credential=ASIAYZTTEKKESMM3W3WB%2F20230222%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=cd310388a59d6ac0b48d6dc824337d152bc6e61aec0229a0e6ecabea490d8562" -O FAF5_highway_network_assignments.zip
-unzip FAF5_highway_network_assignments.zip
-rm FAF5_highway_network_assignments.zip
+# from https://ops.fhwa.dot.gov/freight/freight_analysis/faf/
+
+mkdir -p FAF5_Highway_Assignment_Results
+cd FAF5_Highway_Assignment_Results
+wget https://ops.fhwa.dot.gov/freight/freight_analysis/faf/faf_highway_assignment_results/FAF5_2017_HighwayAssignmentResults_04_07_2022.zip
+unzip FAF5_2017_HighwayAssignmentResults_04_07_2022.zip -d FAF5_2017_Highway_Assignment_Results
+rm FAF5_2017_HighwayAssignmentResults_04_07_2022.zip
+
+wget https://ops.fhwa.dot.gov/freight/freight_analysis/faf/faf_highway_assignment_results/FAF5_2022_HighwayAssignmentResults_04_07_2022.zip
+unzip FAF5_2022_HighwayAssignmentResults_04_07_2022.zip -d FAF5_2022_Highway_Assignment_Results
+rm FAF5_2022_HighwayAssignmentResults_04_07_2022.zip
+
+wget https://ops.fhwa.dot.gov/freight/freight_analysis/faf/faf_highway_assignment_results/FAF5_2050_HighwayAssignmentResults_09_17_2022.zip
+unzip FAF5_2050_HighwayAssignmentResults_04_07_2022.zip -d FAF5_2050_Highway_Assignment_Results
+rm FAF5_2050_HighwayAssignmentResults_04_07_2022.zip
+
+cd ..
 ```
 
 ### FAF5 regional database 
 ```bash
-# FAF5 regional database of tonnage and value by origin-destination pair, commodity type, and mode from 2018-2020 (from https://www.bts.gov/faf)
-wget "https://faf.ornl.gov/faf5/data/download_files/FAF5.4.1_2018-2020.zip" -O FAF5_regional_od.zip
+# FAF5 regional database of tonnage and value by origin-destination pair, commodity type, and mode from 2018-2022 (from https://www.bts.gov/faf)
+wget "https://faf.ornl.gov/faf5/data/download_files/FAF5.5.1_2018-2022.zip" -O FAF5_regional_od.zip
 unzip FAF5_regional_od.zip -d FAF5_regional_flows_origin_destination
 rm FAF5_regional_od.zip
 ```
@@ -179,6 +192,19 @@ You can now cd back out of the data directory
 cd ..
 ```
 
+### Truck stop parking data
+```bash
+# from https://geodata.bts.gov/datasets/usdot::truck-stop-parking
+wget --no-check-certificate -O Truck_Stop_Parking.zip "https://opendata.arcgis.com/api/v3/datasets/0849b1bd4a5e4b4e831877b7c25d6062_0/downloads/data?format=shp&spatialRefId=3857&where=1%3D1"
+unzip Truck_Stop_Parking.zip -d Truck_Stop_Parking
+rm Truck_Stop_Parking.zip
+```
+
+You can now cd back out of the data directory
+```bash
+cd ..
+```
+
 ## How to run python scripts
 
 Python scripts to encode analysis steps are stored in the [source](./source) directory. 
@@ -272,7 +298,7 @@ This should produce shapefiles for zipcode-level and state-level electricity pri
 
 ## Analyzing VIUS data
 
-The script [AnalyzeVius.py] produces distributions of GREET vehicle class, fuel type, age, and payload from the VIUS data. To run:
+The script [AnalyzeVius.py](./source/AnalyzeVius.py) produces distributions of GREET vehicle class, fuel type, age, and payload from the VIUS data. To run:
 
 ```bash
 python source/AnalyzeVius.py
@@ -326,9 +352,17 @@ bash source/run_all_Point2Point.sh
 
 WARNING: This may take several hours to run in full, and the shapefiles and csv files produced will take up ~100 GB. To reduce this, you can comment out items that you don't want in the COMMODITIES, REGIONS and MODES variables.
 
+## Creating shapefiles for hydrogen production facilities
+
+The script [PrepareHydrogenHubs.py](./source/PrepareHydrogenHubs.py) combines locations and information about operating and planned hydrogen production facilities and the U.S. and Canada into shapefiles located in `data/hydrogen_hubs/shapefiles`. To run:
+
+```bash
+python source/PrepareHydrogenHubs.py
+```
+
 ## Identifying truck stops and hydrogen production facilities within a given radius
 
-The script [IdentifyFacilitiesInRadius.py](./source/IdentifyFacilitiesInRadius.py) 
+The script [IdentifyFacilitiesInRadius.py](./source/IdentifyFacilitiesInRadius.py) identifies truck stops and hydrogen production facilities within a user-provided radius and central location (33N, 97W) and 600 miles by default. It p
 
 ## Visualizing layers with QGIS
 
@@ -352,19 +386,37 @@ python source/ProcessElectricityPrices.py
 ```
 
 as well as `python source/Point2PointFAF.py [arguments]` for any freight flow and emission intensity layers you'd like to visualize (more detailed instructions [above](./README.md#producing-shapefiles-to-visualize-freight-flows-and-emission-intensities)). Note that these layers currently need to be read in manually. 
+as well as `python source/Point2PointFAF.py [arguments]` for any freight flow and emission intensity layers you'd like to visualize (more detailed instructions [above](./README.md#producing-shapefiles-to-visualize-freight-flows-and-emission-intensities)). Note that these layers currently need to be read in manually. 
 
 <!-- Executing [PlotWithQGIS.py](./PlotWithQGIS.py) in the QGIS GUI (after first running [Point2PointFAF.py](./source/Point2PointFAF.py)) should produce output PDF files in the [layouts](./layouts) directory, which look something like: -->
 
 ![Total domestic exports](./images/highway_and_total_flows.png "Total Domestic Exports")
 
+## Analyze potential infrastructure investment savings from collective investment in truck stop charging
 
-## Visualizing Shapefiles with a Web Interface
+The script [AnalyzeTruckStopCharging.py](./source/AnalyzeTruckStopCharging.py) is designed to quantify the charging demand at truck stops separated by 100 miles on average and at least 50 miles, and estimate the potential difference in infrastructure costs needed if the entire electrified trucking fleet were to electrify and either:
+* The full electrified fleet shared the investment and usage of charging infrastructure, or
+* The fleet was divided in half, and each half invested in and used their respective charging infrastructure separately. 
+
+The idea of this exercise is to understand the potential infrastructure savings from trucking fleets pooling infrastructure investments in charging infrastructure based on real-world freight flow data. 
+
+To run:
+
+```bash
+python source/AnalyzeTruckStopCharging.py
+```
+
+## Running the geospatial mapping tool
 
 The code and shapefiles in [web_interface](./web_interface) represent an initial skeleton for functionality to visualize shapefiles interactively on a web interface. The code can be executed as follows:
 
+```bash
+# Install python requirements if needed
+install -r requirements.txt
+```
+
 ```bash 
-cd web_interface
-python app.py
+python manage.py runserver
 ```
 
 If that executes without issue, you should be able to view the map in your browser at http://127.0.0.1:5000/. It currently looks something like this:
