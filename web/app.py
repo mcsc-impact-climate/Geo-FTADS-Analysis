@@ -44,7 +44,7 @@ geojsons['Highway Flows (Interstate)'] = os.path.join(geojson_directory, "highwa
 # geojsons['Highway Flows (CU)'] = os.path.join(geojson_directory, "highway_assignment_links_combined_unit.geojson")
 
 # Alternative fueling stations along highway corridors
-geojsons['DCFC Chargers'] = os.path.join(geojson_directory, "US_elec.geojson")
+geojsons['Direct Current Fast Chargers'] = os.path.join(geojson_directory, "US_elec.geojson")
 geojsons['Hydrogen Stations'] = os.path.join(geojson_directory, "US_hy.geojson")
 geojsons['LNG Stations'] = os.path.join(geojson_directory, "US_lng.geojson")
 geojsons['CNG Stations'] = os.path.join(geojson_directory, "US_cng.geojson")

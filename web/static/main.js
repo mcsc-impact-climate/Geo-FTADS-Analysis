@@ -1,6 +1,8 @@
 import { initMap, updateSelectedLayers, updateLegend, attachEventListeners } from './map.js';
 import { populateLayerDropdown, getSelectedLayers } from './ui.js';
 
+let geojsonNames = {};
+
 // Fetch available geojson names from the Flask app
 fetch(GET_GEOJSONS)
   .then(response => {
@@ -9,7 +11,8 @@ fetch(GET_GEOJSONS)
     }
     return response.json();
   })
-  .then(geojsonNames => {
+  .then(data => {
+    geojsonNames = data;
     // Populate the layer selection drop-down with geojson names
     populateLayerDropdown(geojsonNames);
     attachEventListeners(); // Attach event listeners after populating the dropdown
@@ -25,3 +28,5 @@ fetch(GET_GEOJSONS)
 //   map.updateSize();
 //   }
 // });
+
+export { geojsonNames };

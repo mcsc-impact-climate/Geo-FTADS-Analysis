@@ -42,7 +42,7 @@ geojsons['Highway Flows (Interstate)'] = os.path.join(geojson_directory, "highwa
 # geojsons['Highway Flows (CU)'] = os.path.join(geojson_directory, "highway_assignment_links_combined_unit.geojson")
 
 # Alternative fueling stations along highway corridors
-geojsons['DCFC Chargers'] = os.path.join(geojson_directory, "US_elec.geojson")
+geojsons['Direct Current Fast Chargers'] = os.path.join(geojson_directory, "US_elec.geojson")
 geojsons['Hydrogen Stations'] = os.path.join(geojson_directory, "US_hy.geojson")
 geojsons['LNG Stations'] = os.path.join(geojson_directory, "US_lng.geojson")
 geojsons['CNG Stations'] = os.path.join(geojson_directory, "US_cng.geojson")
@@ -70,11 +70,10 @@ geojsons['Truck Stop Locations'] = os.path.join(geojson_directory, "Truck_Stop_P
 geojsons['Principal Ports'] = os.path.join(geojson_directory, "Principal_Port.geojson")
 
 # Regional Incentives
-geojsons['State-Level Incentives and Regulations'] = os.path.join(geojson_directory, "all_incentives_and_regulations.geojson")
+geojsons['State-Level Incentives and Regulations'] = os.path.join(geojson_directory, "incentives_and_regulations/all_incentives_and_regulations.geojson")
 
 # Truck charger layers
-geojsons['Truck Stop Charging'] = os.path.join(geojson_directory, "Truck_Stop_Parking_Along_Interstate_with_min_chargers_range_200.0_chargingtime_4.0_maxwait_0.5.geojson")
-
+geojsons['Truck Stop Charging'] = os.path.join(geojson_directory, "infrastructure_pooling_thought_experiment/Truck_Stop_Parking_Along_Interstate_with_min_chargers_range_200.0_chargingtime_4.0_maxwait_0.5.geojson")
 
 def auth_required(function):
     @wraps(function)

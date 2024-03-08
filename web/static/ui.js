@@ -1,5 +1,6 @@
 import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions, selectedTruckChargingOptions, stateSupportOptions, selectedStateSupportOptions, fuelLabels, dataInfo } from './name_maps.js';
 import { updateSelectedLayers, updateLegend, updateLayer, data, removeLayer, loadLayer } from './map.js'
+import { geojsonNames } from './main.js'
 
 function populateLayerDropdown(mapping) {
   const areaLayerDropdown = document.getElementById("area-layer-dropdown");
@@ -132,6 +133,7 @@ function getSelectedLayersValues() {
   }
   return selectedLayerValues;
 }
+
 // Add event listener to the parent element of the buttons
 document.getElementById("layer-selection").addEventListener("click", function (event) {
   if (event.target.classList.contains("toggle-button")) {
@@ -296,8 +298,33 @@ document.body.addEventListener('click', function(event) {
     // Reset the content of the modal
     resetModalContent();
 
-    // Fetch details based on key or prepare details text in some other way
-    document.getElementById('details-content').innerHTML = dataInfo[key];
+    // Add a link for the user to download the geojson file
+    let url = `${STORAGE_URL}${geojsonNames[key]}`
+    console.log(url)
+  
+    const dirs_with_multiple_geojsons = ['infrastructure_pooling_thought_experiment', 'incentives_and_regulations'];
+  
+    let dir_has_multiple_geojsons = false;
+    for (let i = 0; i < dirs_with_multiple_geojsons.length; i++) {
+      if (url.includes(dirs_with_multiple_geojsons[i])) {
+          dir_has_multiple_geojsons = true;
+          break; // Exit the loop once a match is found
+      }
+    }
+    let details_content = '';
+    if (dir_has_multiple_geojsons) {
+      // Remove the geojson filename from the download url
+      const lastSlashIndex = url.lastIndexOf('/');
+      const base_directory = url.substring(0, lastSlashIndex);
+      
+      details_content = dataInfo[key] + '<br><br><a href=' + base_directory + '.zip>Link to download all geojson files</a> used to visualize this layer.';
+    }
+    else {
+      details_content = dataInfo[key] + '<br><br><a href=' + url + '>Link to download the geojson file</a> used to visualize this layer.';
+    }
+  
+    document.getElementById('details-content').innerHTML = details_content;
+      
     document.getElementById('details-title').innerText = `${key} Details`;
 
     // Show the modal
@@ -331,9 +358,33 @@ document.getElementById("area-details-button").addEventListener("click", functio
 
     // Reset the content of the modal
     resetModalContent();
-
-    // Fetch details based on key or prepare details text in some other way
-    document.getElementById('details-content').innerHTML = dataInfo[selectedAreaLayerName];   // DMM: Replace with actual details about the data source
+      
+    // Add a link for the user to download the geojson file
+    let url = `${STORAGE_URL}${geojsonNames[selectedAreaLayerName]}`
+    
+    const dirs_with_multiple_geojsons = ['infrastructure_pooling_thought_experiment', 'incentives_and_regulations'];
+    
+    let dir_has_multiple_geojsons = false;
+    for (let i = 0; i < dirs_with_multiple_geojsons.length; i++) {
+        if (url.includes(dirs_with_multiple_geojsons[i])) {
+            dir_has_multiple_geojsons = true;
+            break; // Exit the loop once a match is found
+        }
+    }
+    let details_content = '';
+    if (dir_has_multiple_geojsons) {
+        // Remove the geojson filename from the download url
+        const lastSlashIndex = url.lastIndexOf('/');
+        const base_directory = url.substring(0, lastSlashIndex);
+        
+        details_content = dataInfo[selectedAreaLayerName] + '<br><br><a href=' + base_directory + '.zip>Link to download all geojson files</a> used to visualize this layer.';
+    }
+    else {
+        details_content = dataInfo[selectedAreaLayerName] + '<br><br><a href=' + url + '>Link to download the geojson file</a> used to visualize this layer.';
+    }
+    
+    document.getElementById('details-content').innerHTML = details_content;
+      
     document.getElementById('details-title').innerText = `${selectedAreaLayerName} Details`;
 
     // Show the modal
