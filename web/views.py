@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.files.storage import default_storage, FileSystemStorage
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from storages.backends.s3boto3 import S3Boto3Storage
 from shapely.geometry import shape, mapping
 from shapely.geometry.polygon import Polygon
@@ -79,7 +79,9 @@ def auth_required(function):
     @wraps(function)
     def decorator(request, *args, **kwargs):
         if default_storage.__class__.__name__ != 'FileSystemStorage' and not request.user.is_authenticated:
-            return HttpResponse('Unauthorized', content_type="application/json", status=401)
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return HttpResponse('Unauthorized', content_type="application/json", status=401)
+            return redirect('/users/login/')
         return function(request, *args, **kwargs)
 
     return decorator
