@@ -322,7 +322,6 @@ def add_regional_support(top_dir, support_type='incentives_and_regulations', sup
     -------
     None
     '''
-    print(support_type, support_target, fuel_target)
     state_support = readShapefile(f'{top_dir}/data/incentives_and_regulations_merged/{support_target}_{support_type}.shp', f"{support_target.replace('_', ' ')} {support_type.replace('_', ' ')} ({fuel_target})")
     applyColorGradient(state_support, fuel_target)
     QgsProject.instance().layerTreeRoot().findLayer(state_support.id()).setItemVisibilityChecked(False)

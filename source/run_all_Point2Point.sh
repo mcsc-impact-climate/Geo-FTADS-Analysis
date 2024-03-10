@@ -1,5 +1,5 @@
 COMMODITIES=(
-all
+"all"
 "Live animals/fish"
 "Cereal grains"
 "Other ag prods."
@@ -179,7 +179,8 @@ all
 560
 )
 
-MODES=(all truck water rail)
+#MODES=(all truck water rail)
+MODES=(truck)
 
 i=1
 for mode in "${MODES[@]}"; do
@@ -195,7 +196,7 @@ for mode in "${MODES[@]}"; do
         fi
   
         i=$((i+1))
-        echo Processed $i jobs
+        echo Processed $i jobs of
     done
   done
 done
