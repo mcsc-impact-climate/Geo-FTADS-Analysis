@@ -206,7 +206,7 @@ rm Truck_Stop_Parking.zip
 wget https://www.eia.gov/electricity/data/eia861/archive/zip/f8612017.zip -O US_Power_Industry_Report_2017.zip
 unzip US_Power_Industry_Report_2017.zip -d US_Power_Industry_Report_2017
 mv US_Power_Industry_Report_2017/Utility_Data_2017.xlsx .
-rm -r US_Power_Industry_Report_2017
+rm -r US_Power_Industry_Report_2017*
 ```
 
 You can now cd back out of the data directory
