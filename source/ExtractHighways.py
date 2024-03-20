@@ -6,6 +6,7 @@ Created on Fri Jun 30 09:28:26 2023
 @author: micahborrero
 """
 
+
 import geopandas as gpd
 import pandas as pd
 import math
@@ -14,12 +15,11 @@ import momepy
 import numpy as np
 import networkx as nx
 import time
-import sys
-from libpysal import weights, examples
+import pickle
+import os
 
-from shapely.geometry import Point
-from shapely.ops import nearest_points
 from scipy import spatial
+from datetime import datetime
 
 from CommonTools import get_top_dir
 
@@ -27,7 +27,6 @@ from CommonTools import get_top_dir
 top_dir = get_top_dir()
 
 start = time.time()
-
 
 
 def extractHighways():
@@ -43,7 +42,9 @@ def extractHighways():
         DataFrame containing all highway elements as defined by FAF5.
 
     '''
-    highwayPath = f'{top_dir}/data/highway_filter_testing/highway_assignments.shp'    
+    
+    highwayPath = f'{top_dir}/web/geojsons_simplified/highway_assignments.geojson' 
+    # highwayPath = f'{top_dir}/data/highway_filter_testing/highway_assignments.shp'    
     highways = gpd.read_file(highwayPath)
     
     highways = highways.to_crs("epsg:4326")
@@ -68,6 +69,7 @@ def combinedStatisticalAreasCentroids():
         Combined Statistical Areas.
 
     '''
+    
     csaPath = f'{top_dir}/data/tl_2023_us_csa/tl_2023_us_csa.shp' 
     csa = gpd.read_file(csaPath)
 
@@ -95,11 +97,49 @@ def createGraph(highways):
         Dictionary of geographic location of nodes in highway graph.
 
     '''
+    
     graph = momepy.gdf_to_nx(highways, approach='primal')
     positions = {n: [n[0], n[1]] for n in list(graph.nodes)}
     graph.remove_edges_from(list(nx.selfloop_edges(graph)))
     
     return graph, positions
+
+
+def saveGraph(filename, graph=None, load=True):
+    '''
+    Saves or loads NX MultiGraph.
+    TODO: Integrate timestamp in file naming
+    
+    Parameters
+    ----------
+    filename : str
+        Filename of saved graph.
+    graph : NX MultiGraph, optional
+        NX MultiGraph of filtered FAF5 highways. The default is None.
+    load : bool, optional
+        Boolean defining whether to save or load graph. The default is True.
+
+    Returns
+    -------
+    graph : NX MultiGraph
+        NX MultiGraph of filtered FAF5 highways.
+
+    '''   
+    name = filename #+ '_' + datetime.now().strftime("%H%M")
+    
+    # Create the directory to contain geojsons if it doesn't exist
+    if not os.path.exists(f'{top_dir}/data/pickles'):
+        os.makedirs(f'{top_dir}/data/pickles')
+
+    if not load:
+        # save graph object to file
+        pickle.dump(graph, open(f'{top_dir}/data/pickles/{name}.pickle', 'wb'))
+        print('Graph saved...')
+    else:
+        # load graph object from file
+        graph = pickle.load(open(f'{top_dir}/data/pickles/{name}.pickle', 'rb'))
+        print('Graph loaded...')
+        return graph
 
 
 def defineODPoints(graph, centroids, positions):
@@ -120,6 +160,7 @@ def defineODPoints(graph, centroids, positions):
         Dictionary of CSAs with associated node location.
 
     '''
+    
     pos = list(positions.keys())
     ret = dict()
     tree = spatial.KDTree(pos)
@@ -162,6 +203,24 @@ def findPath(graph, orig, dest):
 
 
 def visualize(visual, positions=None, isnx=False):
+    '''
+    Method to produce plots of graphs or highway shapefiles.
+
+    Parameters
+    ----------
+    visual : MultiGraph or Geopandas DataFrame
+        NX MultiGraph of highways/path or GeoDataFrame of highways.
+    positions : Dict, optional
+        Dictionary of the geographic locations of nodes in highway graph. The default is None.
+    isnx : bool, optional
+        Boolean defining whether or not visual is a NX MultiGraph vs GeoDataFrame. The default is False.
+
+    Returns
+    -------
+    None.
+
+    '''
+    
     if isnx:
         if positions != None:
             nx.draw(visual, positions, node_color='tab:blue', node_size=1)
@@ -172,10 +231,27 @@ def visualize(visual, positions=None, isnx=False):
 
     
 def main():
-    centroids = combinedStatisticalAreasCentroids()
-    highways = extractHighways()
-    graph, positions = createGraph(highways)
-    origins = defineODPoints(graph, centroids, positions)
+    #The user should change this value based upon whether or not they are starting fresh
+    load = False
+    
+    #Can be modified based on needs/testing
+    if not load:
+        centroids = combinedStatisticalAreasCentroids()
+        highways = extractHighways()
+        graph, positions = createGraph(highways)
+        origins = defineODPoints(graph, centroids, positions)
+        
+        saveGraph('centroids', centroids, load=False)
+        saveGraph('graph', graph, load=False)
+        saveGraph('positions', positions, load=False)
+        saveGraph('origins', origins, load=False)
+
+    else:
+        centroids = saveGraph('centroids', load=True)
+        graph = saveGraph('graph', load=True)
+        positions = saveGraph('positions', load=True)
+        saveGraph('origins', load=True)
+
     
     path, pathgraph = findPath(graph, origins['San Jose-San Francisco-Oakland, CA'], origins['Seattle-Tacoma, WA'])
     newpath, newpathgraph = findPath(graph, origins['Cape Coral-Fort Myers-Naples, FL'], origins['Tallahassee-Bainbridge, FL-GA'])
