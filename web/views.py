@@ -33,8 +33,11 @@ geojsons['Grid Emission Intensity'] = os.path.join(geojson_directory, "egrid2020
 # Commercial electricity price by state
 geojsons['Commercial Electricity Price'] = os.path.join(geojson_directory, "electricity_rates_by_state_merged.geojson")
 
-#Maximum demand charges from NREL
-geojsons['Maximum Demand Charge'] = os.path.join(geojson_directory, "demand_charges_merged.geojson")
+# Maximum demand charges from NREL
+geojsons['Maximum Demand Charge (utility-level)'] = os.path.join(geojson_directory, "demand_charges_merged.geojson")
+
+# State-level demand charges from NREL
+geojsons['Maximum Demand Charge (state-level)'] = os.path.join(geojson_directory, "demand_charges_by_state.geojson")
 
 # Highway flows
 geojsons['Highway Flows (Interstate)'] = os.path.join(geojson_directory, "highway_assignment_links_interstate.geojson")

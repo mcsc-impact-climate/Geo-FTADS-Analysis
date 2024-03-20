@@ -67,12 +67,14 @@ shapefiles = OrderedDict()
 #
 #shapefiles['Truck charging'] = os.path.join("data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_min_chargers.shp")
 
-# State-level support
-support_types = ['incentives_and_regulations', 'incentives', 'regulations']
-support_targets = ['all', 'emissions', 'fuel_use', 'infrastructure', 'vehicle_purchase']
-for support_type in support_types:
-    for support_target in support_targets:
-        shapefiles['State-Level Support (%s_%s)'%(support_target, support_type)] = os.path.join(f"data/incentives_and_regulations_merged/{support_target}_{support_type}.shp")
+shapefiles['Demand Charge by State'] = os.path.join("data/electricity_rates_merged/demand_charges_by_state.shp")
+
+## State-level support
+#support_types = ['incentives_and_regulations', 'incentives', 'regulations']
+#support_targets = ['all', 'emissions', 'fuel_use', 'infrastructure', 'vehicle_purchase']
+#for support_type in support_types:
+#    for support_target in support_targets:
+#        shapefiles['State-Level Support (%s_%s)'%(support_target, support_type)] = os.path.join(f"data/incentives_and_regulations_merged/{support_target}_{support_type}.shp")
 
 geojson_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '../web/geojsons_simplified'))
 
