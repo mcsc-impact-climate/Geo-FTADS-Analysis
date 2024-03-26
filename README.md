@@ -417,7 +417,7 @@ python source/AnalyzeTruckStopCharging.py
 
 ## Running the geospatial mapping tool
 
-The code and shapefiles in [web_interface](./web_interface) represent an initial skeleton for functionality to visualize shapefiles interactively on a web interface. The code can be executed as follows:
+The code in [web](./web) contains all functionality to visualize the geojsons interactively on a web interface. The code can be executed as follows:
 
 ```bash
 # Install python requirements if needed
