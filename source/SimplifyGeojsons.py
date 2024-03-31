@@ -136,6 +136,7 @@ if __name__ == "__main__":
     #            shapefiles['Truck charging (%s_%s_%s)'%(truck_range, charging_time, max_wait_time)] = os.path.join("data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_min_chargers_range_%s_chargingtime_%s_maxwait_%s.shp"%(truck_range, charging_time, max_wait_time))
     #
     #shapefiles['Truck charging'] = os.path.join("data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_min_chargers.shp")
+    #shapefiles['Demand Charge by State'] = os.path.join("data/electricity_rates_merged/demand_charges_by_state.shp")
     
     # State-level support
     '''

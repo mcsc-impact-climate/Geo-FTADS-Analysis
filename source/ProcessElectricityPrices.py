@@ -131,6 +131,88 @@ def read_demand_charge_data(top_dir):
 
     return data_df_unique_ID
     
+def evaluate_utility_states(top_dir):
+    '''
+    Evaluates utility IDs in each US state
+    
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    utility_state_dict (pd.DataFrame): A python dict containing a list of utility ids and associated state names
+        
+    NOTE: None.
+    '''
+    
+    # Read in the service territory data
+    dataPath = f'{top_dir}/data/Service_Territory_2017.xlsx'
+    data = pd.ExcelFile(dataPath)
+    data_df_1 = pd.read_excel(data)
+    
+    # Select columns of interest
+    data_df = data_df_1.filter(['Utility Number', 'State'], axis=1)
+    
+    # Complement with the Short Form data
+    dataPath = f'{top_dir}/data/Short_Form_2017.xlsx'
+    data = pd.ExcelFile(dataPath)
+    data_df_2 = pd.read_excel(data)
+    
+    data_df = pd.concat([data_df, data_df_2.filter(['Utility Number', 'State'], axis=1)])
+    
+    # Complement with the Utility Data
+    dataPath = f'{top_dir}/data/Utility_Data_2017.xlsx'
+    data = pd.ExcelFile(dataPath)
+    data_df_3 = pd.read_excel(data, skiprows=[0])
+    
+    data_df = pd.concat([data_df, data_df_3.filter(['Utility Number', 'State'], axis=1)])
+    
+    return data_df
+    
+def read_demand_charge_data_by_state(top_dir, utility_state_df):
+    '''
+    Reads in the data file for demand charges and evaluates the average and maximum value by state
+    
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    state_data (pd.DataFrame): A pandas dataframe containing maximum demand charge data compiled by NREL in 2017
+        
+    NOTE: None.
+
+    '''
+
+    # Read in the demand charge rate data
+    dataPath = f'{top_dir}/data/Demand_charge_rate_data.xlsm'
+    data = pd.ExcelFile(dataPath)
+    data_df = pd.read_excel(data, 'Data')
+    
+    # Select columns of interest, and the year 2021
+    data_df = data_df.filter(['Utility ID (EIA)', 'Maximum Demand Charge ($/kW)'], axis=1)
+    
+    # Rename the 'Utility Number' column in utility_state_df to match the 'Utility ID (EIA)' column in data_df for a consistent merge key
+    utility_state_df.rename(columns={'Utility Number': 'Utility ID (EIA)'}, inplace=True)
+
+    # Merge data_df with utility_state_df on the 'Utility ID (EIA)' column to add the 'State' column to data_df
+    data_df = pd.merge(data_df, utility_state_df, on='Utility ID (EIA)', how='left')
+    data_df = data_df.dropna()
+    data_df = data_df[data_df['Maximum Demand Charge ($/kW)'] >= 0]
+
+    # Group the DataFrame by the 'State' column and calculate the mean, median, and max of 'Maximum Demand Charge ($/kW)' for each group
+    state_demand_charge_stats_df = data_df.groupby('State')['Maximum Demand Charge ($/kW)'].agg(['mean', 'median', 'max']).reset_index()
+
+    # Rename columns for clarity
+    state_demand_charge_stats_df.columns = ['State', 'Average Maximum Demand Charge ($/kW)', 'Median Maximum Demand Charge ($/kW)', 'Max Maximum Demand Charge ($/kW)']
+
+    # Rename the state header to match the shapefile
+    state_demand_charge_stats_df = state_demand_charge_stats_df.rename(columns={'State': 'STUSPS'})
+    
+    return state_demand_charge_stats_df
+    
 def merge_state_shapefile(data_df, shapefile_path):
     '''
     Merges the shapefile containing state boundaries with the dataframe containing the electricity prices by state
@@ -204,31 +286,43 @@ def main():
     # Get the path to the top level of the Git repo
     top_dir = get_top_dir()
     
-    # Read electricity price data for 2021 by state
-    state_data = read_state_data(top_dir)
+#    # Read electricity price data for 2021 by state
+#    state_data = read_state_data(top_dir)
     
-    # Merge the electricity price data by state with the shapefile with state borders
-    merged_state_data = merge_state_shapefile(state_data, f'{top_dir}/data/state_boundaries/tl_2012_us_state.shp')
-
-    # Save the merged shapefile
-    saveShapefile(merged_state_data, f'{top_dir}/data/electricity_rates_merged/electricity_rates_by_state_merged.shp')
-
-    # Read electricity price data for 2020 by zipcode
-    zipcode_data = read_zipcode_data(top_dir)
-
-    # Merge the electricity price data by zipcode with the shapefile with zipcode borders
-    merged_zipcode_data = merge_zipcode_shapefile(zipcode_data, f'{top_dir}/data/zip_code_regions/USA_ZIP_Code_Boundaries.shp')
-
-    # Save the merged shapefile
-    saveShapefile(merged_zipcode_data, f'{top_dir}/data/electricity_rates_merged/electricity_rates_by_zipcode_merged.shp')
-
+#    # Merge the electricity price data by state with the shapefile with state borders
+#    merged_state_data = merge_state_shapefile(state_data, f'{top_dir}/data/state_boundaries/tl_2012_us_state.shp')
+#
+#    # Save the merged shapefile
+#    saveShapefile(merged_state_data, f'{top_dir}/data/electricity_rates_merged/electricity_rates_by_state_merged.shp')
+#
+#    # Read electricity price data for 2020 by zipcode
+#    zipcode_data = read_zipcode_data(top_dir)
+#
+#    # Merge the electricity price data by zipcode with the shapefile with zipcode borders
+#    merged_zipcode_data = merge_zipcode_shapefile(zipcode_data, f'{top_dir}/data/zip_code_regions/USA_ZIP_Code_Boundaries.shp')
+#
+#    # Save the merged shapefile
+#    saveShapefile(merged_zipcode_data, f'{top_dir}/data/electricity_rates_merged/electricity_rates_by_zipcode_merged.shp')
+#
     # Read maximum demand charge by utility ID
     demand_charge_data = read_demand_charge_data(top_dir)
-
-    # Merge the demand charge data by utility with the shapefile with utility borders
-    merged_demand_charge_data = merge_demand_charge_shapefile(demand_charge_data, f'{top_dir}/data/utility_boundaries/Electric_Retail_Service_Territories.shp')
-
+    
+#    # Merge the demand charge data by utility with the shapefile with utility borders
+#    merged_demand_charge_data = merge_demand_charge_shapefile(demand_charge_data, f'{top_dir}/data/utility_boundaries/Electric_Retail_Service_Territories.shp')
+#
+#    # Save the merged shapefile
+#    saveShapefile(merged_demand_charge_data, f'{top_dir}/data/electricity_rates_merged/demand_charges_merged.shp')
+    
+    # Evaluate the EIA utility IDs associated with each US state
+    utility_state_df = evaluate_utility_states(top_dir)
+    
+    # Evaluate average and maximum values of NREL's max demand charge data by state
+    demand_charge_data_by_state_df = read_demand_charge_data_by_state(top_dir, utility_state_df)
+    
+    # Merge the state-level demand charge data with the shapefile with state borders
+    merged_demand_charge_state_data = merge_state_shapefile(demand_charge_data_by_state_df, f'{top_dir}/data/state_boundaries/tl_2012_us_state.shp')
+    
     # Save the merged shapefile
-    saveShapefile(merged_demand_charge_data, f'{top_dir}/data/electricity_rates_merged/demand_charges_merged.shp')
+    saveShapefile(merged_demand_charge_state_data, f'{top_dir}/data/electricity_rates_merged/demand_charges_by_state.shp')
 
 main()
