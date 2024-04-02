@@ -78,6 +78,10 @@ geojsons['State-Level Incentives and Regulations'] = os.path.join(geojson_direct
 # Truck charger layers
 geojsons['Truck Stop Charging'] = os.path.join(geojson_directory, "infrastructure_pooling_thought_experiment/Truck_Stop_Parking_Along_Interstate_with_min_chargers_range_200.0_chargingtime_4.0_maxwait_0.5.geojson")
 
+# Estimated lifecycle costs and emissions per mile for Tesla Semi
+geojsons['Lifecycle Truck Emissions'] = os.path.join(geojson_directory, "emissions_per_mile.geojson")
+geojsons['Total Cost of Truck Ownership'] = os.path.join(geojson_directory, "costs_per_mile.geojson")
+
 def auth_required(function):
     @wraps(function)
     def decorator(request, *args, **kwargs):

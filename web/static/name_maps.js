@@ -13,6 +13,8 @@ export let selectedGradientTypes = {
   'Hydrogen from Refineries': 'size',
   'State-Level Incentives and Regulations': 'color',
   'Truck Stop Charging': 'size',
+  'Lifecycle Truck Emissions': 'color',
+  'Total Cost of Truck Ownership': 'color',
 }
 
 export const availableGradientAttributes = {
@@ -30,6 +32,8 @@ export const availableGradientAttributes = {
   'Hydrogen from Refineries': ['Cap_MMSCFD'],
   'State-Level Incentives and Regulations': ['all', 'Biodiesel', 'Ethanol', 'Electricit', 'Hydrogen', 'Natural Ga', 'Propane', 'Renewable'],// 'Emissions'],
   'Truck Stop Charging': ['Tot Trips', 'CPD', 'Half_CPD', 'Min_Charge', 'Half_Charg', 'Min_Ratio', 'Half_Ratio', 'Col_Save'],
+  'Lifecycle Truck Emissions': ['C_mi_tot', 'C_mi_grid'],
+  'Total Cost of Truck Ownership': ['$_mi_tot', '$_mi_el'],
 };
 
 export let selectedGradientAttributes = {
@@ -47,6 +51,8 @@ export let selectedGradientAttributes = {
   'Hydrogen from Refineries': 'Cap_MMSCFD',
   'State-Level Incentives and Regulations': 'all',
   'Truck Stop Charging': 'Tot Trips',
+  'Lifecycle Truck Emissions': 'C_mi_tot',
+  'Total Cost of Truck Ownership': '$_mi_tot'
 };
 
 export const legendLabels = {
@@ -85,6 +91,7 @@ export const legendLabels = {
     'Renewable': 'Incentives and Regulations (Renewable Diesel)',
 //    'Emissions': 'Incentives and Regulations (Emissions)',
  },
+    
   'Truck Stop Charging': {
     'Tot Trips': 'Trucks Passing Per Day',
     'CPD': 'Truck Charges Per Day (Full Fleet)',
@@ -94,6 +101,20 @@ export const legendLabels = {
     'Min_Ratio': 'Min Charger-to-truck Ratio (Full Fleet)',
     'Half_Ratio': 'Min Charger-to-truck Ratio (Half Fleet)',
     'Col_Save': 'Infra Savings from Pooled Investment (%)'},
+    
+  'Lifecycle Truck Emissions': {
+    'C_mi_tot': 'Total Emissions (g CO2e / mile)',
+    'C_mi_grid': 'Emissions from Charging (g CO2e / mile)',
+    'C_mi_man': 'Emissions from Battery Manufacturing (g CO2e / mile)',
+    },
+    
+  'Total Cost of Truck Ownership': {
+    '$_mi_tot': 'Total Cost ($ / mile)',
+    '$_mi_cap': 'Capital Cost ($ / mile)',
+    '$_mi_el': 'Electricity Cost ($ / mile)',
+    '$_mi_lab': 'Labor Cost ($ / mile)',
+    '$_mi_op': 'Operating Cost ($ / mile)',
+    },
 };
 
 export const fuelLabels = {
@@ -210,7 +231,9 @@ export const geojsonTypes = {
   'Salt Lake City Region EV Plan': 'area',
   'Truck Stop Locations': ['point', 'other'],
   'Principal Ports': ['point', 'other'],
-  'Truck Stop Charging': ['point', 'other']
+  'Truck Stop Charging': ['point', 'other'],
+  'Lifecycle Truck Emissions': 'area',
+  'Total Cost of Truck Ownership': 'area',
 };
 
 export const dataInfo = {
@@ -239,6 +262,8 @@ export const dataInfo = {
   'Salt Lake City Region EV Plan': "Shows the highway corridor targeted for one of 7 heavy duty vehicle infrastructure projects funded by the Biden-Harris administration (<a href='https://www.energy.gov/articles/biden-harris-administration-announces-funding-zero-emission-medium-and-heavy-duty-vehicle'>link to announcement</a> from Feb. 15, 2023). <br>This project will develop a community, state and industry supported action plan that will improve air quality in the underserved communities most impacted by high-density medium- and heavy-duty traffic in the greater Salt Lake City region. ",
   'Truck Stop Locations': "Locations of truck stops parking facilities in the U.S. Obtained from the DOT Bureau of Transportation Statistics's <a href='https://geodata.bts.gov/datasets/usdot::truck-stop-parking'>Truck Stop Parking database</a> (<a href='https://opendata.arcgis.com/api/v3/datasets/0849b1bd4a5e4b4e831877b7c25d6062_0/downloads/data?format=shp&spatialRefId=3857&where=1%3D1'>link to download</a>)",
   'Principal Ports': "Locations of principal ports in the US. Obtained from <a href='https://geodata.bts.gov/datasets/usdot::principal-ports/'>USDOT BTS</a> (<a href='https://opendata.arcgis.com/api/v3/datasets/e3b6065cce144be8a13a59e03c4195fe_1/downloads/data?format=shp&spatialRefId=4326&where=1%3D1'>link to download</a>).",
-  'Truck Stop Charging': "These layers are used to visualize an analysis of theoretical savings from pooled investment in charging infrastructure at selected U.S. truck stops. The analysis integrates truck stop locations in the U.S. (see 'Truck Stop Locations' layer for details), along with highway freight flow data from the Freight Analysis Framework - see 'Highway Flows (Interstate)' layer for details. "
+  'Truck Stop Charging': "These layers are used to visualize an analysis of theoretical savings from pooled investment in charging infrastructure at selected U.S. truck stops. The analysis integrates truck stop locations in the U.S. (see 'Truck Stop Locations' layer for details), along with highway freight flow data from the Freight Analysis Framework - see 'Highway Flows (Interstate)' layer for details.",
+  'Lifecycle Truck Emissions': "Estimated lifecycle emissions per mile for the Tesla Semi due to charging and battery manufacturing. Charging emissions are based on the CO2e emission intensity of the grid balancing authority region. Emissions are calculated using the model developed by <a href='https://chemrxiv.org/engage/chemrxiv/article-details/656e4691cf8b3c3cd7c96810'>Sader et al.</a>, calibrated to <a href='https://runonless.com/run-on-less-electric-depot-reports/'>NACFE Run on Less data</a> for the Tesla Semi from the 2023 PepsiCo Semi pilot.<br><br><a href='https://github.com/mcsc-impact-climate/Green_Trucking_Analysis'>Link to Git repo with code used to produce these layers</a>",
+  'Total Cost of Truck Ownership': "Estimated lifecycle total cost of ownership per mile for the Tesla Semi due to truck purchase, charging, labor, maintenance, insurance and other operating costs. Charging costs are evaluated using state-level commercial electricity price and demand charge. Costs are calculated using the model developed by <a href='https://chemrxiv.org/engage/chemrxiv/article-details/656e4691cf8b3c3cd7c96810'>Sader et al.</a>, calibrated to <a href='https://runonless.com/run-on-less-electric-depot-reports/'>NACFE Run on Less data</a> for the Tesla Semi from the 2023 PepsiCo Semi pilot.<br><br><a href='https://github.com/mcsc-impact-climate/Green_Trucking_Analysis'>Link to Git repo with code used to produce these layers</a>",
 };
 
