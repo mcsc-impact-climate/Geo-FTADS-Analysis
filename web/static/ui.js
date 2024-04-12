@@ -1,4 +1,4 @@
-import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions, selectedTruckChargingOptions, stateSupportOptions, selectedStateSupportOptions, fuelLabels, dataInfo } from './name_maps.js';
+import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions, selectedTruckChargingOptions, stateSupportOptions, selectedStateSupportOptions, tcoEmissionsOptions, selectedTcoEmissionsOptions, fuelLabels, dataInfo } from './name_maps.js';
 import { updateSelectedLayers, updateLegend, updateLayer, data, removeLayer, loadLayer } from './map.js'
 import { geojsonNames } from './main.js'
 
@@ -279,6 +279,15 @@ function createStateSupportFilename(selected_options_list) {
   return selected_options_list['Support Target'] + "_" + selected_options_list['Support Type'] + ".geojson";
 }
 
+function createTcoFilename(selected_options_list) {
+  console.log("costs_per_mile_payload" + selected_options_list['Average Payload'] + "_avVMT" + selected_options_list['Average VMT'] + ".geojson")
+  return "costs_per_mile_payload" + selected_options_list['Average Payload'] + "_avVMT" + selected_options_list['Average VMT'] + ".geojson";
+}
+
+function createEmissionsFilename(selected_options_list) {
+  return "emissions_per_mile_payload" + selected_options_list['Average Payload'] + "_avVMT" + selected_options_list['Average VMT'] + ".geojson";
+}
+
 function createChargingDropdowns(key) {
   const rangeDropdownResult = createDropdown("range", "Range", "Truck Range: ", key, truckChargingOptions, selectedTruckChargingOptions, createTruckChargingFilename);
   const chargingTimeDropdownResult = createDropdown("chargingTime", "Charging Time", "Charging Time: ", key, truckChargingOptions, selectedTruckChargingOptions, createTruckChargingFilename);
@@ -288,6 +297,16 @@ function createChargingDropdowns(key) {
 function createStateSupportDropdowns(key) {
   const supportTypeDropdownResult = createDropdown("support-type", "Support Type", "Support type: ", key, stateSupportOptions, selectedStateSupportOptions, createStateSupportFilename);
   const supportTargetDropdownResult = createDropdown("support-target", "Support Target", "Support target: ", key, stateSupportOptions, selectedStateSupportOptions, createStateSupportFilename);
+}
+
+function createTcoDropdowns(key) {
+  const payloadDropdownResult = createDropdown("average-payload", "Average Payload", "Average payload: ", key, tcoEmissionsOptions, selectedTcoEmissionsOptions, createTcoFilename);
+  const vmtDropdownResult = createDropdown("average-vmt", "Average VMT", "Average VMT: ", key, tcoEmissionsOptions, selectedTcoEmissionsOptions, createTcoFilename);
+}
+
+function createEmissionsDropdowns(key) {
+  const payloadDropdownResult = createDropdown("average-payload", "Average Payload", "Average payload: ", key, tcoEmissionsOptions, selectedTcoEmissionsOptions, createEmissionsFilename);
+  const vmtDropdownResult = createDropdown("average-vmt", "Average VMT", "Average VMT: ", key, tcoEmissionsOptions, selectedTcoEmissionsOptions, createEmissionsFilename);
 }
 
 document.body.addEventListener('click', function(event) {
@@ -340,7 +359,7 @@ document.body.addEventListener('click', function(event) {
   }
 
   // Check if the close button of the modal was clicked
-  if (event.target.classList.contains("close-btn") || event.target.parentElement.tagName === 'SELECT') {
+  if (event.target.classList.contains("close-btn")) {//|| event.target.parentElement.tagName === 'SELECT') {
     document.getElementById('details-modal').style.display = 'none';
   }
 });
@@ -349,7 +368,7 @@ document.body.addEventListener('click', function(event) {
 document.getElementById("area-details-button").addEventListener("click", function () {
   const areaLayerDropdown = document.getElementById("area-layer-dropdown");
   const selectedAreaLayer = areaLayerDropdown.value;
-
+    
   if (selectedAreaLayer !== "") {
     // Fetch details based on the selected area layer
     const selectedAreaLayerName = getAreaLayerName(selectedAreaLayer);
@@ -396,6 +415,16 @@ document.getElementById("area-details-button").addEventListener("click", functio
     // Create a dropdown if needed for state-level incentives and support
     if (selectedAreaLayerName === 'State-Level Incentives and Regulations') {
         createStateSupportDropdowns(selectedAreaLayerName)
+    }
+    
+    // Create a dropdown if needed for state-level TCO
+    if (selectedAreaLayerName === 'Total Cost of Truck Ownership') {
+        createTcoDropdowns(selectedAreaLayerName)
+    }
+      
+    // Create a dropdown if needed for state-level TCO
+    if (selectedAreaLayerName === 'Lifecycle Truck Emissions') {
+        createEmissionsDropdowns(selectedAreaLayerName)
     }
   }
 });
@@ -460,6 +489,18 @@ function resetModalContent() {
   const supportTargetDropdownContainer = document.querySelector(".support-target-dropdown-container");
   if (supportTargetDropdownContainer) {
     modalContent.removeChild(supportTargetDropdownContainer);
+  }
+    
+  // Remove payload-dropdown-container if it exists
+  const payloadDropdownContainer = document.querySelector(".average-payload-dropdown-container");
+  if (payloadDropdownContainer) {
+    modalContent.removeChild(payloadDropdownContainer);
+  }
+    
+  // Remove vmt-dropdown-container if it exists
+  const vmtDropdownContainer = document.querySelector(".average-vmt-dropdown-container");
+  if (vmtDropdownContainer) {
+    modalContent.removeChild(vmtDropdownContainer);
   }
 }
 

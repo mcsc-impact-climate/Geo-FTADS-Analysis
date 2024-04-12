@@ -82,7 +82,6 @@ async function loadLayer(layerName, filename='') {
   }
 
   let spinner = document.getElementById('lds-spinner')
-
   try {
     spinner.style.visibility= "visible"
     const response = await fetch(url);

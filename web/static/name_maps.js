@@ -176,6 +176,30 @@ export let selectedStateSupportOptions = {
     'Support Target': 'all'
 };
 
+export const tcoEmissionsOptions = {
+  'Average Payload': {
+    '0 lb': '0',
+    '10,000 lb': '10000',
+    '20,000 lb': '20000',
+    '30,000 lb': '30000',
+    '40,000 lb': '40000',
+    '50,000 lb': '50000'
+    },
+  'Average VMT': {
+    '40,000 miles': '40000',
+    '70,000 miles': '70000',
+    '100,000 miles': '100000',
+    '130,000 miles': '130000',
+    '160,000 miles': '160000',
+    '190,000 miles': '190000',
+    },
+};
+
+export let selectedTcoEmissionsOptions = {
+    'Average Payload': '40000',
+    'Average VMT': '100000'
+};
+
 // Key: geojson name, Value: color to use
 export const geojsonColors = {
   'Truck Imports and Exports': 'red',
