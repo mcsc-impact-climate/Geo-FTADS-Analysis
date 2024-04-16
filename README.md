@@ -97,6 +97,12 @@ rm eGRID2021_subregions_shapefile.zip
 wget "https://www.epa.gov/system/files/documents/2024-01/egrid2022_data.xlsx"
 ```
 
+### EIA grid emission intensity by state
+```bash
+# from https://www.eia.gov/electricity/data/emissions/
+wget "https://www.eia.gov/electricity/data/emissions/xls/emissions_region2022.xlsx"
+```
+
 ### US zip code boundaries
 ```bash
 # from https://hub.arcgis.com/datasets/d6f7ee6129e241cc9b6f75978e47128b
