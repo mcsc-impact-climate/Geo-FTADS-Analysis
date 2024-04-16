@@ -86,15 +86,15 @@ rm VIUS_2002.zip
 ### Subregions for eGRID grid intensity data
 ```bash
 # from ls
-wget "https://opendata.arcgis.com/api/v3/datasets/23e16f24702948ac9e2032bfa0526a8f_1/downloads/data?format=shp&spatialRefId=4326&where=1%3D1" -O egrid2020_subregions.zip
-unzip egrid2020_subregions.zip -d egrid2020_subregions
-rm egrid2020_subregions.zip
+wget https://www.epa.gov/system/files/other-files/2023-05/eGRID2021_subregions_shapefile.zip
+unzip eGRID2021_subregions_shapefile.zip -d eGRID2021_subregions
+rm eGRID2021_subregions_shapefile.zip
 ```
 
 ### eGRID grid intensity data
 ```bash
 # from https://www.epa.gov/egrid/download-data
-wget "https://www.epa.gov/system/files/documents/2023-01/eGRID2021_data.xlsx"
+wget "https://www.epa.gov/system/files/documents/2024-01/egrid2022_data.xlsx"
 ```
 
 ### US zip code boundaries
