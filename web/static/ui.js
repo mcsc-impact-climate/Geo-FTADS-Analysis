@@ -328,7 +328,7 @@ document.body.addEventListener('click', function(event) {
     // Add a link for the user to download the geojson file
     let url = `${STORAGE_URL}${geojsonNames[key]}`
   
-    const dirs_with_multiple_geojsons = ['infrastructure_pooling_thought_experiment', 'incentives_and_regulations', 'grid_emission_intensity'];
+    const dirs_with_multiple_geojsons = ['infrastructure_pooling_thought_experiment', 'incentives_and_regulations', 'grid_emission_intensity', 'costs_and_emissions'];
   
     let dir_has_multiple_geojsons = false;
     for (let i = 0; i < dirs_with_multiple_geojsons.length; i++) {
@@ -388,7 +388,7 @@ document.getElementById("area-details-button").addEventListener("click", functio
     // Add a link for the user to download the geojson file
     let url = `${STORAGE_URL}${geojsonNames[selectedAreaLayerName]}`
     
-    const dirs_with_multiple_geojsons = ['infrastructure_pooling_thought_experiment', 'incentives_and_regulations', 'grid_emission_intensity'];
+    const dirs_with_multiple_geojsons = ['infrastructure_pooling_thought_experiment', 'incentives_and_regulations', 'grid_emission_intensity', 'costs_and_emissions'];
     
     let dir_has_multiple_geojsons = false;
     for (let i = 0; i < dirs_with_multiple_geojsons.length; i++) {
