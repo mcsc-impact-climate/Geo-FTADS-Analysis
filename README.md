@@ -8,7 +8,7 @@ This repo contains code to produce and interactively visualize publicly availabl
 ## Setup
 
 ```bash
-git clone git@github.com:cubicalknight/FAF5-Analysis.git
+git clone git@github.com:mcsc-impact-climate/FAF5-Analysis.git
 ```
 
 Install python requirements
@@ -107,10 +107,10 @@ wget "https://www.eia.gov/electricity/data/state/existcapacity_annual.xlsx"
 wget "https://www.eia.gov/electricity/data/state/plancapacity_annual.xlsx"
 ```
 
-### EIA net annual generation by state (1000 MWh)
+### EIA net annual generation by state (MWh)
 ```bash
 # from https://www.eia.gov/electricity/annual/
-wget "https://www.eia.gov/electricity/annual/xls/epa_03_07.xlsx"
+wget "https://www.eia.gov/electricity/data/state/annual_generation_state.xls"
 ```
 
 ### US zip code boundaries
