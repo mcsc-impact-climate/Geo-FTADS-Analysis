@@ -19,7 +19,7 @@ export let selectedGradientTypes = {
 
 export const availableGradientAttributes = {
   'Truck Imports and Exports': ['Tmil Tot D', 'Tmil Imp D', 'Tmil Exp D', 'E Tot Den', 'E Imp Den', 'E Exp Den'],
-  'Grid Emission Intensity': ['SRC2ERTA'],
+  'Grid Emission Intensity': ['CO2_rate'],
   'Commercial Electricity Price': ['Cents_kWh'],
   'Maximum Demand Charge (utility-level)': ['MaxDemCh'],
   'Maximum Demand Charge (state-level)': ['Average Ma', 'Median Max', 'Max Maximu'],
@@ -38,7 +38,7 @@ export const availableGradientAttributes = {
 
 export let selectedGradientAttributes = {
   'Truck Imports and Exports': 'Tmil Tot D',
-  'Grid Emission Intensity': 'SRC2ERTA',
+  'Grid Emission Intensity': 'CO2_rate',
   'Commercial Electricity Price': 'Cents_kWh',
   'Maximum Demand Charge (utility-level)': 'MaxDemCh',
   'Maximum Demand Charge (state-level)': 'Average Ma',
@@ -63,7 +63,7 @@ export const legendLabels = {
     'E Tot Den': 'Import+Export Emissions (tons CO2 / sq mile)',
     'E Imp Den': 'Import Emissions (tons CO2 / sq mile)',
     'E Exp Den': 'Export Emissions (tons CO2 / sq mile)'},
-  'Grid Emission Intensity': {'SRC2ERTA': 'CO2e intensity of power grid (lb/MWh)'},
+  'Grid Emission Intensity': {'CO2_rate': 'CO2 intensity of power grid (lb/MWh)'},
   'Commercial Electricity Price': {'Cents_kWh': 'Electricity rate (cents/kWh)'},
   'Maximum Demand Charge (utility-level)': {'MaxDemCh': 'Maximum Demand Charge by Utility ($/kW)'},
   'Maximum Demand Charge (state-level)': {'Average Ma': 'Average of Max Demand Charges over Utilities ($/kW)', 'Median Max': 'Median of Max Demand Charges over Utilities ($/kW)', 'Max Maximu': 'Maximum of Max Demand Charges over Utilities  ($/kW)'},
@@ -198,6 +198,17 @@ export const tcoEmissionsOptions = {
 export let selectedTcoEmissionsOptions = {
     'Average Payload': '40000',
     'Average VMT': '100000'
+};
+
+export const gridEmissionsOptions = {
+  'Visualize By': {
+    'State': 'eia2022_state',
+    'Balancing authority': 'egrid2022_subregions'
+    }
+};
+
+export let selectedGridEmissionsOptions = {
+    'Visualize By': 'State'
 };
 
 // Key: geojson name, Value: color to use

@@ -1,4 +1,4 @@
-import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions, selectedTruckChargingOptions, stateSupportOptions, selectedStateSupportOptions, tcoEmissionsOptions, selectedTcoEmissionsOptions, fuelLabels, dataInfo } from './name_maps.js';
+import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions, selectedTruckChargingOptions, stateSupportOptions, selectedStateSupportOptions, tcoEmissionsOptions, selectedTcoEmissionsOptions, gridEmissionsOptions, selectedGridEmissionsOptions, fuelLabels, dataInfo } from './name_maps.js';
 import { updateSelectedLayers, updateLegend, updateLayer, data, removeLayer, loadLayer } from './map.js'
 import { geojsonNames } from './main.js'
 
@@ -80,7 +80,6 @@ function addLayerCheckbox(key, value, container) {
 }
 
 function getSelectedLayers() {
-  console.log('In getSelectedLayers()')
   const selectedLayerNames = [];
   const checkboxes = document.querySelectorAll('input[type="checkbox"]');
 
@@ -280,12 +279,15 @@ function createStateSupportFilename(selected_options_list) {
 }
 
 function createTcoFilename(selected_options_list) {
-  console.log("costs_per_mile_payload" + selected_options_list['Average Payload'] + "_avVMT" + selected_options_list['Average VMT'] + ".geojson")
   return "costs_per_mile_payload" + selected_options_list['Average Payload'] + "_avVMT" + selected_options_list['Average VMT'] + ".geojson";
 }
 
 function createEmissionsFilename(selected_options_list) {
   return "emissions_per_mile_payload" + selected_options_list['Average Payload'] + "_avVMT" + selected_options_list['Average VMT'] + ".geojson";
+}
+
+function createGridEmissionsFilename(selected_options_list) {
+  return selected_options_list['Visualize By'] + "_merged.geojson";
 }
 
 function createChargingDropdowns(key) {
@@ -309,6 +311,10 @@ function createEmissionsDropdowns(key) {
   const vmtDropdownResult = createDropdown("average-vmt", "Average VMT", "Average VMT: ", key, tcoEmissionsOptions, selectedTcoEmissionsOptions, createEmissionsFilename);
 }
 
+function createGridEmissionsDropdowns(key) {
+  const visualizeDropdownResult = createDropdown("visualize-by", "Visualize By", "Visualize by: ", key, gridEmissionsOptions, selectedGridEmissionsOptions, createGridEmissionsFilename);
+}
+
 document.body.addEventListener('click', function(event) {
   // Check if a details button was clicked
   if (event.target.classList.contains("details-btn") && event.target.hasAttribute("data-key")) {
@@ -319,7 +325,6 @@ document.body.addEventListener('click', function(event) {
 
     // Add a link for the user to download the geojson file
     let url = `${STORAGE_URL}${geojsonNames[key]}`
-    console.log(url)
   
     const dirs_with_multiple_geojsons = ['infrastructure_pooling_thought_experiment', 'incentives_and_regulations'];
   
@@ -426,6 +431,10 @@ document.getElementById("area-details-button").addEventListener("click", functio
     if (selectedAreaLayerName === 'Lifecycle Truck Emissions') {
         createEmissionsDropdowns(selectedAreaLayerName)
     }
+    // Create a dropdown to select whether to view grid emission by state or balancing authority
+    if(selectedAreaLayerName === "Grid Emission Intensity") {
+        createGridEmissionsDropdowns(selectedAreaLayerName);
+    }
   }
 });
 
@@ -501,6 +510,12 @@ function resetModalContent() {
   const vmtDropdownContainer = document.querySelector(".average-vmt-dropdown-container");
   if (vmtDropdownContainer) {
     modalContent.removeChild(vmtDropdownContainer);
+  }
+    
+  // Remove visualize-by-dropdown-container if it exists
+  const visualizeByDropdownContainer = document.querySelector(".visualize-by-dropdown-container");
+  if (visualizeByDropdownContainer) {
+    modalContent.removeChild(visualizeByDropdownContainer);
   }
 }
 

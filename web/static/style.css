@@ -307,6 +307,26 @@ body {
   font-size: 14px; /* Adjust the font size as needed */
 }
 
+/* Style for the support target dropdown container */
+.visualize-by-dropdown-container {
+  display: flex;
+  justify-content: left; /* Center the content horizontally */
+  align-items: center; /* Center the content vertically */
+  margin-top: 20px; /* Adjust the top margin as needed */
+}
+
+/* Style for the label */
+.visualize-by-dropdown-container label {
+  margin-right: 10px; /* Add right margin for spacing */
+}
+
+/* Style for the "Visualize By" dropdown */
+#visualize-by-dropdown {
+  width: 60%; /* Make the dropdown fill the available width */
+  padding: 5px; /* Add some padding to the dropdown */
+  font-size: 14px; /* Adjust the font size as needed */
+}
+
 .lds-default {
   display: inline-block;
   position: relative;

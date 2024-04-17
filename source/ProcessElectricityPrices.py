@@ -33,7 +33,7 @@ def read_state_data(top_dir):
 
     '''
 
-    # Read in the data associated with each eGrids subregion
+    # Read in the data associated with each state
     dataPath = f'{top_dir}/data/electricity_rates/sales_annual_a.xlsx'
     data = pd.ExcelFile(dataPath)
     data_df = pd.read_excel(data, 'Total Electric Industry', skiprows=[0,1])

@@ -14,8 +14,9 @@ shapefiles = OrderedDict()
 ## Total domestic Imports and Exports
 #shapefiles['Truck Imports and Exports'] = os.path.join("data/Point2Point_outputs/mode_truck_commodity_all_origin_all_dest_all.shp")
 #
-## Grid emission intensity
-#shapefiles['Grid Emission Intensity'] = os.path.join("data/egrid2020_subregions_merged/egrid2020_subregions_merged.shp")
+# Grid emission intensity
+shapefiles['Grid Emission Intensity by Balancing Authority'] = os.path.join("data/egrid2022_subregions_merged/egrid2022_subregions_merged.shp")
+shapefiles['Grid Emission Intensity by State'] = os.path.join("data/eia2022_state_merged/eia2022_state_merged.shp")
 #
 ## Commercial electricity price by state
 #shapefiles['Commercial Electricity Price'] = os.path.join("data/electricity_rates_merged/electricity_rates_by_state_merged.shp")
@@ -67,7 +68,7 @@ shapefiles = OrderedDict()
 #
 #shapefiles['Truck charging'] = os.path.join("data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_min_chargers.shp")
 
-shapefiles['Demand Charge by State'] = os.path.join("data/electricity_rates_merged/demand_charges_by_state.shp")
+#shapefiles['Demand Charge by State'] = os.path.join("data/electricity_rates_merged/demand_charges_by_state.shp")
 
 ## State-level support
 #support_types = ['incentives_and_regulations', 'incentives', 'regulations']
