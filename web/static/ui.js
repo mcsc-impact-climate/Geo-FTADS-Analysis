@@ -1,4 +1,4 @@
-import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions, selectedTruckChargingOptions, stateSupportOptions, selectedStateSupportOptions, tcoEmissionsOptions, selectedTcoEmissionsOptions, gridEmissionsOptions, selectedGridEmissionsOptions, fuelLabels, dataInfo } from './name_maps.js';
+import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions, selectedTruckChargingOptions, stateSupportOptions, selectedStateSupportOptions, tcoOptions, selectedTcoOptions, emissionsOptions, selectedEmissionsOptions, gridEmissionsOptions, selectedGridEmissionsOptions, fuelLabels, dataInfo } from './name_maps.js';
 import { updateSelectedLayers, updateLegend, updateLayer, data, removeLayer, loadLayer } from './map.js'
 import { geojsonNames } from './main.js'
 
@@ -279,11 +279,11 @@ function createStateSupportFilename(selected_options_list) {
 }
 
 function createTcoFilename(selected_options_list) {
-  return "costs_per_mile_payload" + selected_options_list['Average Payload'] + "_avVMT" + selected_options_list['Average VMT'] + ".geojson";
+  return "costs_per_mile_payload" + selected_options_list['Average Payload'] + "_avVMT" + selected_options_list['Average VMT'] + '_maxChP' + selected_options_list['Max Charging Power'] + ".geojson";
 }
 
 function createEmissionsFilename(selected_options_list) {
-  return "emissions_per_mile_payload" + selected_options_list['Average Payload'] + "_avVMT" + selected_options_list['Average VMT'] + ".geojson";
+  return selected_options_list['Visualize By'] + "emissions_per_mile_payload" + selected_options_list['Average Payload'] + "_avVMT" + selected_options_list['Average VMT'] + ".geojson";
 }
 
 function createGridEmissionsFilename(selected_options_list) {
@@ -302,13 +302,15 @@ function createStateSupportDropdowns(key) {
 }
 
 function createTcoDropdowns(key) {
-  const payloadDropdownResult = createDropdown("average-payload", "Average Payload", "Average payload: ", key, tcoEmissionsOptions, selectedTcoEmissionsOptions, createTcoFilename);
-  const vmtDropdownResult = createDropdown("average-vmt", "Average VMT", "Average VMT: ", key, tcoEmissionsOptions, selectedTcoEmissionsOptions, createTcoFilename);
+  const payloadDropdownResult = createDropdown("average-payload", "Average Payload", "Average payload: ", key, tcoOptions, selectedTcoOptions, createTcoFilename);
+  const vmtDropdownResult = createDropdown("average-vmt", "Average VMT", "Average VMT: ", key, tcoOptions, selectedTcoOptions, createTcoFilename);
+  const chargingPowerDropdownResult = createDropdown("charging-power", "Max Charging Power", "Max charging power: ", key, tcoOptions, selectedTcoOptions, createTcoFilename);
 }
 
 function createEmissionsDropdowns(key) {
-  const payloadDropdownResult = createDropdown("average-payload", "Average Payload", "Average payload: ", key, tcoEmissionsOptions, selectedTcoEmissionsOptions, createEmissionsFilename);
-  const vmtDropdownResult = createDropdown("average-vmt", "Average VMT", "Average VMT: ", key, tcoEmissionsOptions, selectedTcoEmissionsOptions, createEmissionsFilename);
+  const payloadDropdownResult = createDropdown("average-payload", "Average Payload", "Average payload: ", key, emissionsOptions, selectedEmissionsOptions, createEmissionsFilename);
+  const vmtDropdownResult = createDropdown("average-vmt", "Average VMT", "Average VMT: ", key, emissionsOptions, selectedEmissionsOptions, createEmissionsFilename);
+  const visualizeByDropdownResult = createDropdown("visualize-by", "Visualize By", "Visualize by: ", key, emissionsOptions, selectedEmissionsOptions, createEmissionsFilename);
 }
 
 function createGridEmissionsDropdowns(key) {
@@ -326,7 +328,7 @@ document.body.addEventListener('click', function(event) {
     // Add a link for the user to download the geojson file
     let url = `${STORAGE_URL}${geojsonNames[key]}`
   
-    const dirs_with_multiple_geojsons = ['infrastructure_pooling_thought_experiment', 'incentives_and_regulations'];
+    const dirs_with_multiple_geojsons = ['infrastructure_pooling_thought_experiment', 'incentives_and_regulations', 'grid_emission_intensity'];
   
     let dir_has_multiple_geojsons = false;
     for (let i = 0; i < dirs_with_multiple_geojsons.length; i++) {
@@ -386,7 +388,7 @@ document.getElementById("area-details-button").addEventListener("click", functio
     // Add a link for the user to download the geojson file
     let url = `${STORAGE_URL}${geojsonNames[selectedAreaLayerName]}`
     
-    const dirs_with_multiple_geojsons = ['infrastructure_pooling_thought_experiment', 'incentives_and_regulations'];
+    const dirs_with_multiple_geojsons = ['infrastructure_pooling_thought_experiment', 'incentives_and_regulations', 'grid_emission_intensity'];
     
     let dir_has_multiple_geojsons = false;
     for (let i = 0; i < dirs_with_multiple_geojsons.length; i++) {
@@ -516,6 +518,12 @@ function resetModalContent() {
   const visualizeByDropdownContainer = document.querySelector(".visualize-by-dropdown-container");
   if (visualizeByDropdownContainer) {
     modalContent.removeChild(visualizeByDropdownContainer);
+  }
+
+  // Remove visualize-by-dropdown-container if it exists
+  const chargingPowerDropdownContainer = document.querySelector(".charging-power-dropdown-container");
+  if (chargingPowerDropdownContainer) {
+    modalContent.removeChild(chargingPowerDropdownContainer);
   }
 }
 

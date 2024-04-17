@@ -28,7 +28,7 @@ geojson_directory = 'geojsons_simplified'
 geojsons['Truck Imports and Exports'] = os.path.join(geojson_directory, "mode_truck_commodity_all_origin_all_dest_all.geojson")
 
 # Grid emission intensity
-geojsons['Grid Emission Intensity'] = os.path.join(geojson_directory, "eia2022_state_merged.geojson")
+geojsons['Grid Emission Intensity'] = os.path.join(geojson_directory, "grid_emission_intensity/eia2022_state_merged.geojson")
 
 # Commercial electricity price by state
 geojsons['Commercial Electricity Price'] = os.path.join(geojson_directory, "electricity_rates_by_state_merged.geojson")
@@ -79,8 +79,8 @@ geojsons['State-Level Incentives and Regulations'] = os.path.join(geojson_direct
 geojsons['Truck Stop Charging'] = os.path.join(geojson_directory, "infrastructure_pooling_thought_experiment/Truck_Stop_Parking_Along_Interstate_with_min_chargers_range_200.0_chargingtime_4.0_maxwait_0.5.geojson")
 
 # Estimated lifecycle costs and emissions per mile for Tesla Semi
-geojsons['Lifecycle Truck Emissions'] = os.path.join(geojson_directory, "costs_and_emissions/emissions_per_mile_payload40000_avVMT100000.geojson")
-geojsons['Total Cost of Truck Ownership'] = os.path.join(geojson_directory, "costs_and_emissions/costs_per_mile_payload40000_avVMT100000.geojson")
+geojsons['Lifecycle Truck Emissions'] = os.path.join(geojson_directory, "costs_and_emissions/state_emissions_per_mile_payload40000_avVMT100000.geojson")
+geojsons['Total Cost of Truck Ownership'] = os.path.join(geojson_directory, "costs_and_emissions/costs_per_mile_payload40000_avVMT100000_maxChP400.geojson")
 
 def auth_required(function):
     @wraps(function)

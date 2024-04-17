@@ -176,7 +176,7 @@ export let selectedStateSupportOptions = {
     'Support Target': 'all'
 };
 
-export const tcoEmissionsOptions = {
+export const tcoOptions = {
   'Average Payload': {
     '0 lb': '0',
     '10,000 lb': '10000',
@@ -193,11 +193,47 @@ export const tcoEmissionsOptions = {
     '160,000 miles': '160000',
     '190,000 miles': '190000',
     },
+    'Max Charging Power': {
+      '100 kW': '100',
+      '200 kW': '200',
+      '400 kW': '400',
+      '800 kW': '800',
+      },
 };
 
-export let selectedTcoEmissionsOptions = {
+export let selectedTcoOptions = {
     'Average Payload': '40000',
-    'Average VMT': '100000'
+    'Average VMT': '100000',
+    'Max Charging Power': '400'
+};
+
+export const emissionsOptions = {
+  'Average Payload': {
+    '0 lb': '0',
+    '10,000 lb': '10000',
+    '20,000 lb': '20000',
+    '30,000 lb': '30000',
+    '40,000 lb': '40000',
+    '50,000 lb': '50000'
+    },
+  'Average VMT': {
+    '40,000 miles': '40000',
+    '70,000 miles': '70000',
+    '100,000 miles': '100000',
+    '130,000 miles': '130000',
+    '160,000 miles': '160000',
+    '190,000 miles': '190000',
+    },
+    'Visualize By': {
+        'State': 'state_',
+        'Balancing Authority': 'ba_'
+    }
+};
+
+export let selectedEmissionsOptions = {
+    'Average Payload': '40000',
+    'Average VMT': '100000',
+    'Visualize By': 'State'
 };
 
 export const gridEmissionsOptions = {
