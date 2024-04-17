@@ -105,8 +105,13 @@ wget "https://www.eia.gov/electricity/data/emissions/xls/emissions_region2022.xl
 
 ### EIA net summer capacity by state (MW)
 ```bash
-# from https://www.eia.gov/electricity/annual/
-wget "https://www.eia.gov/electricity/annual/xls/epa_04_07_a.xlsx"
+# from https://www.eia.gov/electricity/data/state/
+wget "https://www.eia.gov/electricity/data/state/existcapacity_annual.xlsx"
+```
+### EIA proposed additions to net summer capacity by state: 2023-2027 (MW)
+```bash
+# from https://www.eia.gov/electricity/data/state/
+wget "https://www.eia.gov/electricity/data/state/plancapacity_annual.xlsx"
 ```
 
 ### EIA net annual generation by state (1000 MWh)
