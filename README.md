@@ -103,6 +103,18 @@ wget "https://www.epa.gov/system/files/documents/2024-01/egrid2022_data.xlsx"
 wget "https://www.eia.gov/electricity/data/emissions/xls/emissions_region2022.xlsx"
 ```
 
+### EIA net summer capacity by state (MW)
+```bash
+# from https://www.eia.gov/electricity/annual/
+wget "https://www.eia.gov/electricity/annual/xls/epa_04_07_a.xlsx"
+```
+
+### EIA net annual generation by state (1000 MWh)
+```bash
+# from https://www.eia.gov/electricity/annual/
+wget "https://www.eia.gov/electricity/annual/xls/epa_03_07.xlsx"
+```
+
 ### US zip code boundaries
 ```bash
 # from https://hub.arcgis.com/datasets/d6f7ee6129e241cc9b6f75978e47128b
