@@ -203,11 +203,6 @@ unzip 90431cac2f9f49f4bcf1505419583753_0.zip -d utah_counties
 rm 90431cac2f9f49f4bcf1505419583753_0.zip
 ```
 
-You can now cd back out of the data directory
-```bash
-cd ..
-```
-
 ### Truck stop parking data
 ```bash
 # from https://geodata.bts.gov/datasets/usdot::truck-stop-parking
