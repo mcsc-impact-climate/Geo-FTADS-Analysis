@@ -15,8 +15,9 @@ shapefiles = OrderedDict()
 #shapefiles['Truck Imports and Exports'] = os.path.join("data/Point2Point_outputs/mode_truck_commodity_all_origin_all_dest_all.shp")
 #
 # Grid emission intensity
-shapefiles['Grid Emission Intensity by Balancing Authority'] = os.path.join("data/egrid2022_subregions_merged/egrid2022_subregions_merged.shp")
-shapefiles['Grid Emission Intensity by State'] = os.path.join("data/eia2022_state_merged/eia2022_state_merged.shp")
+#shapefiles['Grid Emission Intensity by Balancing Authority'] = os.path.join("data/egrid2022_subregions_merged/egrid2022_subregions_merged.shp")
+#shapefiles['Grid Emission Intensity by State'] = os.path.join("data/eia2022_state_merged/eia2022_state_merged.shp")
+shapefiles['Grid Capacity and Generation by State'] = os.path.join("data/eia2022_state_merged/gen_cap_2022_state_merged.shp")
 #
 ## Commercial electricity price by state
 #shapefiles['Commercial Electricity Price'] = os.path.join("data/electricity_rates_merged/electricity_rates_by_state_merged.shp")

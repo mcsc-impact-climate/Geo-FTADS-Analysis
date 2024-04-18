@@ -18,20 +18,19 @@ from tqdm import tqdm, trange
 from CommonTools import get_top_dir, mergeShapefile, saveShapefile, state_names_to_abbr
 
 LB_PER_KG = 2.20462
+HOURS_PER_YEAR = 365*24
 
-def read_ba_data(top_dir):
+def read_ba_emissions_data(top_dir):
     '''
     Reads in grid emission intensities by balancing authorities from eGRIDS
     
     Parameters
     ----------
-    None
+    top_dir (string): path to the top level of the git repo
 
     Returns
     -------
     egrid_data (pd.DataFrame): A pandas dataframe containing the 2022 eGrid data for each subregion (lb CO2 / MWh)
-        
-    NOTE: None.
 
     '''
     
@@ -50,19 +49,17 @@ def read_ba_data(top_dir):
 
     return data_df
     
-def read_state_data(top_dir):
+def read_state_emissions_data(top_dir):
     '''
     Reads in grid emission intensities by state from EIA
     
     Parameters
     ----------
-    None
+    top_dir (string): path to the top level of the git repo
 
     Returns
     -------
-    eia_data (pd.DataFrame): A pandas dataframe containing the 2022 emission intensity data (lb CO2 / MWh)
-        
-    NOTE: None.
+    data_df (pd.DataFrame): A pandas dataframe containing the 2022 emission intensity data (lb CO2 / MWh)
 
     '''
     
@@ -90,26 +87,125 @@ def read_state_data(top_dir):
     data_df = data_df.dropna()
     
     return data_df
+    
+def read_state_capacity_data(top_dir):
+    '''
+    Reads in grid generating capacity by state
+    
+    Parameters
+    ----------
+    top_dir (string): path to the top level of the git repo
+
+    Returns
+    -------
+    state_capacity_data_df (pd.DataFrame): A pandas dataframe containing the 2022 electricity generating capacity (MW) for each state
+    '''
+    
+    # Read in the data associated with each eGrids subregion
+    dataPath = f'{top_dir}/data/existcapacity_annual.xlsx'
+    data = pd.ExcelFile(dataPath)
+    data_df = pd.read_excel(data, 'Existing Capacity', skiprows=[0])
+    state_capacity_data_df = data_df[(data_df['Year']==2022)&(data_df['Producer Type'] == 'Total Electric Power Industry')&(data_df['Fuel Source'] == 'All Sources')]
+    
+    state_capacity_data_df = state_capacity_data_df.drop(columns=['Fuel Source', 'Generators', 'Facilities', 'Nameplate Capacity (Megawatts)', 'Producer Type', 'Year'])
+    
+    state_capacity_data_df = state_capacity_data_df.rename(columns={'State Code': 'STUSPS', 'Summer Capacity (Megawatts)': 'Cap_MW'})
+    state_capacity_data_df['Cap_MW'] = state_capacity_data_df['Cap_MW'].astype('float')
+        
+    return state_capacity_data_df
+    
+def read_state_generation_data(top_dir):
+    '''
+    Reads in annual grid electricity generation by state
+    
+    Parameters
+    ----------
+    top_dir (string): path to the top level of the git repo
+
+    Returns
+    -------
+    state_generation_data_df (pd.DataFrame): A pandas dataframe containing electricity generated (MWh) in each state for 2022
+    '''
+    
+    # Read in the data associated with each eGrids subregion
+    dataPath = f'{top_dir}/data/annual_generation_state.xls'
+    data = pd.ExcelFile(dataPath)
+    data_df = pd.read_excel(data, skiprows=[0])
+    state_generation_data_df = data_df[(data_df['YEAR']==2022)&(data_df['TYPE OF PRODUCER'] == 'Total Electric Power Industry')&(data_df['ENERGY SOURCE'] == 'Total')]
+    
+    state_generation_data_df = state_generation_data_df.drop(columns=['TYPE OF PRODUCER', 'ENERGY SOURCE', 'YEAR'])
+    
+    state_generation_data_df = state_generation_data_df.rename(columns={'STATE': 'STUSPS', 'GENERATION (Megawatthours)': 'Ann_Gen'})
+    state_generation_data_df['Ann_Gen'] = state_generation_data_df['Ann_Gen'].astype('float')
+    
+    # Remove the US total
+    state_generation_data_df = state_generation_data_df[state_generation_data_df['STUSPS'] != 'US-Total']
+        
+    return state_generation_data_df
+    
+def combine_gen_cap_data(state_capacity_data_df, state_generation_data_df):
+    '''
+    Combines generating and capacity data into a single dataframe, and also estimates the difference between the annual generating capacity and actual energy generated.
+    
+    Parameters
+    ----------
+    state_capacity_data_df (DataFrame): A pandas dataframe containing the 2022 electricity generating capacity (MW) for each state
+    
+    state_generation_data_df (pd.DataFrame): A pandas dataframe containing electricity generated in each state for 2022
+
+    Returns
+    -------
+    state_gen_cap_data_df (pd.DataFrame): A pandas dataframe containing summary info
+    '''
+    
+    # Combine the two dataframes
+    state_gen_cap_data_df = state_capacity_data_df.merge(state_generation_data_df, on='STUSPS', how='left').dropna()
+    
+    # Add a column with the theoretical annual generating capacity (MWh)
+    state_gen_cap_data_df['Ann_Cap'] = state_gen_cap_data_df['Cap_MW']*HOURS_PER_YEAR
+    
+    # Calculate the difference between theoretical and actual annual generation
+    state_gen_cap_data_df['Ann_Diff'] = state_gen_cap_data_df['Ann_Cap'] - state_gen_cap_data_df['Ann_Gen']
+    
+    # Calculate the ratio between theoretical maximum and actual annual generation
+    state_gen_cap_data_df['Ann_Rat'] = state_gen_cap_data_df['Ann_Cap'] / state_gen_cap_data_df['Ann_Gen']
+    
+    return state_gen_cap_data_df
 
 def main():
-
+    
     # Get the path to the top level of the Git repo
     top_dir = get_top_dir()
     
     # Read in the grid CO2 intensity by balancing authority from eGRIDS
-    egrid_data = read_ba_data(top_dir)
+    egrid_data = read_ba_emissions_data(top_dir)
 
     # Read in the state-level CO2 intensity from EIA
-    eia_data = read_state_data(top_dir)
+    eia_data = read_state_emissions_data (top_dir)
+    
+    # Read in the 2022 state-level generating capacity from EIA
+    state_capacity_data = read_state_capacity_data(top_dir)
+    
+    # Read in 2022 state-level annual electricity generated from EIA
+    state_generation_data = read_state_generation_data(top_dir)
+    
+    # Combine the capacity and generation data
+    state_gen_cap_data = combine_gen_cap_data(state_capacity_data, state_generation_data)
 
     # Merge the eGrids data in with the shapefile with subregion borders
     merged_dataframe_egrid = mergeShapefile(egrid_data, f'{top_dir}/data/eGRID2021_subregions/eGRID2021 Subregions Shapefile final.shp', 'SUBRGN')
     
     # Merge the state-level CO2 intensity data with the state borders shapefile
     merged_dataframe_eia = mergeShapefile(eia_data, f'{top_dir}/data/state_boundaries/tl_2012_us_state.shp', 'STUSPS')
+    
+    # Merge the state-level 2022 capacity and generation data with the state borders shapefile
+    merged_dataframe_gen_cap = mergeShapefile(state_gen_cap_data, f'{top_dir}/data/state_boundaries/tl_2012_us_state.shp', 'STUSPS')
 
     # Save the merged shapefiles
     saveShapefile(merged_dataframe_egrid, f'{top_dir}/data/egrid2022_subregions_merged/egrid2022_subregions_merged.shp')
+    
     saveShapefile(merged_dataframe_eia, f'{top_dir}/data/eia2022_state_merged/eia2022_state_merged.shp')
+    
+    saveShapefile(merged_dataframe_gen_cap, f'{top_dir}/data/eia2022_state_merged/gen_cap_2022_state_merged.shp')
     
 main()
