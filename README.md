@@ -353,34 +353,6 @@ python source/PrepareHydrogenHubs.py
 
 The script [IdentifyFacilitiesInRadius.py](./source/IdentifyFacilitiesInRadius.py) identifies truck stops and hydrogen production facilities within a user-provided radius and central location (33N, 97W) and 600 miles by default. It p
 
-## Visualizing layers with QGIS
-
-The script [PlotWithQGIS.py](./PlotWithQGIS.py) reads in processed shapefiles containing:
-* total imports and exports for all of the FAF5 regions 
-* CO2e intensity (in lb/MWh) of the US powergrid
-* Public charging and alternative refueling stations along highway corridors
-* Highway links and assignments
-* Electricity rates by state
-* Demand charges by utility
-
-and plots them as colormaps in QGIS. It also visualizes the network links as lines on the map, with the line width of each link weighted by its total annual freight flow (in tons). This should look something like:
-
-Before running this code, you'll need to have run the following:
-
-```bash
-python source/processFAFHighwayData.py 
-python source/ProcessGridData.py 
-python source/ProcessElectricityDemand.py
-python source/ProcessElectricityPrices.py 
-```
-
-as well as `python source/Point2PointFAF.py [arguments]` for any freight flow and emission intensity layers you'd like to visualize (more detailed instructions [above](./README.md#producing-shapefiles-to-visualize-freight-flows-and-emission-intensities)). Note that these layers currently need to be read in manually. 
-as well as `python source/Point2PointFAF.py [arguments]` for any freight flow and emission intensity layers you'd like to visualize (more detailed instructions [above](./README.md#producing-shapefiles-to-visualize-freight-flows-and-emission-intensities)). Note that these layers currently need to be read in manually. 
-
-<!-- Executing [PlotWithQGIS.py](./PlotWithQGIS.py) in the QGIS GUI (after first running [Point2PointFAF.py](./source/Point2PointFAF.py)) should produce output PDF files in the [layouts](./layouts) directory, which look something like: -->
-
-![Total domestic exports](./images/highway_and_total_flows.png "Total Domestic Exports")
-
 ## Analyze potential infrastructure investment savings from collective investment in truck stop charging
 
 The script [AnalyzeTruckStopCharging.py](./source/AnalyzeTruckStopCharging.py) is designed to quantify the charging demand at truck stops separated by 100 miles on average and at least 50 miles, and estimate the potential difference in infrastructure costs needed if the entire electrified trucking fleet were to electrify and either:
