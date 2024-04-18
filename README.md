@@ -1,4 +1,4 @@
-# FAF5 Analysis with QGIS
+# Interactive geospatial decision support tool for trucking fleet decarbonization
 
 This repo contains code to produce and interactively visualize publicly available geospatial data to support trucking fleets in navigating the transition to alternative energy carriers. The tool uses data from the "freight analysis framework" (FAF5) database and other public data sources.
 
