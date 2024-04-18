@@ -270,19 +270,7 @@ To run:
 python source/ProcessGridData.py 
 ```
 
-This should produce a shapefile in `data/egrid2020_subregions_merged`.
-
-## Processing electricity demand data
-
-The script [rocessElectricityDemand.py](./source/ProcessElectricityDemand.py) reads in the shapefile containing the borders of US states, along with the associated electricity demand data, and joins the shapefile with the electricity demand data via the subregion ID to produce a combined shapefile.
-
-To run:
-
-```bash
-python source/ProcessElectricityDemand.py
-```
-
-This should produce a shapefile in `data/electricity_demand_merged`.
+This should produce shapefiles in `data/egrid2020_subregions_merged` and `data/eia2020_subregions_merged`.
 
 ## Processing electricity prices and demand charges
 
