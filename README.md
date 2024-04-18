@@ -351,7 +351,7 @@ python source/PrepareHydrogenHubs.py
 
 ## Identifying truck stops and hydrogen production facilities within a given radius
 
-The script [IdentifyFacilitiesInRadius.py](./source/IdentifyFacilitiesInRadius.py) identifies truck stops and hydrogen production facilities within a user-provided radius and central location (33N, 97W) and 600 miles by default. It p
+The script [IdentifyFacilitiesInRadius.py](./source/IdentifyFacilitiesInRadius.py) identifies truck stops and hydrogen production facilities within a user-provided radius and central location - (33N, 97W) and 600 miles by default.
 
 ## Analyze potential infrastructure investment savings from collective investment in truck stop charging
 
