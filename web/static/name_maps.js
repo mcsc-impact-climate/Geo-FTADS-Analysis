@@ -71,13 +71,13 @@ export const legendLabels = {
   'Maximum Demand Charge (utility-level)': {'MaxDemCh': 'Maximum Demand Charge by Utility ($/kW)'},
   'Maximum Demand Charge (state-level)': {'Average Ma': 'Average of Max Demand Charges over Utilities ($/kW)', 'Median Max': 'Median of Max Demand Charges over Utilities ($/kW)', 'Max Maximu': 'Maximum of Max Demand Charges over Utilities  ($/kW)'},
   'Highway Flows (Interstate)': {
-    'Tot Tons': 'Highway Freight Flows (annual tons/link)',
+    'Tot Tons': 'Highway Freight Flows (annual kilo-tons/link)',
     'Tot Trips': 'Highway Freight Flows (daily trips/link)'},
   'Highway Flows (SU)': {
-    'Tot Tons': 'Single-unit Highway Freight Flows (annual tons/link)',
+    'Tot Tons': 'Single-unit Highway Freight Flows (annual kilo-tons/link)',
     'Tot Trips': 'Single-unit Highway Freight Flows (daily trips/link)'},
   'Highway Flows (CU)': {
-    'Tot Tons': 'Combined-unit Highway Freight Flows (annual tons/link)',
+    'Tot Tons': 'Combined-unit Highway Freight Flows (annual kilo-tons/link)',
     'Tot Trips': 'Combined-unit Highway Freight Flows (daily trips/link)'},
   'Operational Electrolyzers': {'Power_kW': 'Operational Hydrogen Electrolyzer Facility Capacity (kW)'},
   'Installed Electrolyzers': {'Power_kW': 'Installed Hydrogen Electrolyzer Facility Capacity (kW)'},
