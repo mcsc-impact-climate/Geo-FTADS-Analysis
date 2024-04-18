@@ -229,25 +229,6 @@ cd ..
 
 Python scripts to encode analysis steps are stored in the [source](./source) directory. 
 
-### Running scripts in QGIS
-
-The following scripts should be run in QGIS: 
-* [AnalyzeFAFData.py](./source/AnalyzeFAFData.py)
-* [PlotWithQGIS.py](./source/PlotWithQGIS.py)
-
-To run a script in QGIS:
-1. Open up the QGIS GUI and press the `New Project` option (white page on the top left)
-2. Select `Plugins --> Python Console` to open the python console.
-3. Press the `Show Editor` option (white script icon at the top) to open an empty python script. 
-4. Press the `Open Script...` option (yellow folder icon in the menu above the empty python script) to open an existing script. 
-5. Execute the script by pressing the `Run Script` option (green play button in the menu above the python script). 
-
-### Running scripts outside of QGIS
-The following scripts should be run outside of QGIS:
-* [Point2PointFAF.py](./source/Point2PointFAF.py)
-
-Scripts run outside of QGIS should be executed directly with the python installation that was used to install the requirements in `requirements.txt`(./requirements.txt) (examples below).
-
 ## Processing highway assignments
 
 The script [ProcessFAFHighwayData.py](./source/ProcessFAFHighwayData.py) reads in both the FAF5 network links for the entire US and the associated highway network assignments for total trucking flows, and joins the total flows for 2022 (all commodities combined) with the FAF5 network links via their common link IDs to produce a combined shapefile.
