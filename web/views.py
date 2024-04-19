@@ -84,6 +84,7 @@ geojsons['Truck Stop Charging'] = os.path.join(geojson_directory, "infrastructur
 # Estimated lifecycle costs and emissions per mile for Tesla Semi
 geojsons['Lifecycle Truck Emissions'] = os.path.join(geojson_directory, "costs_and_emissions/state_emissions_per_mile_payload40000_avVMT100000.geojson")
 geojsons['Total Cost of Truck Ownership'] = os.path.join(geojson_directory, "costs_and_emissions/costs_per_mile_payload40000_avVMT100000_maxChP400.geojson")
+geojsons['Energy Demand from Electrified Trucking'] = os.path.join(geojson_directory, "trucking_energy_demand.geojson")
 
 def auth_required(function):
     @wraps(function)

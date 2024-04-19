@@ -16,6 +16,7 @@ export let selectedGradientTypes = {
   'Lifecycle Truck Emissions': 'color',
   'Total Cost of Truck Ownership': 'color',
   'Grid Generation and Capacity': 'color',
+  'Energy Demand from Electrified Trucking': 'color',
 }
 
 export const availableGradientAttributes = {
@@ -36,6 +37,7 @@ export const availableGradientAttributes = {
   'Lifecycle Truck Emissions': ['C_mi_tot', 'C_mi_grid'],
   'Total Cost of Truck Ownership': ['$_mi_tot', '$_mi_el'],
   'Grid Generation and Capacity': ['Ann_Gen', 'Cap_MW', 'Ann_Cap', 'Ann_Diff', 'Ann_Rat'],
+  'Energy Demand from Electrified Trucking': ['An E Dem', 'Perc Gen', 'Perc Cap', 'Perc Diff'],
 };
 
 export let selectedGradientAttributes = {
@@ -56,6 +58,7 @@ export let selectedGradientAttributes = {
   'Lifecycle Truck Emissions': 'C_mi_tot',
   'Total Cost of Truck Ownership': '$_mi_tot',
   'Grid Generation and Capacity': 'Ann_Gen',
+  'Energy Demand from Electrified Trucking': 'An E Dem',
 };
 
 export const legendLabels = {
@@ -125,6 +128,13 @@ export const legendLabels = {
     'Ann_Cap': 'Theoretical Electricity Generation Capacity in 2022 (MWh)',
     'Ann_Diff': 'Difference Between Theoretical Capacity and Actual Electricity Generation in 2022 (MWh)',
     'Ann_Rat': 'Ratio Between Theoretical Capacity and Actual Electricity Generation in 2022',
+    },
+
+  'Energy Demand from Electrified Trucking': {
+    'An E Dem': 'Annual Energy Demand for Fully Electrified Trucking (MWh)',
+    'Perc Gen': 'Annual Energy Demand for Fully Electrified Trucking, as % of Electricity Generated in 2022 (%)',
+    'Perc Cap': 'Annual Energy Demand for Fully Electrified Trucking, as % of Theoretical Electricity Generation Capacity in 2022 (%)',
+    'Perc Diff': 'Annual Energy Demand for Fully Electrified Trucking, as % of Theoretical Excess Electricity Generation Capacity in 2022 (%)',
     },
 };
 
@@ -317,6 +327,7 @@ export const geojsonTypes = {
   'Lifecycle Truck Emissions': 'area',
   'Total Cost of Truck Ownership': 'area',
   'Grid Generation and Capacity': 'area',
+  'Energy Demand from Electrified Trucking': 'area',
 };
 
 export const dataInfo = {
@@ -349,5 +360,6 @@ export const dataInfo = {
   'Lifecycle Truck Emissions': "Estimated lifecycle emissions per mile for the Tesla Semi due to charging and battery manufacturing. Charging emissions are based on the CO2e emission intensity of the grid balancing authority region. Emissions are calculated using the model developed by <a href='https://chemrxiv.org/engage/chemrxiv/article-details/656e4691cf8b3c3cd7c96810'>Sader et al.</a>, calibrated to <a href='https://runonless.com/run-on-less-electric-depot-reports/'>NACFE Run on Less data</a> for the Tesla Semi from the 2023 PepsiCo Semi pilot.<br><br><a href='https://github.com/mcsc-impact-climate/Green_Trucking_Analysis'>Link to Git repo with code used to produce these layers</a>",
   'Total Cost of Truck Ownership': "Estimated lifecycle total cost of ownership per mile for the Tesla Semi due to truck purchase, charging, labor, maintenance, insurance and other operating costs. Charging costs are evaluated using state-level commercial electricity price and demand charge. Costs are calculated using the model developed by <a href='https://chemrxiv.org/engage/chemrxiv/article-details/656e4691cf8b3c3cd7c96810'>Sader et al.</a>, calibrated to <a href='https://runonless.com/run-on-less-electric-depot-reports/'>NACFE Run on Less data</a> for the Tesla Semi from the 2023 PepsiCo Semi pilot.<br><br><a href='https://github.com/mcsc-impact-climate/Green_Trucking_Analysis'>Link to Git repo with code used to produce these layers</a>",
   'Grid Generation and Capacity': "Grid electricity generation and net summer power capacity by state for 2022, along with estimated theoretical maximum generation capacity and its difference and ratio relative to the actual grid electricity generation. Theoretical maximum electricity generation capacity is obtained under the assumption that the grid operates at its net summer power capacity year-round. <br><br>Data is obtained from the EIA's <a href='https://www.eia.gov/electricity/data/state/'>state-level electricity database</a>.<br><a href='https://www.eia.gov/electricity/data/state/annual_generation_state.xls'>Link to download annual generation data</a><br><a href='https://www.eia.gov/electricity/data/state/existcapacity_annual.xlsx'>Link to download net summer power capacity data</a>",
+  'Energy Demand from Electrified Trucking': "Energy demand from electrified trucking, based on FAF5 highway flows (see Highway Flows layer for details) and payload-based mileage calibrated to the Tesla Semi (code and details for Tesla Semi calibration can be found in the following GitHub repos <a href='https://github.com/mcsc-impact-climate/PepsiCo_NACFE_Analysis'>Repo 1</a>, <a href='https://github.com/mcsc-impact-climate/Green_Trucking_Analysis'>Repo 2</a>).",
 };
 

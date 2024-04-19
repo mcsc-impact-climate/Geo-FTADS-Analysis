@@ -131,6 +131,9 @@ def evaluate_annual_e_demand_state(highway_data_df):
     # Convert the state column name to STUSPS to match the state border file
     state_sum_df = state_sum_df.rename(columns={'state': 'STUSPS'})
     
+    # Drop Hawaii because it essentially has no highways
+    state_sum_df = state_sum_df[state_sum_df['STUSPS'] != 'HI']
+    
     return state_sum_df
     
 def add_gen_cap_ratios(top_dir, state_data_df):
@@ -159,9 +162,9 @@ def add_gen_cap_ratios(top_dir, state_data_df):
     state_data_df = state_data_df.merge(gen_cap_data_df, on='STUSPS', how='left').dropna()
     
     # Evaluate the ratios of interest
-    state_data_df['Rat Gen'] = state_data_df['An E Dem'] / state_data_df['Ann_Gen']
-    state_data_df['Rat Cap'] = state_data_df['An E Dem'] / state_data_df['Ann_Cap']
-    state_data_df['Rat Diff'] = state_data_df['An E Dem'] / state_data_df['Ann_Diff']
+    state_data_df['Perc Gen'] = 100*state_data_df['An E Dem'] / state_data_df['Ann_Gen']
+    state_data_df['Perc Cap'] = 100*state_data_df['An E Dem'] / state_data_df['Ann_Cap']
+    state_data_df['Perc Diff'] = 100*state_data_df['An E Dem'] / state_data_df['Ann_Diff']
     
     return state_data_df
 
@@ -193,9 +196,7 @@ def main():
     
     # Merge the aggregated annual energy demand per state with the state borders
     merged_state_data_gdf = mergeShapefile(state_data_df, f'{top_dir}/data/state_boundaries/tl_2012_us_state.shp', 'STUSPS').dropna()
-    
-    print(merged_state_data_gdf)
-    
+        
     # Save the merged shapefile
     saveShapefile(merged_state_data_gdf, f'{top_dir}/data/trucking_energy_demand/trucking_energy_demand.shp')
 

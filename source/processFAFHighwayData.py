@@ -102,24 +102,24 @@ def main():
 
     # Read in the highway flow assignments for each link
     df_highway_assignments_all = read_highway_assignments(top_dir, unit_type='All')
-#    df_highway_assignments_su = read_highway_assignments(top_dir, unit_type='SU')
-#    df_highway_assignments_cu = read_highway_assignments(top_dir, unit_type='CU')
-#    df_highway_assignments_interstate = read_highway_assignments(top_dir, unit_type='All', include_trips=True)
+    df_highway_assignments_su = read_highway_assignments(top_dir, unit_type='SU')
+    df_highway_assignments_cu = read_highway_assignments(top_dir, unit_type='CU')
+    df_highway_assignments_interstate = read_highway_assignments(top_dir, unit_type='All', include_trips=True)
     #start_time = time.time()
     
     # Merge the highway flow assignments in with the shapefile containing the highway links
     merged_dataframe_all_nomin = mergeShapefile(df_highway_assignments_all, f'{top_dir}/data/FAF5_network_links/freight_analysis_framework_network_faf5_network_link.shp', min_tonnage=0)
-#    merged_dataframe_all = mergeShapefile(df_highway_assignments_all, f'{top_dir}/data/FAF5_network_links/freight_analysis_framework_network_faf5_network_link.shp', min_tonnage=10000)
-#    merged_dataframe_su = mergeShapefile(df_highway_assignments_su, f'{top_dir}/data/FAF5_network_links/freight_analysis_framework_network_faf5_network_link.shp', min_tonnage=10000)
-#    merged_dataframe_cu = mergeShapefile(df_highway_assignments_cu, f'{top_dir}/data/FAF5_network_links/freight_analysis_framework_network_faf5_network_link.shp', min_tonnage=10000)
-#    merged_dataframe_interstate = mergeShapefile(df_highway_assignments_interstate, f'{top_dir}/data/FAF5_network_links/freight_analysis_framework_network_faf5_network_link.shp', min_tonnage=0, road_class=11)
+    merged_dataframe_all = mergeShapefile(df_highway_assignments_all, f'{top_dir}/data/FAF5_network_links/freight_analysis_framework_network_faf5_network_link.shp', min_tonnage=10000)
+    merged_dataframe_su = mergeShapefile(df_highway_assignments_su, f'{top_dir}/data/FAF5_network_links/freight_analysis_framework_network_faf5_network_link.shp', min_tonnage=10000)
+    merged_dataframe_cu = mergeShapefile(df_highway_assignments_cu, f'{top_dir}/data/FAF5_network_links/freight_analysis_framework_network_faf5_network_link.shp', min_tonnage=10000)
+    merged_dataframe_interstate = mergeShapefile(df_highway_assignments_interstate, f'{top_dir}/data/FAF5_network_links/freight_analysis_framework_network_faf5_network_link.shp', min_tonnage=0, road_class=11)
     
     #print(f'Merging took {time.time() - start_time} seconds')
     
     # Save the merged shapefile
     saveShapefile(merged_dataframe_all_nomin, f'{top_dir}/data/highway_assignment_links/highway_assignment_links_nomin.shp')
-#    saveShapefile(merged_dataframe_su, f'{top_dir}/data/highway_assignment_links/highway_assignment_links_single_unit.shp')
-#    saveShapefile(merged_dataframe_cu, f'{top_dir}/data/highway_assignment_links/highway_assignment_links_combined_unit.shp')
-#    saveShapefile(merged_dataframe_interstate, f'{top_dir}/data/highway_assignment_links/highway_assignment_links_interstate.shp')
+    saveShapefile(merged_dataframe_su, f'{top_dir}/data/highway_assignment_links/highway_assignment_links_single_unit.shp')
+    saveShapefile(merged_dataframe_cu, f'{top_dir}/data/highway_assignment_links/highway_assignment_links_combined_unit.shp')
+    saveShapefile(merged_dataframe_interstate, f'{top_dir}/data/highway_assignment_links/highway_assignment_links_interstate.shp')
         
 main()
