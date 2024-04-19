@@ -367,6 +367,21 @@ To run:
 python source/AnalyzeTruckStopCharging.py
 ```
 
+## Evaluating state-level electricity demand if trucking is fully electrified
+
+The script [EvaluateTruckingEnergyDemand.py](./source/EvaluateTruckingEnergyDemand.py) aggregates highway-level FAF5 commodity flows and trips to evaluate the approximate annual energy demand (in MWh) that would be placed on the grid for each state if all trucking operations were to be fully electrified. The energy demand is calculated assuming that the flows are carried by the Tesla Semi, using the mileage with respect to payload calibrated using code in [this repo](https://github.com/mcsc-impact-climate/Green_Trucking_Analysis) ([link to relevant section of README](https://github.com/mcsc-impact-climate/Green_Trucking_Analysis?tab=readme-ov-file#evaluate-straight-line-approximation-of-fuel-economy-as-a-function-of-payload)). The underlying calibration is performed in [this repo](https://github.com/mcsc-impact-climate/PepsiCo_NACFE_Analysis) using data from the PepsiCo Tesla Semi pilot. 
+
+To run:
+
+```bash
+python source/EvaluateTruckingEnergyDemand.py
+```
+
+This produces an output shapefile in `data/trucking_energy_demand` containing the energy demand for each state from electrified trucking, both as an absolute value (in MWh), and as a percent of each of the following:
+* The total energy generated in the state in 2022
+* The theoretical total energy generation capacity for the state in 2022 (if the grid were to run at its full summer generating capacity 24/7)
+* The theoretical excess energy generation capacity (i.e. theoretical - actual energy generated in 2022)
+
 ## Running the geospatial mapping tool
 
 The code in [web](./web) contains all functionality to visualize the geojsons interactively on a web interface. The code can be executed as follows:
