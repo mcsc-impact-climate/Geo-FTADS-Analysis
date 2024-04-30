@@ -430,3 +430,8 @@ body {
     transform: scale(1.5);
   }
 }
+
+ul {
+    padding-left: 40px; /* Adjusts the indentation of the entire list */
+    list-style-type: disc; /* Ensures bullets are used */
+}
