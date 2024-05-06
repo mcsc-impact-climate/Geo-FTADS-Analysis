@@ -261,12 +261,12 @@ This should produce shapefiles in `data/egrid2020_subregions_merged` and `data/e
 
 ## Processing electricity prices and demand charges
 
-The script [ProcessElectricityPrices.py](./source/ProcessElectricityPrices.py) reads in the shapefile containing borders of zip codes and states, along with the associated electricity price data and demand charges, and joins the shapefiles with the electricity price data via the subregion ID to produce combined shapefiles.
+The script [ProcessPrices.py](./source/ProcessPrices.py) reads in the shapefile containing borders of zip codes and states, along with the associated electricity price data and demand charges, and joins the shapefiles with the electricity price data via the subregion ID to produce combined shapefiles. It also evaluates electricity price, demand charge and diesel price by state. 
 
 To run:
 
 ```bash
-python source/ProcessElectricityPrices.py 
+python source/ProcessPrices.py 
 ```
 
 ## Processing State-level Incentives and Regulations
