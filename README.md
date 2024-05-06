@@ -220,6 +220,12 @@ mv US_Power_Industry_Report_2017/Utility_Data_2017.xlsx .
 rm -r US_Power_Industry_Report_2017*
 ```
 
+### Diesel price by state, averaged over the last 5 years
+```bash
+From https://github.com/mcsc-impact-climate/Green_Trucking_Analysis
+wget https://raw.githubusercontent.com/mcsc-impact-climate/Green_Trucking_Analysis/main/tables/average_diesel_price_by_state.csv
+```
+
 You can now cd back out of the data directory
 ```bash
 cd ..
