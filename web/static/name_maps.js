@@ -35,7 +35,7 @@ export const availableGradientAttributes = {
   'State-Level Incentives and Regulations': ['all', 'Biodiesel', 'Ethanol', 'Electricit', 'Hydrogen', 'Natural Ga', 'Propane', 'Renewable'],// 'Emissions'],
   'Truck Stop Charging': ['Tot Trips', 'CPD', 'Half_CPD', 'Min_Charge', 'Half_Charg', 'Min_Ratio', 'Half_Ratio', 'Col_Save'],
   'Lifecycle Truck Emissions': ['C_mi_tot', 'C_mi_grid'],
-  'Total Cost of Truck Ownership': ['$_mi_tot', '$_mi_el'],
+  'Total Cost of Truck Ownership': ['$_mi_tot', 'dies_tot', 'diff_tot', 'perc_tot'],
   'Grid Generation and Capacity': ['Ann_Gen', 'Cap_MW', 'Ann_Cap', 'Ann_Diff', 'Ann_Rat'],
   'Energy Demand from Electrified Trucking': ['An E Dem', 'Perc Gen', 'Perc Cap', 'Perc Diff'],
 };
@@ -115,11 +115,10 @@ export const legendLabels = {
     },
     
   'Total Cost of Truck Ownership': {
-    '$_mi_tot': 'Total Cost ($ / mile)',
-    '$_mi_cap': 'Capital Cost ($ / mile)',
-    '$_mi_el': 'Electricity Cost ($ / mile)',
-    '$_mi_lab': 'Labor Cost ($ / mile)',
-    '$_mi_op': 'Operating Cost ($ / mile)',
+    '$_mi_tot': 'EV Trucking Cost ($ / mile)',
+    'dies_tot': 'Diesel Trucking Cost ($ / mile)',
+    'diff_tot': 'EV Trucking Cost Premium ($ / mile)',
+    'perc_tot': 'EV Trucking Cost Premium (%)',
     },
     
   'Grid Generation and Capacity': {

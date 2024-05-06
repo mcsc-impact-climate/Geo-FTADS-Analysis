@@ -22,10 +22,12 @@ shapefiles = OrderedDict()
 #shapefiles['Grid Capacity and Generation by State'] = os.path.join("data/eia2022_state_merged/gen_cap_2022_state_merged.shp")
 
 # Electricity demand from electrified trucking
-shapefiles['Energy Demand from Electrified Trucking'] = os.path.join("data/trucking_energy_demand/trucking_energy_demand.shp")
+#shapefiles['Energy Demand from Electrified Trucking'] = os.path.join("data/trucking_energy_demand/trucking_energy_demand.shp")
 #
 ## Commercial electricity price by state
 #shapefiles['Commercial Electricity Price'] = os.path.join("data/electricity_rates_merged/electricity_rates_by_state_merged.shp")
+# Diesel price by state
+shapefiles['Diesel Price'] = os.path.join("data/diesel_price_by_state/diesel_price_by_state.shp")
 #
 ##Maximum demand charges from NREL
 #shapefiles['Maximum Demand Charge'] = os.path.join("data/electricity_rates_merged/demand_charges_merged.shp")

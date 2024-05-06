@@ -213,6 +213,30 @@ def read_demand_charge_data_by_state(top_dir, utility_state_df):
     
     return state_demand_charge_stats_df
     
+def read_diesel_price_data_by_state(top_dir):
+    '''
+    Reads in the data file containing average diesel price by state
+    
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    state_data (pd.DataFrame): A pandas dataframe containing the average diesel price by state
+    '''
+    
+    # Read in the average diesel price by state
+    state_diesel_prices_df = pd.read_csv(f'{top_dir}/data/average_diesel_price_by_state.csv')
+    
+    # Rename the 'State' column to match the shapefile with state boundaries and the diesel price column to something more concise
+    state_diesel_prices_df = state_diesel_prices_df.rename(columns={'State': 'STUSPS', 'Average Price ($/gal)': 'dies_price'})
+    
+    # Only keep columns of interest
+    state_diesel_prices_df = state_diesel_prices_df[['STUSPS', 'dies_price']]
+    
+    return state_diesel_prices_df
+    
 def merge_state_shapefile(data_df, shapefile_path):
     '''
     Merges the shapefile containing state boundaries with the dataframe containing the electricity prices by state
@@ -326,13 +350,11 @@ def main():
     # Save the merged shapefile
     saveShapefile(merged_demand_charge_state_data, f'{top_dir}/data/electricity_rates_merged/demand_charges_by_state.shp')
     
-    # Read in the average diesel price by state
-    state_diesel_prices_df = pd.read_csv(f'{top_dir}/data/average_diesel_price_by_state.csv')
     
-    # Rename the 'State' column to match the shapefile with state boundaries
-    state_diesel_prices_df = state_diesel_prices_df.rename(columns={'State': 'STUSPS'})
+    # Read in the diesel price by state
+    state_diesel_prices_df = read_diesel_price_data_by_state(top_dir)
     
-    # Evaluate average and maximum values of NREL's max demand charge data by state
+    # Merge with the shapefile containing US state boundaries
     state_diesel_prices_gdf = merge_state_shapefile(state_diesel_prices_df, f'data/state_boundaries/tl_2012_us_state.shp')
     
     # Save the merged shapefile
