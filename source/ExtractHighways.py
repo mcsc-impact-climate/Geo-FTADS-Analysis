@@ -14,12 +14,11 @@ import momepy
 import numpy as np
 import networkx as nx
 import time
-import sys
-from libpysal import weights, examples
+import pickle
+import os
 
-from shapely.geometry import Point
-from shapely.ops import nearest_points
 from scipy import spatial
+from datetime import datetime
 
 from CommonTools import get_top_dir
 
@@ -29,13 +28,31 @@ top_dir = get_top_dir()
 start = time.time()
 
 
+def loadShapefile(path):
+    '''
+    Reads in shapefile and converts to EPSG:4326 coordinate reference system
+
+    Parameters
+    ----------
+    path : str
+        String describing the path to the desired shapefile.
+
+    Returns
+    -------
+    shapefile : Geopandas DataFrame
+        DataFrame containing desired shpaefile.
+
+    '''
+    shapefile = gpd.read_file(path)
+    shapefile = shapefile.to_crs("epsg:4326")
+    
+    return shapefile
+
 
 def extractHighways():
     '''
-    TODO: Rescale/flip ton miles in a new column such that the max is 0 and the "0s" are the max value
-    
-    Note conversion to EPSG:4326 coordinate reference system
     Additionally converts all 'Null' 'Tot Tons' values to 0
+    Rescale/flip ton miles in a new column such that the max is 0 and the "0s" are the max value
     
     Returns
     -------
@@ -43,16 +60,17 @@ def extractHighways():
         DataFrame containing all highway elements as defined by FAF5.
 
     '''
-    highwayPath = f'{top_dir}/data/highway_filter_testing/highway_assignments.shp'    
-    highways = gpd.read_file(highwayPath)
+    highwayPath = f'{top_dir}/web/geojsons_simplified/highway_assignments.geojson' 
+    # highwayPath = f'{top_dir}/data/highway_filter_testing/highway_assignments.shp'  
     
-    highways = highways.to_crs("epsg:4326")
+    highways = loadShapefile(highwayPath)
+
 
     highways['Tot Tons'] = highways['Tot Tons'].fillna(0)
     
     # Rescale/flip ton miles in a new column such that the max is 0 and the "0s" are the max value
     maxTons = highways['Tot Tons'].max()
-    highways['Tot Tons'] = maxTons - highways['Tot Tons']
+    highways['Scaled Tot Tons'] = maxTons - highways['Tot Tons']
 
     return highways
     
@@ -68,6 +86,7 @@ def combinedStatisticalAreasCentroids():
         Combined Statistical Areas.
 
     '''
+    
     csaPath = f'{top_dir}/data/tl_2023_us_csa/tl_2023_us_csa.shp' 
     csa = gpd.read_file(csaPath)
 
@@ -95,11 +114,49 @@ def createGraph(highways):
         Dictionary of geographic location of nodes in highway graph.
 
     '''
+    
     graph = momepy.gdf_to_nx(highways, approach='primal')
     positions = {n: [n[0], n[1]] for n in list(graph.nodes)}
     graph.remove_edges_from(list(nx.selfloop_edges(graph)))
     
     return graph, positions
+
+
+def saveGraph(filename, graph=None, load=True):
+    '''
+    Saves or loads NX MultiGraph.
+    TODO: Integrate timestamp in file naming
+    
+    Parameters
+    ----------
+    filename : str
+        Filename of saved graph.
+    graph : NX MultiGraph, optional
+        NX MultiGraph of filtered FAF5 highways. The default is None.
+    load : bool, optional
+        Boolean defining whether to save or load graph. The default is True.
+
+    Returns
+    -------
+    graph : NX MultiGraph
+        NX MultiGraph of filtered FAF5 highways.
+
+    '''   
+    name = filename #+ '_' + datetime.now().strftime("%H%M")
+    
+    # Create the directory to contain geojsons if it doesn't exist
+    if not os.path.exists(f'{top_dir}/data/pickles'):
+        os.makedirs(f'{top_dir}/data/pickles')
+
+    if not load:
+        # save graph object to file
+        pickle.dump(graph, open(f'{top_dir}/data/pickles/{name}.pickle', 'wb'))
+        print('Graph saved...')
+    else:
+        # load graph object from file
+        graph = pickle.load(open(f'{top_dir}/data/pickles/{name}.pickle', 'rb'))
+        print('Graph loaded...')
+        return graph
 
 
 def defineODPoints(graph, centroids, positions):
@@ -120,6 +177,7 @@ def defineODPoints(graph, centroids, positions):
         Dictionary of CSAs with associated node location.
 
     '''
+    
     pos = list(positions.keys())
     ret = dict()
     tree = spatial.KDTree(pos)
@@ -162,6 +220,24 @@ def findPath(graph, orig, dest):
 
 
 def visualize(visual, positions=None, isnx=False):
+    '''
+    Method to produce plots of graphs or highway shapefiles.
+
+    Parameters
+    ----------
+    visual : MultiGraph or Geopandas DataFrame
+        NX MultiGraph of highways/path or GeoDataFrame of highways.
+    positions : Dict, optional
+        Dictionary of the geographic locations of nodes in highway graph. The default is None.
+    isnx : bool, optional
+        Boolean defining whether or not visual is a NX MultiGraph vs GeoDataFrame. The default is False.
+
+    Returns
+    -------
+    None.
+
+    '''
+    
     if isnx:
         if positions != None:
             nx.draw(visual, positions, node_color='tab:blue', node_size=1)
@@ -171,21 +247,70 @@ def visualize(visual, positions=None, isnx=False):
         visual.plot()
 
     
-def main():
-    centroids = combinedStatisticalAreasCentroids()
-    highways = extractHighways()
-    graph, positions = createGraph(highways)
-    origins = defineODPoints(graph, centroids, positions)
+def toShapefile(graph, filename):
+    '''
+    Converts NetworkX Graph to GeoDataFrame and saves as shapefile.
+    TODO: Had to manually change method references in module 'networkx' from
+        'to_scipy_sparse_matrix' to 'to_scipy_sparse_array' => find out which 
+        library needs to be updated.
+
+    Parameters
+    ----------
+    graph : MultiGraph
+        NX MultiGraph of path.
+    filename : str
+        Filename of shapefile.
+
+    Returns
+    -------
+    None.
+
+    '''
+    # Create the directory to contain geojsons if it doesn't exist
+    if not os.path.exists(f'{top_dir}/data/paths_of_interest'):
+        os.makedirs(f'{top_dir}/data/paths_of_interest')
+
+    nodes, edges, sw = momepy.nx_to_gdf(graph, points=True, lines=True, spatial_weights=True)
+    edges.to_file(f"{top_dir}/data/paths_of_interest/{filename}.shp")
+    
+
+if __name__ == "__main__":
+    #The user should change this value based upon whether or not they are starting fresh
+    load = True
+    
+    #Can be modified based on needs/testing
+    if not load:
+        centroids = combinedStatisticalAreasCentroids()
+        highways = extractHighways()
+        graph, positions = createGraph(highways)
+        origins = defineODPoints(graph, centroids, positions)
+        
+        saveGraph('centroids', centroids, load=False)
+        saveGraph('graph', graph, load=False)
+        saveGraph('positions', positions, load=False)
+        saveGraph('origins', origins, load=False)
+
+    else:
+        centroids = saveGraph('centroids', load=True)
+        graph = saveGraph('graph', load=True)
+        positions = saveGraph('positions', load=True)
+        origins = saveGraph('origins', load=True)
+
     
     path, pathgraph = findPath(graph, origins['San Jose-San Francisco-Oakland, CA'], origins['Seattle-Tacoma, WA'])
     newpath, newpathgraph = findPath(graph, origins['Cape Coral-Fort Myers-Naples, FL'], origins['Tallahassee-Bainbridge, FL-GA'])
+    ultranewpath, ultranewpathgraph = findPath(graph, origins['Seattle-Tacoma, WA'], origins['Tallahassee-Bainbridge, FL-GA'])
     
     end = time.time()
     print(end - start)
     
-    return centroids, graph, positions, origins, path, pathgraph
     
-centroids, graph, positions, origins, path, pathgraph = main()
+    visualize(graph, positions, isnx=True)
+    visualize(pathgraph, isnx=True)
+    
+    toShapefile(pathgraph, 'BayToSea')
+    
+    # return centroids, graph, positions, origins, path, pathgraph
+    
 
-visualize(graph, positions, isnx=True)
-visualize(pathgraph, isnx=True)
+# centroids, graph, positions, origins, path, pathgraph = main()
