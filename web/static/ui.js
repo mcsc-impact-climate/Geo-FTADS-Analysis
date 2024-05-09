@@ -1,4 +1,4 @@
-import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions, selectedTruckChargingOptions, stateSupportOptions, selectedStateSupportOptions, fuelLabels, dataInfo } from './name_maps.js';
+import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions, selectedTruckChargingOptions, stateSupportOptions, selectedStateSupportOptions, tcoOptions, selectedTcoOptions, emissionsOptions, selectedEmissionsOptions, gridEmissionsOptions, selectedGridEmissionsOptions, fuelLabels, dataInfo } from './name_maps.js';
 import { updateSelectedLayers, updateLegend, updateLayer, data, removeLayer, loadLayer } from './map.js'
 import { geojsonNames } from './main.js'
 
@@ -80,7 +80,6 @@ function addLayerCheckbox(key, value, container) {
 }
 
 function getSelectedLayers() {
-  console.log('In getSelectedLayers()')
   const selectedLayerNames = [];
   const checkboxes = document.querySelectorAll('input[type="checkbox"]');
 
@@ -279,6 +278,18 @@ function createStateSupportFilename(selected_options_list) {
   return selected_options_list['Support Target'] + "_" + selected_options_list['Support Type'] + ".geojson";
 }
 
+function createTcoFilename(selected_options_list) {
+  return "costs_per_mile_payload" + selected_options_list['Average Payload'] + "_avVMT" + selected_options_list['Average VMT'] + '_maxChP' + selected_options_list['Max Charging Power'] + ".geojson";
+}
+
+function createEmissionsFilename(selected_options_list) {
+  return selected_options_list['Visualize By'] + "emissions_per_mile_payload" + selected_options_list['Average Payload'] + "_avVMT" + selected_options_list['Average VMT'] + ".geojson";
+}
+
+function createGridEmissionsFilename(selected_options_list) {
+  return selected_options_list['Visualize By'] + "_merged.geojson";
+}
+
 function createChargingDropdowns(key) {
   const rangeDropdownResult = createDropdown("range", "Range", "Truck Range: ", key, truckChargingOptions, selectedTruckChargingOptions, createTruckChargingFilename);
   const chargingTimeDropdownResult = createDropdown("chargingTime", "Charging Time", "Charging Time: ", key, truckChargingOptions, selectedTruckChargingOptions, createTruckChargingFilename);
@@ -288,6 +299,22 @@ function createChargingDropdowns(key) {
 function createStateSupportDropdowns(key) {
   const supportTypeDropdownResult = createDropdown("support-type", "Support Type", "Support type: ", key, stateSupportOptions, selectedStateSupportOptions, createStateSupportFilename);
   const supportTargetDropdownResult = createDropdown("support-target", "Support Target", "Support target: ", key, stateSupportOptions, selectedStateSupportOptions, createStateSupportFilename);
+}
+
+function createTcoDropdowns(key) {
+  const payloadDropdownResult = createDropdown("average-payload", "Average Payload", "Average payload: ", key, tcoOptions, selectedTcoOptions, createTcoFilename);
+  const vmtDropdownResult = createDropdown("average-vmt", "Average VMT", "Average VMT: ", key, tcoOptions, selectedTcoOptions, createTcoFilename);
+  const chargingPowerDropdownResult = createDropdown("charging-power", "Max Charging Power", "Max charging power: ", key, tcoOptions, selectedTcoOptions, createTcoFilename);
+}
+
+function createEmissionsDropdowns(key) {
+  const payloadDropdownResult = createDropdown("average-payload", "Average Payload", "Average payload: ", key, emissionsOptions, selectedEmissionsOptions, createEmissionsFilename);
+  const vmtDropdownResult = createDropdown("average-vmt", "Average VMT", "Average VMT: ", key, emissionsOptions, selectedEmissionsOptions, createEmissionsFilename);
+  const visualizeByDropdownResult = createDropdown("visualize-by", "Visualize By", "Visualize by: ", key, emissionsOptions, selectedEmissionsOptions, createEmissionsFilename);
+}
+
+function createGridEmissionsDropdowns(key) {
+  const visualizeDropdownResult = createDropdown("visualize-by", "Visualize By", "Visualize by: ", key, gridEmissionsOptions, selectedGridEmissionsOptions, createGridEmissionsFilename);
 }
 
 document.body.addEventListener('click', function(event) {
@@ -300,9 +327,8 @@ document.body.addEventListener('click', function(event) {
 
     // Add a link for the user to download the geojson file
     let url = `${STORAGE_URL}${geojsonNames[key]}`
-    console.log(url)
   
-    const dirs_with_multiple_geojsons = ['infrastructure_pooling_thought_experiment', 'incentives_and_regulations'];
+    const dirs_with_multiple_geojsons = ['infrastructure_pooling_thought_experiment', 'incentives_and_regulations', 'grid_emission_intensity', 'costs_and_emissions'];
   
     let dir_has_multiple_geojsons = false;
     for (let i = 0; i < dirs_with_multiple_geojsons.length; i++) {
@@ -340,7 +366,7 @@ document.body.addEventListener('click', function(event) {
   }
 
   // Check if the close button of the modal was clicked
-  if (event.target.classList.contains("close-btn") || event.target.parentElement.tagName === 'SELECT') {
+  if (event.target.classList.contains("close-btn")) {//|| event.target.parentElement.tagName === 'SELECT') {
     document.getElementById('details-modal').style.display = 'none';
   }
 });
@@ -349,7 +375,7 @@ document.body.addEventListener('click', function(event) {
 document.getElementById("area-details-button").addEventListener("click", function () {
   const areaLayerDropdown = document.getElementById("area-layer-dropdown");
   const selectedAreaLayer = areaLayerDropdown.value;
-
+    
   if (selectedAreaLayer !== "") {
     // Fetch details based on the selected area layer
     const selectedAreaLayerName = getAreaLayerName(selectedAreaLayer);
@@ -362,7 +388,7 @@ document.getElementById("area-details-button").addEventListener("click", functio
     // Add a link for the user to download the geojson file
     let url = `${STORAGE_URL}${geojsonNames[selectedAreaLayerName]}`
     
-    const dirs_with_multiple_geojsons = ['infrastructure_pooling_thought_experiment', 'incentives_and_regulations'];
+    const dirs_with_multiple_geojsons = ['infrastructure_pooling_thought_experiment', 'incentives_and_regulations', 'grid_emission_intensity', 'costs_and_emissions'];
     
     let dir_has_multiple_geojsons = false;
     for (let i = 0; i < dirs_with_multiple_geojsons.length; i++) {
@@ -396,6 +422,20 @@ document.getElementById("area-details-button").addEventListener("click", functio
     // Create a dropdown if needed for state-level incentives and support
     if (selectedAreaLayerName === 'State-Level Incentives and Regulations') {
         createStateSupportDropdowns(selectedAreaLayerName)
+    }
+    
+    // Create a dropdown if needed for state-level TCO
+    if (selectedAreaLayerName === 'Total Cost of Truck Ownership') {
+        createTcoDropdowns(selectedAreaLayerName)
+    }
+      
+    // Create a dropdown if needed for state-level TCO
+    if (selectedAreaLayerName === 'Lifecycle Truck Emissions') {
+        createEmissionsDropdowns(selectedAreaLayerName)
+    }
+    // Create a dropdown to select whether to view grid emission by state or balancing authority
+    if(selectedAreaLayerName === "Grid Emission Intensity") {
+        createGridEmissionsDropdowns(selectedAreaLayerName);
     }
   }
 });
@@ -460,6 +500,30 @@ function resetModalContent() {
   const supportTargetDropdownContainer = document.querySelector(".support-target-dropdown-container");
   if (supportTargetDropdownContainer) {
     modalContent.removeChild(supportTargetDropdownContainer);
+  }
+    
+  // Remove payload-dropdown-container if it exists
+  const payloadDropdownContainer = document.querySelector(".average-payload-dropdown-container");
+  if (payloadDropdownContainer) {
+    modalContent.removeChild(payloadDropdownContainer);
+  }
+    
+  // Remove vmt-dropdown-container if it exists
+  const vmtDropdownContainer = document.querySelector(".average-vmt-dropdown-container");
+  if (vmtDropdownContainer) {
+    modalContent.removeChild(vmtDropdownContainer);
+  }
+    
+  // Remove visualize-by-dropdown-container if it exists
+  const visualizeByDropdownContainer = document.querySelector(".visualize-by-dropdown-container");
+  if (visualizeByDropdownContainer) {
+    modalContent.removeChild(visualizeByDropdownContainer);
+  }
+
+  // Remove visualize-by-dropdown-container if it exists
+  const chargingPowerDropdownContainer = document.querySelector(".charging-power-dropdown-container");
+  if (chargingPowerDropdownContainer) {
+    modalContent.removeChild(chargingPowerDropdownContainer);
   }
 }
 

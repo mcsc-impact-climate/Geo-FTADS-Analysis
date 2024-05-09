@@ -80,21 +80,30 @@ if __name__ == "__main__":
     # Create an ordered dictionary to maintain the order of items
     shapefiles = OrderedDict()
     
-    ## Total domestic Imports and Exports
+   ## Total domestic Imports and Exports
     #shapefiles['Truck Imports and Exports'] = os.path.join("data/Point2Point_outputs/mode_truck_commodity_all_origin_all_dest_all.shp")
     #
-    ## Grid emission intensity
-    #shapefiles['Grid Emission Intensity'] = os.path.join("data/egrid2020_subregions_merged/egrid2020_subregions_merged.shp")
+    # Grid emission intensity
+    #shapefiles['Grid Emission Intensity by Balancing Authority'] = os.path.join("data/egrid2022_subregions_merged/egrid2022_subregions_merged.shp")
+    #shapefiles['Grid Emission Intensity by State'] = os.path.join("data/eia2022_state_merged/eia2022_state_merged.shp")
+
+    # Grid generation and capacity
+    #shapefiles['Grid Capacity and Generation by State'] = os.path.join("data/eia2022_state_merged/gen_cap_2022_state_merged.shp")
+
+    # Electricity demand from electrified trucking
+    #shapefiles['Energy Demand from Electrified Trucking'] = os.path.join("data/trucking_energy_demand/trucking_energy_demand.shp")
     #
     ## Commercial electricity price by state
     #shapefiles['Commercial Electricity Price'] = os.path.join("data/electricity_rates_merged/electricity_rates_by_state_merged.shp")
+    # Diesel price by state
+    shapefiles['Diesel Price'] = os.path.join("data/diesel_price_by_state/diesel_price_by_state.shp")
     #
     ##Maximum demand charges from NREL
     #shapefiles['Maximum Demand Charge'] = os.path.join("data/electricity_rates_merged/demand_charges_merged.shp")
     #
     ## Highway flows
     shapefiles['Highway Flows Old'] = os.path.join(f'{top_dir}/data/highway_filter_testing/highway_assignments.shp')
-    # shapefiles['Highway Flows (Interstate)'] = os.path.join(f'{top_dir}/data/highway_assignment_links/highway_assignment_links_interstate.shp')
+    #shapefiles['Highway Flows (Interstate)'] = os.path.join("data/highway_assignment_links/highway_assignment_links_interstate.shp")
     #shapefiles['Highway Flows (SU)'] = os.path.join("data/highway_assignment_links/highway_assignment_links_single_unit.shp")
     #shapefiles['Highway Flows (CU)'] = os.path.join("data/highway_assignment_links/highway_assignment_links_combined_unit.shp")
     #
@@ -136,6 +145,7 @@ if __name__ == "__main__":
     #            shapefiles['Truck charging (%s_%s_%s)'%(truck_range, charging_time, max_wait_time)] = os.path.join("data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_min_chargers_range_%s_chargingtime_%s_maxwait_%s.shp"%(truck_range, charging_time, max_wait_time))
     #
     #shapefiles['Truck charging'] = os.path.join("data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_min_chargers.shp")
+
     #shapefiles['Demand Charge by State'] = os.path.join("data/electricity_rates_merged/demand_charges_by_state.shp")
     
     # State-level support

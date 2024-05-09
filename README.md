@@ -1,21 +1,14 @@
-# FAF5 Analysis with QGIS
+# Interactive geospatial decision support tool for trucking fleet decarbonization
 
-The purpose of this repo is to document the development of a geospatial analysis tool with QGIS that utilizes data from the "freight analysis framework" (FAF5) database. The ultimate goal is to evaluate lifecycle emissions associated with the transportation of freight flows, and incorporate these evaluated emissions into the geospatial visualization. 
-
-Users can interact with QGIS either through the user interface ([link to user manual](https://docs.qgis.org/3.22/en/docs/user_manual/)), or via the Python API (links to [developer's cookbook](https://docs.qgis.org/3.22/en/docs/pyqgis_developer_cookbook/) and [API documentation](https://qgis.org/pyqgis/3.22/)). My general approach has been as follows:
-
-1. Interact initially via the user interface (UI) to get a feel for the functionality available to perform whatever analysis I'm trying to do. 
-2. Complete a first round of the analysis with the UI
-3. Encode the analysis with the python API to make it reproducible and configurable. 
+This repo contains code to produce and interactively visualize publicly available geospatial data to support trucking fleets in navigating the transition to alternative energy carriers. The tool uses data from the "freight analysis framework" (FAF5) database and other public data sources.
 
 ## Pre-requisites
-* An installation of QGIS: [link to downloads for Mac, Windows and Linux](https://qgis.org/en/site/forusers/download.html)
 * python3
 
 ## Setup
 
 ```bash
-git clone git@github.com:cubicalknight/FAF5-Analysis.git
+git clone git@github.com:mcsc-impact-climate/FAF5-Analysis.git
 ```
 
 Install python requirements
@@ -86,15 +79,38 @@ rm VIUS_2002.zip
 ### Subregions for eGRID grid intensity data
 ```bash
 # from ls
-wget "https://opendata.arcgis.com/api/v3/datasets/23e16f24702948ac9e2032bfa0526a8f_1/downloads/data?format=shp&spatialRefId=4326&where=1%3D1" -O egrid2020_subregions.zip
-unzip egrid2020_subregions.zip -d egrid2020_subregions
-rm egrid2020_subregions.zip
+wget https://www.epa.gov/system/files/other-files/2023-05/eGRID2021_subregions_shapefile.zip
+unzip eGRID2021_subregions_shapefile.zip -d eGRID2021_subregions
+rm eGRID2021_subregions_shapefile.zip
 ```
 
 ### eGRID grid intensity data
 ```bash
 # from https://www.epa.gov/egrid/download-data
-wget "https://www.epa.gov/system/files/documents/2023-01/eGRID2021_data.xlsx"
+wget "https://www.epa.gov/system/files/documents/2024-01/egrid2022_data.xlsx"
+```
+
+### EIA grid emission intensity by state
+```bash
+# from https://www.eia.gov/electricity/data/emissions/
+wget "https://www.eia.gov/electricity/data/emissions/xls/emissions_region2022.xlsx"
+```
+
+### EIA net summer capacity by state (MW)
+```bash
+# from https://www.eia.gov/electricity/data/state/
+wget "https://www.eia.gov/electricity/data/state/existcapacity_annual.xlsx"
+```
+### EIA proposed additions to net summer capacity by state: 2023-2027 (MW)
+```bash
+# from https://www.eia.gov/electricity/data/state/
+wget "https://www.eia.gov/electricity/data/state/plancapacity_annual.xlsx"
+```
+
+### EIA net annual generation by state (MWh)
+```bash
+# from https://www.eia.gov/electricity/annual/
+wget "https://www.eia.gov/electricity/data/state/annual_generation_state.xls"
 ```
 
 ### US zip code boundaries
@@ -187,11 +203,6 @@ unzip 90431cac2f9f49f4bcf1505419583753_0.zip -d utah_counties
 rm 90431cac2f9f49f4bcf1505419583753_0.zip
 ```
 
-You can now cd back out of the data directory
-```bash
-cd ..
-```
-
 ### Truck stop parking data
 ```bash
 # from https://geodata.bts.gov/datasets/usdot::truck-stop-parking
@@ -209,6 +220,12 @@ mv US_Power_Industry_Report_2017/Utility_Data_2017.xlsx .
 rm -r US_Power_Industry_Report_2017*
 ```
 
+### Diesel price by state, averaged over the last 5 years
+```bash
+From https://github.com/mcsc-impact-climate/Green_Trucking_Analysis
+wget https://raw.githubusercontent.com/mcsc-impact-climate/Green_Trucking_Analysis/main/tables/average_diesel_price_by_state.csv
+```
+
 You can now cd back out of the data directory
 ```bash
 cd ..
@@ -217,25 +234,6 @@ cd ..
 ## How to run python scripts
 
 Python scripts to encode analysis steps are stored in the [source](./source) directory. 
-
-### Running scripts in QGIS
-
-The following scripts should be run in QGIS: 
-* [AnalyzeFAFData.py](./source/AnalyzeFAFData.py)
-* [PlotWithQGIS.py](./source/PlotWithQGIS.py)
-
-To run a script in QGIS:
-1. Open up the QGIS GUI and press the `New Project` option (white page on the top left)
-2. Select `Plugins --> Python Console` to open the python console.
-3. Press the `Show Editor` option (white script icon at the top) to open an empty python script. 
-4. Press the `Open Script...` option (yellow folder icon in the menu above the empty python script) to open an existing script. 
-5. Execute the script by pressing the `Run Script` option (green play button in the menu above the python script). 
-
-### Running scripts outside of QGIS
-The following scripts should be run outside of QGIS:
-* [Point2PointFAF.py](./source/Point2PointFAF.py)
-
-Scripts run outside of QGIS should be executed directly with the python installation that was used to install the requirements in `requirements.txt`(./requirements.txt) (examples below).
 
 ## Processing highway assignments
 
@@ -259,28 +257,16 @@ To run:
 python source/ProcessGridData.py 
 ```
 
-This should produce a shapefile in `data/egrid2020_subregions_merged`.
-
-## Processing electricity demand data
-
-The script [rocessElectricityDemand.py](./source/ProcessElectricityDemand.py) reads in the shapefile containing the borders of US states, along with the associated electricity demand data, and joins the shapefile with the electricity demand data via the subregion ID to produce a combined shapefile.
-
-To run:
-
-```bash
-python source/ProcessElectricityDemand.py
-```
-
-This should produce a shapefile in `data/electricity_demand_merged`.
+This should produce shapefiles in `data/egrid2020_subregions_merged` and `data/eia2020_subregions_merged`.
 
 ## Processing electricity prices and demand charges
 
-The script [ProcessElectricityPrices.py](./source/ProcessElectricityPrices.py) reads in the shapefile containing borders of zip codes and states, along with the associated electricity price data and demand charges, and joins the shapefiles with the electricity price data via the subregion ID to produce combined shapefiles.
+The script [ProcessPrices.py](./source/ProcessPrices.py) reads in the shapefile containing borders of zip codes and states, along with the associated electricity price data and demand charges, and joins the shapefiles with the electricity price data via the subregion ID to produce combined shapefiles. It also evaluates electricity price, demand charge and diesel price by state. 
 
 To run:
 
 ```bash
-python source/ProcessElectricityPrices.py 
+python source/ProcessPrices.py 
 ```
 
 ## Processing State-level Incentives and Regulations
@@ -371,35 +357,7 @@ python source/PrepareHydrogenHubs.py
 
 ## Identifying truck stops and hydrogen production facilities within a given radius
 
-The script [IdentifyFacilitiesInRadius.py](./source/IdentifyFacilitiesInRadius.py) identifies truck stops and hydrogen production facilities within a user-provided radius and central location (33N, 97W) and 600 miles by default. It p
-
-## Visualizing layers with QGIS
-
-The script [PlotWithQGIS.py](./PlotWithQGIS.py) reads in processed shapefiles containing:
-* total imports and exports for all of the FAF5 regions 
-* CO2e intensity (in lb/MWh) of the US powergrid
-* Public charging and alternative refueling stations along highway corridors
-* Highway links and assignments
-* Electricity rates by state
-* Demand charges by utility
-
-and plots them as colormaps in QGIS. It also visualizes the network links as lines on the map, with the line width of each link weighted by its total annual freight flow (in tons). This should look something like:
-
-Before running this code, you'll need to have run the following:
-
-```bash
-python source/processFAFHighwayData.py 
-python source/ProcessGridData.py 
-python source/ProcessElectricityDemand.py
-python source/ProcessElectricityPrices.py 
-```
-
-as well as `python source/Point2PointFAF.py [arguments]` for any freight flow and emission intensity layers you'd like to visualize (more detailed instructions [above](./README.md#producing-shapefiles-to-visualize-freight-flows-and-emission-intensities)). Note that these layers currently need to be read in manually. 
-as well as `python source/Point2PointFAF.py [arguments]` for any freight flow and emission intensity layers you'd like to visualize (more detailed instructions [above](./README.md#producing-shapefiles-to-visualize-freight-flows-and-emission-intensities)). Note that these layers currently need to be read in manually. 
-
-<!-- Executing [PlotWithQGIS.py](./PlotWithQGIS.py) in the QGIS GUI (after first running [Point2PointFAF.py](./source/Point2PointFAF.py)) should produce output PDF files in the [layouts](./layouts) directory, which look something like: -->
-
-![Total domestic exports](./images/highway_and_total_flows.png "Total Domestic Exports")
+The script [IdentifyFacilitiesInRadius.py](./source/IdentifyFacilitiesInRadius.py) identifies truck stops and hydrogen production facilities within a user-provided radius and central location - (33N, 97W) and 600 miles by default.
 
 ## Analyze potential infrastructure investment savings from collective investment in truck stop charging
 
@@ -414,6 +372,21 @@ To run:
 ```bash
 python source/AnalyzeTruckStopCharging.py
 ```
+
+## Evaluating state-level electricity demand if trucking is fully electrified
+
+The script [EvaluateTruckingEnergyDemand.py](./source/EvaluateTruckingEnergyDemand.py) aggregates highway-level FAF5 commodity flows and trips to evaluate the approximate annual energy demand (in MWh) that would be placed on the grid for each state if all trucking operations were to be fully electrified. The energy demand is calculated assuming that the flows are carried by the Tesla Semi, using the mileage with respect to payload calibrated using code in [this repo](https://github.com/mcsc-impact-climate/Green_Trucking_Analysis) ([link to relevant section of README](https://github.com/mcsc-impact-climate/Green_Trucking_Analysis?tab=readme-ov-file#evaluate-straight-line-approximation-of-fuel-economy-as-a-function-of-payload)). The underlying calibration is performed in [this repo](https://github.com/mcsc-impact-climate/PepsiCo_NACFE_Analysis) using data from the PepsiCo Tesla Semi pilot. 
+
+To run:
+
+```bash
+python source/EvaluateTruckingEnergyDemand.py
+```
+
+This produces an output shapefile in `data/trucking_energy_demand` containing the energy demand for each state from electrified trucking, both as an absolute value (in MWh), and as a percent of each of the following:
+* The total energy generated in the state in 2022
+* The theoretical total energy generation capacity for the state in 2022 (if the grid were to run at its full summer generating capacity 24/7)
+* The theoretical excess energy generation capacity (i.e. theoretical - actual energy generated in 2022)
 
 ## Running the geospatial mapping tool
 

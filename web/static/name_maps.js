@@ -13,11 +13,15 @@ export let selectedGradientTypes = {
   'Hydrogen from Refineries': 'size',
   'State-Level Incentives and Regulations': 'color',
   'Truck Stop Charging': 'size',
+  'Lifecycle Truck Emissions': 'color',
+  'Total Cost of Truck Ownership': 'color',
+  'Grid Generation and Capacity': 'color',
+  'Energy Demand from Electrified Trucking': 'color',
 }
 
 export const availableGradientAttributes = {
   'Truck Imports and Exports': ['Tmil Tot D', 'Tmil Imp D', 'Tmil Exp D', 'E Tot Den', 'E Imp Den', 'E Exp Den'],
-  'Grid Emission Intensity': ['SRC2ERTA'],
+  'Grid Emission Intensity': ['CO2_rate'],
   'Commercial Electricity Price': ['Cents_kWh'],
   'Maximum Demand Charge (utility-level)': ['MaxDemCh'],
   'Maximum Demand Charge (state-level)': ['Average Ma', 'Median Max', 'Max Maximu'],
@@ -30,11 +34,15 @@ export const availableGradientAttributes = {
   'Hydrogen from Refineries': ['Cap_MMSCFD'],
   'State-Level Incentives and Regulations': ['all', 'Biodiesel', 'Ethanol', 'Electricit', 'Hydrogen', 'Natural Ga', 'Propane', 'Renewable'],// 'Emissions'],
   'Truck Stop Charging': ['Tot Trips', 'CPD', 'Half_CPD', 'Min_Charge', 'Half_Charg', 'Min_Ratio', 'Half_Ratio', 'Col_Save'],
+  'Lifecycle Truck Emissions': ['C_mi_tot', 'C_mi_grid'],
+  'Total Cost of Truck Ownership': ['$_mi_tot', 'dies_tot', 'diff_tot', 'perc_tot'],
+  'Grid Generation and Capacity': ['Ann_Gen', 'Cap_MW', 'Ann_Cap', 'Ann_Diff', 'Ann_Rat'],
+  'Energy Demand from Electrified Trucking': ['An E Dem', 'Perc Gen', 'Perc Cap', 'Perc Diff'],
 };
 
 export let selectedGradientAttributes = {
   'Truck Imports and Exports': 'Tmil Tot D',
-  'Grid Emission Intensity': 'SRC2ERTA',
+  'Grid Emission Intensity': 'CO2_rate',
   'Commercial Electricity Price': 'Cents_kWh',
   'Maximum Demand Charge (utility-level)': 'MaxDemCh',
   'Maximum Demand Charge (state-level)': 'Average Ma',
@@ -47,6 +55,10 @@ export let selectedGradientAttributes = {
   'Hydrogen from Refineries': 'Cap_MMSCFD',
   'State-Level Incentives and Regulations': 'all',
   'Truck Stop Charging': 'Tot Trips',
+  'Lifecycle Truck Emissions': 'C_mi_tot',
+  'Total Cost of Truck Ownership': '$_mi_tot',
+  'Grid Generation and Capacity': 'Ann_Gen',
+  'Energy Demand from Electrified Trucking': 'An E Dem',
 };
 
 export const legendLabels = {
@@ -57,18 +69,18 @@ export const legendLabels = {
     'E Tot Den': 'Import+Export Emissions (tons CO2 / sq mile)',
     'E Imp Den': 'Import Emissions (tons CO2 / sq mile)',
     'E Exp Den': 'Export Emissions (tons CO2 / sq mile)'},
-  'Grid Emission Intensity': {'SRC2ERTA': 'CO2e intensity of power grid (lb/MWh)'},
+  'Grid Emission Intensity': {'CO2_rate': 'CO2 intensity of power grid (lb/MWh)'},
   'Commercial Electricity Price': {'Cents_kWh': 'Electricity rate (cents/kWh)'},
   'Maximum Demand Charge (utility-level)': {'MaxDemCh': 'Maximum Demand Charge by Utility ($/kW)'},
   'Maximum Demand Charge (state-level)': {'Average Ma': 'Average of Max Demand Charges over Utilities ($/kW)', 'Median Max': 'Median of Max Demand Charges over Utilities ($/kW)', 'Max Maximu': 'Maximum of Max Demand Charges over Utilities  ($/kW)'},
   'Highway Flows (Interstate)': {
-    'Tot Tons': 'Highway Freight Flows (annual tons/link)',
+    'Tot Tons': 'Highway Freight Flows (annual kilo-tons/link)',
     'Tot Trips': 'Highway Freight Flows (daily trips/link)'},
   'Highway Flows (SU)': {
-    'Tot Tons': 'Single-unit Highway Freight Flows (annual tons/link)',
+    'Tot Tons': 'Single-unit Highway Freight Flows (annual kilo-tons/link)',
     'Tot Trips': 'Single-unit Highway Freight Flows (daily trips/link)'},
   'Highway Flows (CU)': {
-    'Tot Tons': 'Combined-unit Highway Freight Flows (annual tons/link)',
+    'Tot Tons': 'Combined-unit Highway Freight Flows (annual kilo-tons/link)',
     'Tot Trips': 'Combined-unit Highway Freight Flows (daily trips/link)'},
   'Operational Electrolyzers': {'Power_kW': 'Operational Hydrogen Electrolyzer Facility Capacity (kW)'},
   'Installed Electrolyzers': {'Power_kW': 'Installed Hydrogen Electrolyzer Facility Capacity (kW)'},
@@ -85,6 +97,7 @@ export const legendLabels = {
     'Renewable': 'Incentives and Regulations (Renewable Diesel)',
 //    'Emissions': 'Incentives and Regulations (Emissions)',
  },
+    
   'Truck Stop Charging': {
     'Tot Trips': 'Trucks Passing Per Day',
     'CPD': 'Truck Charges Per Day (Full Fleet)',
@@ -94,6 +107,34 @@ export const legendLabels = {
     'Min_Ratio': 'Min Charger-to-truck Ratio (Full Fleet)',
     'Half_Ratio': 'Min Charger-to-truck Ratio (Half Fleet)',
     'Col_Save': 'Infra Savings from Pooled Investment (%)'},
+    
+  'Lifecycle Truck Emissions': {
+    'C_mi_tot': 'Total Emissions (g CO2e / mile)',
+    'C_mi_grid': 'Emissions from Charging (g CO2e / mile)',
+    'C_mi_man': 'Emissions from Battery Manufacturing (g CO2e / mile)',
+    },
+    
+  'Total Cost of Truck Ownership': {
+    '$_mi_tot': 'EV Trucking Cost ($ / mile)',
+    'dies_tot': 'Diesel Trucking Cost ($ / mile)',
+    'diff_tot': 'EV Trucking Cost Premium ($ / mile)',
+    'perc_tot': 'EV Trucking Cost Premium (%)',
+    },
+    
+  'Grid Generation and Capacity': {
+    'Ann_Gen': 'Electricity Generated in 2022 (MWh)',
+    'Cap_MW': 'Summer Power Generation Capacity in 2022 (MW)',
+    'Ann_Cap': 'Theoretical Electricity Generation Capacity in 2022 (MWh)',
+    'Ann_Diff': 'Difference Between Theoretical Capacity and Actual Electricity Generation in 2022 (MWh)',
+    'Ann_Rat': 'Ratio Between Theoretical Capacity and Actual Electricity Generation in 2022',
+    },
+
+  'Energy Demand from Electrified Trucking': {
+    'An E Dem': 'Annual Energy Demand for Fully Electrified Trucking (MWh)',
+    'Perc Gen': 'Annual Energy Demand for Fully Electrified Trucking, as % of Electricity Generated in 2022 (%)',
+    'Perc Cap': 'Annual Energy Demand for Fully Electrified Trucking, as % of Theoretical Electricity Generation Capacity in 2022 (%)',
+    'Perc Diff': 'Annual Energy Demand for Fully Electrified Trucking, as % of Theoretical Excess Electricity Generation Capacity in 2022 (%)',
+    },
 };
 
 export const fuelLabels = {
@@ -155,6 +196,77 @@ export let selectedStateSupportOptions = {
     'Support Target': 'all'
 };
 
+export const tcoOptions = {
+  'Average Payload': {
+    '0 lb': '0',
+    '10,000 lb': '10000',
+    '20,000 lb': '20000',
+    '30,000 lb': '30000',
+    '40,000 lb': '40000',
+    '50,000 lb': '50000'
+    },
+  'Average VMT': {
+    '40,000 miles': '40000',
+    '70,000 miles': '70000',
+    '100,000 miles': '100000',
+    '130,000 miles': '130000',
+    '160,000 miles': '160000',
+    '190,000 miles': '190000',
+    },
+    'Max Charging Power': {
+      '100 kW': '100',
+      '200 kW': '200',
+      '400 kW': '400',
+      '800 kW': '800',
+      },
+};
+
+export let selectedTcoOptions = {
+    'Average Payload': '40000',
+    'Average VMT': '100000',
+    'Max Charging Power': '400'
+};
+
+export const emissionsOptions = {
+  'Average Payload': {
+    '0 lb': '0',
+    '10,000 lb': '10000',
+    '20,000 lb': '20000',
+    '30,000 lb': '30000',
+    '40,000 lb': '40000',
+    '50,000 lb': '50000'
+    },
+  'Average VMT': {
+    '40,000 miles': '40000',
+    '70,000 miles': '70000',
+    '100,000 miles': '100000',
+    '130,000 miles': '130000',
+    '160,000 miles': '160000',
+    '190,000 miles': '190000',
+    },
+    'Visualize By': {
+        'State': 'state_',
+        'Balancing Authority': 'ba_'
+    }
+};
+
+export let selectedEmissionsOptions = {
+    'Average Payload': '40000',
+    'Average VMT': '100000',
+    'Visualize By': 'State'
+};
+
+export const gridEmissionsOptions = {
+  'Visualize By': {
+    'State': 'eia2022_state',
+    'Balancing authority': 'egrid2022_subregions'
+    }
+};
+
+export let selectedGridEmissionsOptions = {
+    'Visualize By': 'State'
+};
+
 // Key: geojson name, Value: color to use
 export const geojsonColors = {
   'Truck Imports and Exports': 'red',
@@ -210,7 +322,11 @@ export const geojsonTypes = {
   'Salt Lake City Region EV Plan': 'area',
   'Truck Stop Locations': ['point', 'other'],
   'Principal Ports': ['point', 'other'],
-  'Truck Stop Charging': ['point', 'other']
+  'Truck Stop Charging': ['point', 'other'],
+  'Lifecycle Truck Emissions': 'area',
+  'Total Cost of Truck Ownership': 'area',
+  'Grid Generation and Capacity': 'area',
+  'Energy Demand from Electrified Trucking': 'area',
 };
 
 export const dataInfo = {
@@ -239,6 +355,10 @@ export const dataInfo = {
   'Salt Lake City Region EV Plan': "Shows the highway corridor targeted for one of 7 heavy duty vehicle infrastructure projects funded by the Biden-Harris administration (<a href='https://www.energy.gov/articles/biden-harris-administration-announces-funding-zero-emission-medium-and-heavy-duty-vehicle'>link to announcement</a> from Feb. 15, 2023). <br>This project will develop a community, state and industry supported action plan that will improve air quality in the underserved communities most impacted by high-density medium- and heavy-duty traffic in the greater Salt Lake City region. ",
   'Truck Stop Locations': "Locations of truck stops parking facilities in the U.S. Obtained from the DOT Bureau of Transportation Statistics's <a href='https://geodata.bts.gov/datasets/usdot::truck-stop-parking'>Truck Stop Parking database</a> (<a href='https://opendata.arcgis.com/api/v3/datasets/0849b1bd4a5e4b4e831877b7c25d6062_0/downloads/data?format=shp&spatialRefId=3857&where=1%3D1'>link to download</a>)",
   'Principal Ports': "Locations of principal ports in the US. Obtained from <a href='https://geodata.bts.gov/datasets/usdot::principal-ports/'>USDOT BTS</a> (<a href='https://opendata.arcgis.com/api/v3/datasets/e3b6065cce144be8a13a59e03c4195fe_1/downloads/data?format=shp&spatialRefId=4326&where=1%3D1'>link to download</a>).",
-  'Truck Stop Charging': "These layers are used to visualize an analysis of theoretical savings from pooled investment in charging infrastructure at selected U.S. truck stops. The analysis integrates truck stop locations in the U.S. (see 'Truck Stop Locations' layer for details), along with highway freight flow data from the Freight Analysis Framework - see 'Highway Flows (Interstate)' layer for details. "
+  'Truck Stop Charging': "These layers are used to visualize an analysis of theoretical savings from pooled investment in charging infrastructure at selected U.S. truck stops. The analysis integrates truck stop locations in the U.S. (see 'Truck Stop Locations' layer for details), along with highway freight flow data from the Freight Analysis Framework - see 'Highway Flows (Interstate)' layer for details.",
+  'Lifecycle Truck Emissions': "Estimated lifecycle emissions per mile for the Tesla Semi due to charging and battery manufacturing. Charging emissions are based on the CO2e emission intensity of the grid balancing authority region. Emissions are calculated using the model developed by <a href='https://chemrxiv.org/engage/chemrxiv/article-details/656e4691cf8b3c3cd7c96810'>Sader et al.</a>, calibrated to <a href='https://runonless.com/run-on-less-electric-depot-reports/'>NACFE Run on Less data</a> for the Tesla Semi from the 2023 PepsiCo Semi pilot.<br><br><a href='https://github.com/mcsc-impact-climate/Green_Trucking_Analysis'>Link to Git repo with code used to produce these layers</a>",
+  'Total Cost of Truck Ownership': "Estimated lifecycle total cost of ownership per mile for the Tesla Semi due to truck purchase, charging, labor, maintenance, insurance and other operating costs. Charging costs are evaluated using state-level commercial electricity price and demand charge. Costs are calculated using the model developed by <a href='https://chemrxiv.org/engage/chemrxiv/article-details/656e4691cf8b3c3cd7c96810'>Sader et al.</a>, calibrated to <a href='https://runonless.com/run-on-less-electric-depot-reports/'>NACFE Run on Less data</a> for the Tesla Semi from the 2023 PepsiCo Semi pilot.<br><br><a href='https://github.com/mcsc-impact-climate/Green_Trucking_Analysis'>Link to Git repo with code used to produce these layers</a>",
+  'Grid Generation and Capacity': "Grid electricity generation and net summer power capacity by state for 2022, along with estimated theoretical maximum generation capacity and its difference and ratio relative to the actual grid electricity generation. Theoretical maximum electricity generation capacity is obtained under the assumption that the grid operates at its net summer power capacity year-round. <br><br>Data is obtained from the EIA's <a href='https://www.eia.gov/electricity/data/state/'>state-level electricity database</a>.<br><a href='https://www.eia.gov/electricity/data/state/annual_generation_state.xls'>Link to download annual generation data</a><br><a href='https://www.eia.gov/electricity/data/state/existcapacity_annual.xlsx'>Link to download net summer power capacity data</a>",
+  'Energy Demand from Electrified Trucking': "Total energy demand from electrified trucking (in MWh), assuming all 2022 trucking operations in the state are electrified. This is evaluated using the FAF5 highway flows (see Highway Flows layer for details), along with payload-based energy economy calibrated to the Tesla Semi (code and details for Tesla Semi calibration can be found in the following GitHub repos <a href='https://github.com/mcsc-impact-climate/PepsiCo_NACFE_Analysis'>Repo 1</a>, <a href='https://github.com/mcsc-impact-climate/Green_Trucking_Analysis'>Repo 2</a>).<br><br>To assess the capacity of the grid to support electrified trucking, you can also change the gradient attribute to show the energy demand from electrified trucking as a percent of one of the following measures of grid capacity (see 'Grid Generation and Capacity' layer for details): <ul><li>Total electricity generated in the state in 2022</li><li>Total theoretical generating capacity of the state in 2022 (MWh), assuming the grid ran at its peak summer capacity year-round </li><li>Theoretical excess generating capacity (MWh). This is quantified as the difference between the total theoretical generating capacity and the actual electricity generated in 2022.</li></ul>",
 };
 
