@@ -226,6 +226,14 @@ From https://github.com/mcsc-impact-climate/Green_Trucking_Analysis
 wget https://raw.githubusercontent.com/mcsc-impact-climate/Green_Trucking_Analysis/main/tables/average_diesel_price_by_state.csv
 ```
 
+### 2023-24 hourly load data for the Texas grid (ERCOT)
+```bash
+wget https://www.ercot.com/files/docs/2023/02/09/Native_Load_2023.zip https://www.ercot.com/files/docs/2024/02/06/Native_Load_2024.zip
+unzip Native_Load_2023.zip
+unzip Native_Load_2024.zip
+rm Native_Load_2023.zip Native_Load_2024.zip
+```
+
 You can now cd back out of the data directory
 ```bash
 cd ..
