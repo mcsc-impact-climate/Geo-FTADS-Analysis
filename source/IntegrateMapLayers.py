@@ -77,7 +77,7 @@ def applyPointLayer(location: str, isgeojson: bool, pathLoc: str, distanceThresh
 
 
 def combineToSingle(corridors, name):
-    name = name + ' Combined'
+    name = name + '_Combined'
     
     combined = pd.concat(corridors, ignore_index=True)
         
