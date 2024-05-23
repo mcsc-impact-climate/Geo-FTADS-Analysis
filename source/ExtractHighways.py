@@ -28,7 +28,7 @@ top_dir = get_top_dir()
 start = time.time()
 
 
-def loadShapefile(path):
+def loadShapefile(path, isgeojson = False):
     '''
     Reads in shapefile and converts to EPSG:4326 coordinate reference system
 
@@ -40,10 +40,16 @@ def loadShapefile(path):
     Returns
     -------
     shapefile : Geopandas DataFrame
-        DataFrame containing desired shpaefile.
+        DataFrame containing desired shapefile.
 
     '''
     shapefile = gpd.read_file(path)
+    
+    # Files saved as geojson by default save as EPSG 3857 - this allows for proper
+    #  correction to standardized 4326 when reading in
+    if isgeojson:
+        shapefile.crs = {'init' :'epsg:3857'}
+        
     shapefile = shapefile.to_crs("epsg:4326")
     
     return shapefile
