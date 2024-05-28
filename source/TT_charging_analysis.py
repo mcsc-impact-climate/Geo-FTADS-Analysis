@@ -14,14 +14,18 @@ import os
 import geopandas as gpd
 from shapely.geometry import Point
 from CommonTools import get_top_dir, mergeShapefile, saveShapefile
+import matplotlib.lines as mlines
+import matplotlib.patches as mpatches
 
 import matplotlib.pyplot as plt
 
 METERS_PER_MILE = 1609.34
 LB_PER_TON = 2000.
-KWH_PER_MWH = 1000.
+KWH_PER_MWH = 1000
 TONS_PER_KILOTON = 1000.
 DAYS_PER_YEAR = 365.
+HOURS_PER_DAY = 24
+HOURS_PER_YEAR = HOURS_PER_DAY * DAYS_PER_YEAR
 
 def get_charger_locations(csv_path, charger_location_geojson_path):
     '''
@@ -279,25 +283,37 @@ def evaluate_annual_e_demand_charger(filtered_highways_gdf, charger_circles_gdf,
     
     # Fill any NaNs with 0 if any location did not have any overlapping highways
     charger_locations_gdf['An E Dem'] = charger_locations_gdf['An E Dem'].fillna(0)
+    
+    # Also evaluate average power demand over the year
+    charger_locations_gdf['Av P Dem'] = charger_locations_gdf['An E Dem'] / HOURS_PER_YEAR
         
     return charger_locations_gdf
+    
+#def get_
     
 def visualize_chargers(top_dir, charger_locations_gdf, texas_boundary_gdf, texas_highways_gdf, charger_circles_gdf, filtered_highways_gdf=None):
     # Set up the plot
     fig, ax = plt.subplots(figsize=(10, 10))
 
     # Plot texas_highways_gdf first, with texas_boundary_gdf above it, and charger_locations_gdf on top
-    texas_highways_gdf['line_width'] = texas_highways_gdf['Tot Tons'] / texas_highways_gdf['Tot Tons'].max() * 9.5 + 0.5
-    size_scale = 150 / (charger_locations_gdf['An E Dem'].max() - charger_locations_gdf['An E Dem'].min())
-    charger_locations_gdf['scaled_size'] = 10 + (charger_locations_gdf['An E Dem'] - charger_locations_gdf['An E Dem'].min()) * size_scale
+    min_width = 0.5
+    max_width = 10
+    min_size = 10
+    max_size = 150
+    min_Av_P_Dem = charger_locations_gdf['Av P Dem'].min()
+    max_Av_P_Dem = charger_locations_gdf['Av P Dem'].max()
+
+    texas_highways_gdf['line_width'] = texas_highways_gdf['Tot Tons'] / texas_highways_gdf['Tot Tons'].max() * (max_width - min_width) + min_width
+    size_scale = max_size / (max_Av_P_Dem - min_Av_P_Dem)
+    charger_locations_gdf['scaled_size'] = min_size + (charger_locations_gdf['Av P Dem'] - min_Av_P_Dem) * size_scale
 
     texas_highways_gdf.plot(ax=ax, color='black', linewidth=texas_highways_gdf['line_width'], label='Highways', zorder=1)  # Highways
     if not filtered_highways_gdf is None:
-        filtered_highways_gdf['line_width'] = filtered_highways_gdf['Tot Tons'] / texas_highways_gdf['Tot Tons'].max() * 9.5 + 0.5
+        filtered_highways_gdf['line_width'] = filtered_highways_gdf['Tot Tons'] / texas_highways_gdf['Tot Tons'].max() * (max_width - min_width) + min_width
         filtered_highways_gdf.plot(ax=ax, color='red', linewidth=filtered_highways_gdf['line_width'], label='Highways', zorder=2)  # Highways overlapping with circles
-    texas_boundary_gdf.plot(ax=ax, color='blue', edgecolor='blue', alpha=0.5, linewidth=1, label='Texas Boundary', zorder=3)  # Boundary
-    charger_locations_gdf.plot(ax=ax, marker='o', color='red', markersize=charger_locations_gdf['scaled_size'], label='Annual electricity demand (MWh)', zorder=4)  # Chargers
-    charger_circles_gdf.plot(ax=ax, color='red', edgecolor='red', alpha=0.2, linewidth=2, label='Charger Coverage', zorder=5)  # Circles
+    texas_boundary_gdf.plot(ax=ax, color='blue', edgecolor='blue', alpha=0, linewidth=1, label='Texas Boundary', zorder=3)  # Boundary
+    charger_locations_gdf.plot(ax=ax, marker='o', color='red', markersize=charger_locations_gdf['scaled_size'], label='Average Power Demand', zorder=4)  # Chargers
+    charger_circles_gdf.plot(ax=ax, color='red', edgecolor='red', alpha=0, linewidth=2, label='Charger Coverage', zorder=5)  # Circles
 
     # Add labels and title
     ax.set_title('Map of Texas with Charger Locations', fontsize=24)
@@ -305,6 +321,15 @@ def visualize_chargers(top_dir, charger_locations_gdf, texas_boundary_gdf, texas
     # Remove x and y axis ticks
     ax.set_xticks([])
     ax.set_yticks([])
+
+    min_marker = mlines.Line2D([], [], color='red', marker='o', linestyle='None',
+                           markersize=np.sqrt(min_size), label=f'{min_Av_P_Dem:.0f} MW')
+    max_marker = mlines.Line2D([], [], color='red', marker='o', linestyle='None',
+                           markersize=np.sqrt(max_size), label=f'{max_Av_P_Dem:.0f} MW')
+                           
+    legend1 = ax.legend(handles=[min_marker, max_marker], loc='lower left', title="Charger Size Scale", fontsize=16, title_fontsize=18)
+    
+    ax.add_artist(legend1)
 
     # Add a legend
     ax.legend(fontsize=18)
