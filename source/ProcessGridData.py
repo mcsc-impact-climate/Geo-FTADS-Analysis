@@ -193,7 +193,7 @@ def main():
     state_gen_cap_data = combine_gen_cap_data(state_capacity_data, state_generation_data)
 
     # Merge the eGrids data in with the shapefile with subregion borders
-    merged_dataframe_egrid = mergeShapefile(egrid_data, f'{top_dir}/data/eGRID2021_subregions/eGRID2021 Subregions Shapefile final.shp', 'SUBRGN')
+    merged_dataframe_egrid = mergeShapefile(egrid_data, f'{top_dir}/data/eGRID2022_subregions/eGRID2022 Subregions Shapefile final.shp', 'SUBRGN')
     
     # Merge the state-level CO2 intensity data with the state borders shapefile
     merged_dataframe_eia = mergeShapefile(eia_data, f'{top_dir}/data/state_boundaries/tl_2012_us_state.shp', 'STUSPS')
