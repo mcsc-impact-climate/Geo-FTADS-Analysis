@@ -18,7 +18,7 @@ pip install -r requirements.txt
 
 ## Downloading the data
 
-The script [./download_data.sh] downloads all the data needed to run this code into the `data` directory. Note that it will only download a file if it doesn't already exist in the `data` directory. To run:
+The script [`download_data.sh`](./download_data.sh) downloads all the data needed to run this code into the `data` directory. Note that it will only download a file if it doesn't already exist in the `data` directory. To run:
 
 ```bash
 bash download_data.sh
