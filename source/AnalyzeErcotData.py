@@ -67,42 +67,6 @@ def correct_datetime(time_str):
         new_time_str = pd.to_datetime(time_str[:-5]).date() + pd.Timedelta(days=1)
         return new_time_str.strftime("%m/%d/%Y") + " 00:00"
     return time_str
-    
-def plot_daily_power(load_data):
-
-    # Extract the date for filtering
-    load_data['Date'] = load_data['Hour Ending'].dt.date
-    
-    # Get unique dates that are the first of the month
-    first_days = load_data[load_data['Hour Ending'].dt.day == 1]['Date'].unique()
-    
-    # Filter data for each first of the month
-    for date in first_days:
-        # Filter data for the specific day
-        daily_data = load_data[load_data['Date'] == date]
-        
-        # Creating a figure and axis objects
-        fig, axs = plt.subplots(nrows=8, ncols=1, figsize=(10, 20), sharex=True)
-        
-        # Title for the whole figure
-        fig.suptitle(f'Power Variation for {date}', fontsize=16)
-        
-        regions = ['COAST', 'EAST', 'FWEST', 'NORTH', 'NCENT', 'SOUTH', 'SCENT', 'WEST']
-        
-        for i, region in enumerate(regions):
-            axs[i].plot(daily_data['Hour Ending'].dt.hour, daily_data[region], label=region)
-            axs[i].set_title(region)
-            axs[i].set_ylabel('Power (MW)')
-        
-        # Setting x-label for the last subplot
-        axs[-1].set_xlabel('Hour')
-        
-        # Adjust layout to prevent overlap
-        plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-        
-        # Show the plot
-        plt.savefig(f'{top_dir}/plots/daily_power_variation_{date}.png')
-        plt.close()
         
 def make_daily_ev_demands_fig(top_dir, filename, zone):
     daily_ev_demands = pd.read_csv(filename)
