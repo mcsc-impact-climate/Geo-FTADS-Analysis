@@ -66,7 +66,7 @@ def get_texas_boundary(state_boundaries_path, state_boundaries_geojson_path):
 
     Returns
     -------
-    charger_locations_gpd (string): Path that the file gets saved to
+    texas_boundary_gdf (Pandas GeoDataFrame): Geodataframe containing the Texas state boundary
     '''
 
     # Read in the boundaries for all us states
@@ -80,11 +80,41 @@ def get_texas_boundary(state_boundaries_path, state_boundaries_geojson_path):
     
     # Ensure the file is in the geographic coordinate system
     texas_boundary_gdf = texas_boundary_gdf.to_crs("EPSG:4326")
+    texas_boundary_gdf = texas_boundary_gdf[texas_boundary_gdf.is_valid]
+    
+    print(texas_boundary_gdf)
     
     # Save to a geojson and return
     texas_boundary_gdf.to_file(state_boundaries_geojson_path)
     
     return texas_boundary_gdf
+    
+def get_ercot_boundaries(ercot_boundaries_path, ercot_boundaries_geojson_path):
+    '''
+    Reads in the boundaries for the ERCOT weather regions
+
+    Parameters
+    ----------
+    ercot_boundaries_path (string): Path to the shapefile containing ERCOT weather region boundaries
+    ercot_boundaries_geojson_path (string): Geojson file path to save the ERCOT weather boundaries to
+
+    Returns
+    -------
+    ercot_boundaries_gdf (Pandas GeoDataFrame): Geodataframe containing the ERCOT weather boundaries
+    '''
+
+    # Read in the ercot weather region boundaries
+    ercot_boundaries_gdf = gpd.read_file(ercot_boundaries_path)
+    
+    # Ensure the file is in the right geographic coordinate system
+    ercot_boundaries_gdf = ercot_boundaries_gdf.set_crs("EPSG:3857", allow_override=True)
+    ercot_boundaries_gdf = ercot_boundaries_gdf.to_crs("EPSG:4326")
+    
+    # Save to a geojson and return
+    ercot_boundaries_gdf.to_file(ercot_boundaries_geojson_path)
+    
+    return ercot_boundaries_gdf
+
     
 def get_texas_highways(us_highways_path, texas_highways_geojson_path):
     '''
@@ -289,9 +319,7 @@ def evaluate_annual_e_demand_charger(filtered_highways_gdf, charger_circles_gdf,
         
     return charger_locations_gdf
     
-#def get_
-    
-def visualize_chargers(top_dir, charger_locations_gdf, texas_boundary_gdf, texas_highways_gdf, charger_circles_gdf, filtered_highways_gdf=None):
+def visualize_chargers(top_dir, charger_locations_gdf, ercot_boundary_gdf, texas_highways_gdf, charger_circles_gdf, filtered_highways_gdf=None):
     # Set up the plot
     fig, ax = plt.subplots(figsize=(10, 10))
 
@@ -307,13 +335,28 @@ def visualize_chargers(top_dir, charger_locations_gdf, texas_boundary_gdf, texas
     size_scale = max_size / (max_Av_P_Dem - min_Av_P_Dem)
     charger_locations_gdf['scaled_size'] = min_size + (charger_locations_gdf['Av P Dem'] - min_Av_P_Dem) * size_scale
 
-    texas_highways_gdf.plot(ax=ax, color='black', linewidth=texas_highways_gdf['line_width'], label='Highways', zorder=1)  # Highways
+    texas_highways_gdf.plot(ax=ax, color='black', linewidth=texas_highways_gdf['line_width'], label='Highways', zorder=2, alpha=0.3)  # Highways
     if not filtered_highways_gdf is None:
         filtered_highways_gdf['line_width'] = filtered_highways_gdf['Tot Tons'] / texas_highways_gdf['Tot Tons'].max() * (max_width - min_width) + min_width
-        filtered_highways_gdf.plot(ax=ax, color='red', linewidth=filtered_highways_gdf['line_width'], label='Highways', zorder=2)  # Highways overlapping with circles
-    texas_boundary_gdf.plot(ax=ax, color='blue', edgecolor='blue', alpha=0, linewidth=1, label='Texas Boundary', zorder=3)  # Boundary
+        filtered_highways_gdf.plot(ax=ax, color='red', linewidth=filtered_highways_gdf['line_width'], label='Highways', zorder=3)  # Highways overlapping with circles
     charger_locations_gdf.plot(ax=ax, marker='o', color='red', markersize=charger_locations_gdf['scaled_size'], label='Average Power Demand', zorder=4)  # Chargers
-    charger_circles_gdf.plot(ax=ax, color='red', edgecolor='red', alpha=0, linewidth=2, label='Charger Coverage', zorder=5)  # Circles
+    charger_circles_gdf.plot(ax=ax, color='none', edgecolor='red', linewidth=0.6, alpha=1, label='Charger Coverage', zorder=5)
+    charger_circles_gdf.plot(ax=ax, color='red', edgecolor='none', alpha=0.15, zorder=5)
+    
+    # Create a unique color for each zone using a colormap
+    num_zones = len(ercot_boundary_gdf['zone'].unique())
+    cmap = plt.cm.get_cmap('tab20c', num_zones)  # You can change 'viridis' to any other colormap
+
+    # Plot each zone with a different color and add a label
+    for idx, (zone, group) in enumerate(ercot_boundary_gdf.groupby('zone')):
+        color = cmap(idx)
+        group.plot(ax=ax, color=color, edgecolor='black', alpha=1, linewidth=1, label=zone, zorder=1)
+
+        # Add labels at the centroid of each polygon
+        for _, row in group.iterrows():
+            # Calculate the centroid of each polygon
+            centroid = row.geometry.centroid
+            ax.text(centroid.x, centroid.y, zone.upper().replace('_', ' '), fontsize=16, fontweight='bold', ha='center', va='center')
 
     # Add labels and title
     ax.set_title('Map of Texas with Charger Locations', fontsize=24)
@@ -338,6 +381,37 @@ def visualize_chargers(top_dir, charger_locations_gdf, texas_boundary_gdf, texas
     plt.savefig(f'{top_dir}/plots/Texas_charger_locations.png')
     plt.savefig(f'{top_dir}/plots/Texas_charger_locations.pdf')
     
+def assign_zones(charger_gdf, boundary_gdf):
+    '''
+    Assigns each charger location a zone based on its geographical position relative to specified zone boundaries.
+    This function performs a spatial join between a GeoDataFrame of charger locations (points) and a GeoDataFrame of zone boundaries (polygons).
+    It adds a 'zone' column to the charger locations GeoDataFrame indicating the zone each charger location falls within.
+
+    Parameters
+    ----------
+    charger_gdf (GeoDataFrame): A GeoDataFrame containing points for charger locations. It should have at least the columns ['Latitude', 'Longitude', 'geometry'].
+    
+    boundary_gdf (GeoDataFrame): A GeoDataFrame containing polygons that define different geographical zones. It should have at least the columns ['zone', 'geometry'].
+
+    Returns
+    -------
+    merged_gdf (GeoDataFrame): A GeoDataFrame that includes all original columns from charger_gdf plus a new 'zone' column indicating the geographical zone each charger location falls within. If a charger location does not fall within any zone, its 'zone' entry will be NaN.
+    '''
+    # Ensure the GeoDataFrames are set with the correct CRS
+    if charger_gdf.crs != boundary_gdf.crs:
+        charger_gdf = charger_gdf.to_crs(boundary_gdf.crs)
+    
+    # Perform spatial join
+    # 'op="within"' ensures we check if the charger location (point) is within a boundary (polygon)
+    merged_gdf = gpd.sjoin(charger_gdf, boundary_gdf, how="left", op="within")
+    
+    # Clean up the merged GeoDataFrame by dropping unnecessary columns
+    # If there are additional columns from boundaries that you do not want, specify them in drop
+    merged_gdf = merged_gdf.drop(columns=['index_right'])
+    
+    # The zone information is now in the 'zone' column
+    return merged_gdf
+    
 def main():
     # Get the path to the top level of the Git repo
     top_dir = get_top_dir()
@@ -349,8 +423,12 @@ def main():
     state_boundaries_path = f'{top_dir}/data/state_boundaries/tl_2012_us_state.shp'
     state_boundaries_geojson_path = f'{top_dir}/geojsons/texas_state_boundary.json'
     
+    ercot_boundaries_path = f'{top_dir}/data/ERCOT_Weather_Zones/ERCOT_Weather_Zones.shp'
+    ercot_boundaries_geojson_path = f'{top_dir}/geojsons/ERCOT_Weather_Zones.json'
+    
     us_highways_path = f'{top_dir}/data/highway_assignment_links/highway_assignment_links_nomin.shp'
     texas_highways_geojson_path = f'{top_dir}/geojsons/texas_state_highways.json'
+    
         
     if os.path.exists(charger_location_geojson_path):
         charger_locations_gdf = gpd.read_file(charger_location_geojson_path)
@@ -361,6 +439,12 @@ def main():
         texas_boundary_gdf = gpd.read_file(state_boundaries_geojson_path)
     else:
         texas_boundary_gdf = get_texas_boundary(state_boundaries_path, state_boundaries_geojson_path)
+
+
+    if os.path.exists(ercot_boundaries_geojson_path):
+        ercot_boundaries_gdf = gpd.read_file(ercot_boundaries_geojson_path)
+    else:
+        ercot_boundaries_gdf = get_ercot_boundaries(ercot_boundaries_path, ercot_boundaries_geojson_path)
 
     if os.path.exists(texas_highways_geojson_path):
         texas_highways_gdf = gpd.read_file(texas_highways_geojson_path)
@@ -386,7 +470,11 @@ def main():
     charger_locations_gdf = evaluate_annual_e_demand_charger(filtered_highways_gdf, charger_circles_gdf, charger_locations_gdf)
 
     # Plot the state boundary, charger locations and highways together
-    visualize_chargers(top_dir, charger_locations_gdf, texas_boundary_gdf, texas_highways_gdf, charger_circles_gdf)
+    visualize_chargers(top_dir, charger_locations_gdf, ercot_boundaries_gdf, texas_highways_gdf, charger_circles_gdf)
+    
+    # Merge the charger location dataframe with the ercot regions to assign an ercot zone to each charger
+    charger_locations_gdf = assign_zones(charger_locations_gdf, ercot_boundaries_gdf)
+    charger_locations_gdf.to_file(charger_location_geojson_path)
 
 main()
     
