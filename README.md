@@ -239,9 +239,22 @@ You can now cd back out of the data directory
 cd ..
 ```
 
-## How to run python scripts
+## Running the geospatial mapping tool
 
-Python scripts to encode analysis steps are stored in the [source](./source) directory. 
+The code in [web](./web) contains all functionality to visualize the geojsons interactively on a web interface. The code can be executed as follows:
+
+```bash
+# Install python requirements if needed
+install -r requirements.txt
+```
+
+```bash 
+python manage.py runserver
+```
+
+If that executes without issue, you should be able to view the map in your browser at http://127.0.0.1:5000/. It currently looks something like this:
+
+![Interactive Web Map](./images/web_map.png)
 
 ## Processing highway assignments
 
@@ -396,19 +409,40 @@ This produces an output shapefile in `data/trucking_energy_demand` containing th
 * The theoretical total energy generation capacity for the state in 2022 (if the grid were to run at its full summer generating capacity 24/7)
 * The theoretical excess energy generation capacity (i.e. theoretical - actual energy generated in 2022)
 
-## Running the geospatial mapping tool
+## Comparing electricity demand for full trucking electrification with historical load in Texas ERCOT weather zones
 
-The code in [web](./web) contains all functionality to visualize the geojsons interactively on a web interface. The code can be executed as follows:
+### Visualizing demand for each charging site
+
+The script [`TT_charging_analysis.py`](./source/TT_charging_analysis.py) produces a plot visualizing the demands associated with electrifying trucking with charging at 8 sites in the Texas triangle region. To run:
 
 ```bash
-# Install python requirements if needed
-install -r requirements.txt
+python source/TT_charging_analysis.py
+```
+This will produce `Texas_charger_locations.png` in the `plots` directory that compares the 
+
+### Producing daily electricity demand curves for each charging site
+
+The script [`MakeChargingLoadByZone.py`](source/MakeChargingLoadByZone.py) produces a csv file for each ERCOT weather zone containing one or more charging sites. For each such zone, the csv file contains the daily load from each charging site in the weather zone, assuming it follows the most extreme variation found in Borlaug et al (2021) for immediate charging (see red curve in Fig. 5 in the paper). 
+
+To run:
+```bash
+python source/MakeChargingLoadByZone.py
 ```
 
-```bash 
-python manage.py runserver
+This will produce a csv file `daily_ev_load_[zone].csv` for each zone.
+
+### Comparing daily EV demand with historical load for each month
+
+The script [`AnalyzeErcotData.py`](source/AnalyzeErcotData.py) compares the daily EV demand each charging site in a zone (along with the total combined demand) with the estimated excess capacity of the grid over the day. 
+
+To run:
+
+```bash
+python source/AnalyzeErcotData.py
 ```
 
-If that executes without issue, you should be able to view the map in your browser at http://127.0.0.1:5000/. It currently looks something like this:
+This will produce a plot for each zone and month called `daily_ev_load_with_excess_[zone]_[month].png` in the `plots` directory.
 
-![Interactive Web Map](./images/web_map.png)
+
+
+
