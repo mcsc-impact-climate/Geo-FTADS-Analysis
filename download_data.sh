@@ -28,7 +28,6 @@ unzip_file() {
         if [ -f "$file" ]; then
             echo "Unzipping $file to $directory..."
             unzip -o "$file" -d "$directory"
-            rm "$file"
         else
             echo "File $file does not exist, skipping unzip."
         fi
@@ -85,27 +84,27 @@ unzip_file "eGRID2022_subregions_shapefile.zip" "eGRID2022_subregions"
 
 #### eGRID grid intensity data ####
 # from https://www.epa.gov/egrid/download-data
-download_file "https://www.epa.gov/system/files/documents/2024-01/egrid2022_data.xlsx"
+download_file "https://www.epa.gov/system/files/documents/2024-01/egrid2022_data.xlsx" "egrid2022_data.xlsx"
 ###################################
 
 #### EIA grid emission intensity by state ####
 # from https://www.eia.gov/electricity/data/emissions/
-download_file "https://www.eia.gov/electricity/data/emissions/xls/emissions_region2022.xlsx"
+download_file "https://www.eia.gov/electricity/data/emissions/xls/emissions_region2022.xlsx" "emissions_region2022.xlsx"
 ##############################################
 
 #### EIA net summer capacity by state (MW) ####
 # from https://www.eia.gov/electricity/data/state/
-download_file "https://www.eia.gov/electricity/data/state/existcapacity_annual.xlsx"
+download_file "https://www.eia.gov/electricity/data/state/existcapacity_annual.xlsx" "existcapacity_annual.xlsx"
 ###############################################
 
 #### EIA proposed additions to net summer capacity by state: 2023-2027 (MW) ####
 # from https://www.eia.gov/electricity/data/state/
-download_file "https://www.eia.gov/electricity/data/state/plancapacity_annual.xlsx"
+download_file "https://www.eia.gov/electricity/data/state/plancapacity_annual.xlsx" "plancapacity_annual.xlsx"
 ################################################################################
 
 #### EIA net annual generation by state (MWh) ####
 # from https://www.eia.gov/electricity/annual/
-download_file "https://www.eia.gov/electricity/data/state/annual_generation_state.xls"
+download_file "https://www.eia.gov/electricity/data/state/annual_generation_state.xls" "annual_generation_state.xls"
 ##################################################
 
 #### US zip code boundaries ####
@@ -157,7 +156,7 @@ download_file "https://www.eia.gov/electricity/gridmonitor/sixMonthFiles/EIA930_
 
 #### Power demand by state ####
 # from https://www.eia.gov/electricity/data/state/
-download_file "https://www.eia.gov/electricity/data/state/existcapacity_annual.xlsx"
+download_file "https://www.eia.gov/electricity/data/state/existcapacity_annual.xlsx" "existcapacity_annual.xlsx"
 ###############################
 
 #### U.S. Primary Roads National Shapefile ####
@@ -189,21 +188,19 @@ unzip_file "Truck_Stop_Parking.zip" "Truck_Stop_Parking"
 download_file "https://www.eia.gov/electricity/data/eia861/archive/zip/f8612017.zip" "US_Power_Industry_Report_2017.zip"
 unzip_file "US_Power_Industry_Report_2017.zip" "US_Power_Industry_Report_2017"
 mv US_Power_Industry_Report_2017/Utility_Data_2017.xlsx .
-rm -r US_Power_Industry_Report_2017*
 ###########################################
 
 #### Diesel price by state, averaged over the last 5 years ####
 # from https://github.com/mcsc-impact-climate/Green_Trucking_Analysis
-download_file "https://raw.githubusercontent.com/mcsc-impact-climate/Green_Trucking_Analysis/main/tables/average_diesel_price_by_state.csv"
+download_file "https://raw.githubusercontent.com/mcsc-impact-climate/Green_Trucking_Analysis/main/tables/average_diesel_price_by_state.csv" "average_diesel_price_by_state.csv"
 ###############################################################
 
 #### 2023-24 hourly load data for the Texas grid (ERCOT) ####
 # from https://www.ercot.com/gridinfo/load/load_hist
-download_file "https://www.ercot.com/files/docs/2023/02/09/Native_Load_2023.zip"
-unzip_file "Native_Load_2023.zip" "."
-download_file "https://www.ercot.com/files/docs/2024/02/06/Native_Load_2024.zip"
-unzip_file "Native_Load_2024.zip" "."
-rm Native_Load_2023.zip Native_Load_2024.zip
+download_file "https://www.ercot.com/files/docs/2023/02/09/Native_Load_2023.zip" "Native_Load_2023.zip"
+unzip_file "Native_Load_2023.zip" "Native_Load_2023"
+download_file "https://www.ercot.com/files/docs/2024/02/06/Native_Load_2024.zip" "Native_Load_2024.zip"
+unzip_file "Native_Load_2024.zip" "Native_Load_2024"
 #############################################################
 
 # Change back to the original directory
