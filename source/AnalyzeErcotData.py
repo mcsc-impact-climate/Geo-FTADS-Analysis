@@ -71,9 +71,9 @@ def correct_datetime(time_str):
 def make_daily_ev_demands_fig(top_dir, filename, zone):
     daily_ev_demands = pd.read_csv(filename)
     
-    fig, ax = plt.subplots(figsize=(10, 8))
+    fig, ax = plt.subplots(figsize=(11, 8))
     ax.set_xlabel('Hours', fontsize=20)
-    ax.set_xlabel('Power (MW)', fontsize=20)
+    ax.set_ylabel('Power (MW)', fontsize=20)
     zone_title = zone.title().replace('_', ' ')
     ax.set_title(f'Power Demands in {zone_title} Zone', fontsize=24)
     ax.tick_params(axis='both', which='major', labelsize=18)
@@ -95,6 +95,8 @@ def make_daily_ev_demands_fig(top_dir, filename, zone):
         
         ax.plot(daily_ev_demands['Hours'], daily_ev_demands[center], label=f'EV Demand ({center_label})', color=color, linewidth=linewidth, zorder=20)
         i_center+=1
+        
+    ax.axhline(np.mean(daily_ev_demands[center]), label=f'Average Total EV Demand', color='black', linewidth=2, linestyle='--', zorder=100)
         
     return fig, ax
                     
@@ -177,6 +179,8 @@ def plot_with_excess_capacity(top_dir, load_data_df):
             
             # Plot along with the EV demand curves
             fig, ax = make_daily_ev_demands_fig(top_dir, filename, zone)
+                    
+            ax.axhline(aggregated_data_df['Max Load (MW)'].iloc[0], label=f'Max Historical Load for Month', color='blue', linewidth=2, linestyle='--', zorder=100)
             
             handles, labels = ax.get_legend_handles_labels()
             
@@ -193,7 +197,7 @@ def plot_with_excess_capacity(top_dir, load_data_df):
             handles = handles + [(mean_line, std_patch), extrema_patch]
             labels = labels + ['Mean Excess + Stdev (MW)', 'Min/Max Excess (MW)']
             
-            ax.legend(handles, labels, fontsize=16)
+            ax.legend(handles, labels, fontsize=16, ncol=2)
             
             plt.savefig(f'{top_dir}/plots/daily_ev_load_with_excess_{zone}_{month_label}.png')
             plt.close()
