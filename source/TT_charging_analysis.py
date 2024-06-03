@@ -359,7 +359,7 @@ def visualize_chargers(top_dir, charger_locations_gdf, ercot_boundary_gdf, texas
             ax.text(centroid.x, centroid.y, zone.upper().replace('_', ' '), fontsize=16, fontweight='bold', ha='center', va='center')
 
     # Add labels and title
-    ax.set_title('Map of Texas with Charger Locations', fontsize=24)
+    #ax.set_title('Map of Texas with Charger Locations', fontsize=24)
 
     # Remove x and y axis ticks
     ax.set_xticks([])

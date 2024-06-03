@@ -12,3 +12,4 @@ interactive_map
 *.pyc
 __pycache__
 .venv
+*.pyc

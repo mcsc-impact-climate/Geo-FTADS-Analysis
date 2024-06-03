@@ -36,13 +36,23 @@ def get_ev_load_profile(top_dir, load_profile_path):
     fig, ax = plt.subplots(figsize=(10, 8))
     ax.set_ylabel('Power (kW)', fontsize=20)
     ax.set_xlabel('Hours', fontsize=20)
+    ax.set_title('Original Data from Borlaug et al.', fontsize=24)
     ax.tick_params(axis='both', which='major', labelsize=18)
     ax.plot(load_profile_df['Hours'], load_profile_df['Power (kW)'], 'o')
     ax.plot(hours_fine, power_smooth, label='Spline Interpolation', color='red', linewidth=2)
     plt.savefig(f'{top_dir}/plots/extreme_load_profile.png', dpi=300)
     
-    # Normalize the smoothed curve such that its average is 1 and save it to a file
+    # Normalize the profile such that its average is 1
     power_smooth = power_smooth / np.average(power_smooth)
+    fig, ax = plt.subplots(figsize=(10, 8))
+    ax.set_ylabel('Normalize Units', fontsize=20)
+    ax.set_xlabel('Hours', fontsize=20)
+    ax.set_title('Normalize to Unit Average', fontsize=24)
+    ax.tick_params(axis='both', which='major', labelsize=18)
+    ax.plot(hours_fine, power_smooth, label='Spline Interpolation', color='red', linewidth=2)
+    plt.savefig(f'{top_dir}/plots/extreme_load_profile_normalized.png', dpi=300)
+    
+    # Save the normalized load profile to a file
     load_profile_smooth_df = pd.DataFrame({'Hours': hours_fine, 'Power': power_smooth})
     load_profile_smooth_df.to_csv('data/extreme_load_profile_smooth.csv')
     
