@@ -318,7 +318,49 @@ def evaluate_annual_e_demand_charger(filtered_highways_gdf, charger_circles_gdf,
     charger_locations_gdf['Av P Dem'] = charger_locations_gdf['An E Dem'] / HOURS_PER_YEAR
         
     return charger_locations_gdf
+
+def visualize_ercot_zones(top_dir, ercot_boundary_gdf, texas_highways_gdf):
+    # Set up the plot
+    fig, ax = plt.subplots(figsize=(10, 10))
+
+    # Plot texas_highways_gdf first, with texas_boundary_gdf above it, and charger_locations_gdf on top
+    min_width = 0.5
+    max_width = 10
+    min_size = 10
+    max_size = 150
+
+    texas_highways_gdf['line_width'] = texas_highways_gdf['Tot Tons'] / texas_highways_gdf['Tot Tons'].max() * (max_width - min_width) + min_width
+    texas_highways_gdf.plot(ax=ax, color='black', linewidth=texas_highways_gdf['line_width'], label='Highways', zorder=2, alpha=0.3)  # Highways
     
+    # Create a unique color for each zone using a colormap
+    num_zones = len(ercot_boundary_gdf['zone'].unique())
+    cmap = plt.cm.get_cmap('tab20c', num_zones)  # You can change 'viridis' to any other colormap
+
+    # Plot each zone with a different color and add a label
+    for idx, (zone, group) in enumerate(ercot_boundary_gdf.groupby('zone')):
+        color = cmap(idx)
+        print(zone)
+        if zone=='coast':
+            color='red'
+        group.plot(ax=ax, color=color, edgecolor='black', alpha=1, linewidth=1, label=zone, zorder=1)
+
+        # Add labels at the centroid of each polygon
+        for _, row in group.iterrows():
+            # Calculate the centroid of each polygon
+            centroid = row.geometry.centroid
+            ax.text(centroid.x, centroid.y, zone.upper().replace('_', ' '), fontsize=16, fontweight='bold', ha='center', va='center')
+
+    # Remove x and y axis ticks
+    ax.set_xticks([])
+    ax.set_yticks([])
+                               
+    # Add a legend
+    ax.legend(fontsize=18)
+
+    # Show the plot
+    plt.savefig(f'{top_dir}/plots/ERCOT_Weather_Zones.png')
+    plt.savefig(f'{top_dir}/plots/ERCOT_Weather_Zones.pdf')
+
 def visualize_chargers(top_dir, charger_locations_gdf, ercot_boundary_gdf, texas_highways_gdf, charger_circles_gdf, filtered_highways_gdf=None):
     # Set up the plot
     fig, ax = plt.subplots(figsize=(10, 10))
@@ -428,7 +470,7 @@ def main():
     
     us_highways_path = f'{top_dir}/data/highway_assignment_links/highway_assignment_links_nomin.shp'
     texas_highways_geojson_path = f'{top_dir}/geojsons/texas_state_highways.json'
-    
+
         
     if os.path.exists(charger_location_geojson_path):
         charger_locations_gdf = gpd.read_file(charger_location_geojson_path)
@@ -450,28 +492,31 @@ def main():
         texas_highways_gdf = gpd.read_file(texas_highways_geojson_path)
     else:
         texas_highways_gdf = get_texas_highways(us_highways_path, texas_highways_geojson_path)
+        
+    # Plot the ERCOT weather zones
+    visualize_ercot_zones(top_dir, ercot_boundaries_gdf, texas_highways_gdf)
       
     # Evaluate circles around each charger of the given radius to contain highway links contributing to the charger's annual energy demand
     charger_circles_gdf = make_charger_circles(charger_locations_gdf, radius=100)
 
     # Filter the highways to consider only those overlapping with at least one circle. For links with more than one overlapping circle, the freight flow rate is scaled down by the number of overlapping circles to avoid double counting contributions of their associated energy demand to nearby chargers.
     filtered_highways_gdf = get_scaled_highway_links_in_circles(charger_circles_gdf, texas_highways_gdf)
-    
+
     # Evaluate the average payload carried per trip for each link
     filtered_highways_gdf = evaluate_average_payload(filtered_highways_gdf)
-    
+
     # Evaluate the average truck mileage per trip (in kWh/mile) based on the payload (calibrated to the Tesla Semi)
     filtered_highways_gdf = evaluate_average_mileage(top_dir, filtered_highways_gdf)
-    
+
     # Evaluate the annual energy demand associated with trucks passing over each link if they're all electrified
     filtered_highways_gdf = evaluate_annual_e_demand_link(top_dir, filtered_highways_gdf)
-    
+
     # Add up the total annual energy demand associated with fully electrifying highway links in the vicinity of each charger
     charger_locations_gdf = evaluate_annual_e_demand_charger(filtered_highways_gdf, charger_circles_gdf, charger_locations_gdf)
 
     # Plot the state boundary, charger locations and highways together
     visualize_chargers(top_dir, charger_locations_gdf, ercot_boundaries_gdf, texas_highways_gdf, charger_circles_gdf)
-    
+
     # Merge the charger location dataframe with the ercot regions to assign an ercot zone to each charger
     charger_locations_gdf = assign_zones(charger_locations_gdf, ercot_boundaries_gdf)
     charger_locations_gdf.to_file(charger_location_geojson_path)
