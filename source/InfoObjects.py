@@ -71,7 +71,7 @@ pretty_commodities_dict = {
     'POTHER': 'Products, Equipment, or Materials Not Elsewhere Classified',
     'POTHERAGRIC': 'All Other Agricultural Products',
     'POTHERCHEM': 'All Other Chemical Products and Preparations',
-    'POTHERCOAL': 'All Other Coal and Refined Petroleum Products',
+    'POTHERCOAL': 'Natural gas and other fossil products',
     'POTHERFOOD': 'All Other Prepared Foodstuffs',
     'POTHERMIN': 'All Other Nonmetallic Minerals',
     'POTHERTRANS': 'All Other Transportation Equipment',
@@ -156,10 +156,10 @@ FAF5_VIUS_commodity_map = {
         'FAF5': ['Fuel oils'],
         'short name': 'fuel_oils'
     },
-    'All other coal and refined petroleum products': {
+    'Natural gas and other fossil products': {
         'VIUS': ['POTHERCOAL'],
-        'FAF5': ['Coal-n.e.c.'],
-        'short name': 'other_coal_petrol'
+        'FAF5': ['Natural gas and other fossil products'],
+        'short name': 'other_fossil_products'
     },
     'Basic chemicals': {
         'VIUS': ['PCHEMICALS'],
