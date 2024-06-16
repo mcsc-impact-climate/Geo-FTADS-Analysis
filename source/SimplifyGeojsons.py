@@ -46,7 +46,8 @@ def simplify(coordinate=3857, tolerance=1000):
             print('path %s does not exist'%shapefile_path)
     
         # Read in the shapefile
-        shapefile = gpd.read_file(shapefile_path).to_crs(epsg=coordinate)
+        shapefile = gpd.read_file(shapefile_path)
+        shapefile = shapefile.set_crs(coordinate)
         geojson_data = json.loads(shapefile.to_json())
     
         # Simplify the geometries
@@ -159,4 +160,4 @@ if __name__ == "__main__":
         for support_target in support_targets:
             shapefiles['State-Level Support (%s_%s)'%(support_target, support_type)] = os.path.join(f"{top_dir}/data/incentives_and_regulations_merged/{support_target}_{support_type}.shp")
     '''
-    simplify(coordinate=4326)
+    simplify(coordinate=3857)
