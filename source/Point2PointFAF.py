@@ -92,7 +92,7 @@ def readData(cols=None):
     NOTE: dms_dest -> index 2; dms_orig -> index 1; tons_2020 -> index 12
 
     '''
-    dataPath = f'{top_dir}/data/FAF5_regional_flows_origin_destination/FAF5.4.1_2018-2020.csv'
+    dataPath = f'{top_dir}/data/FAF5_regional_flows_origin_destination/FAF5.5.1_2018-2022.csv'
     data = pd.read_csv(dataPath)
     #data = pd.read_csv(dataPath, nrows=1000)  # DMM: This line is just for testing/development, to reduce processing time
     
@@ -426,22 +426,25 @@ def mergeShapefile(dest, shapefile_path):
     shapefile = gpd.read_file(shapefile_path)
     
     # Select columns of interest
-    shapefile_filtered = shapefile.filter(['Short Description', 'FAF_Zone', 'FAF_Zone_D', 'ShapeSTAre', 'ShapeSTLen', 'geometry'], axis=1)
+    shapefile_filtered = shapefile.filter(['faf_zone', 'shape_Area', 'shape_Leng', 'geometry'], axis=1)
+    shapefile_filtered = shapefile_filtered.rename({'faf_zone': 'FAF_Zone'}, axis=1)
+    print(shapefile_filtered.columns)
+    
     dest_filtered = dest.filter(['FAF_Zone', 'Tons Import', 'Tons Export', 'Tons Total', 'Tmiles Import', 'Tmiles Export', 'Tmiles Total', 'E Import', 'E Export', 'E Total'], axis=1)
     
     merged_dataframe = shapefile_filtered.merge(dest_filtered, on='FAF_Zone', how='left')
     
     # Add columns with imports and exports per unit area (km^2)
     meters_per_mile = 1609.34
-    merged_dataframe['Tons Imp Den'] = merged_dataframe['Tons Import'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
-    merged_dataframe['Tons Exp Den'] = merged_dataframe['Tons Export'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
-    merged_dataframe['Tons Tot Den'] = merged_dataframe['Tons Total'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
-    merged_dataframe['Tmil Imp Den'] = merged_dataframe['Tmiles Import'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
-    merged_dataframe['Tmil Exp Den'] = merged_dataframe['Tmiles Export'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
-    merged_dataframe['Tmil Tot Den'] = merged_dataframe['Tmiles Total'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
-    merged_dataframe['E Imp Den'] = merged_dataframe['E Import'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
-    merged_dataframe['E Exp Den'] = merged_dataframe['E Export'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
-    merged_dataframe['E Tot Den'] = merged_dataframe['E Total'] / ( merged_dataframe['ShapeSTAre'] * (1./meters_per_mile)**2 )
+    merged_dataframe['Tons Imp Den'] = merged_dataframe['Tons Import'] / ( merged_dataframe['shape_Area'] * (1./meters_per_mile)**2 )
+    merged_dataframe['Tons Exp Den'] = merged_dataframe['Tons Export'] / ( merged_dataframe['shape_Area'] * (1./meters_per_mile)**2 )
+    merged_dataframe['Tons Tot Den'] = merged_dataframe['Tons Total'] / ( merged_dataframe['shape_Area'] * (1./meters_per_mile)**2 )
+    merged_dataframe['Tmil Imp Den'] = merged_dataframe['Tmiles Import'] / ( merged_dataframe['shape_Area'] * (1./meters_per_mile)**2 )
+    merged_dataframe['Tmil Exp Den'] = merged_dataframe['Tmiles Export'] / ( merged_dataframe['shape_Area'] * (1./meters_per_mile)**2 )
+    merged_dataframe['Tmil Tot Den'] = merged_dataframe['Tmiles Total'] / ( merged_dataframe['shape_Area'] * (1./meters_per_mile)**2 )
+    merged_dataframe['E Imp Den'] = merged_dataframe['E Import'] / ( merged_dataframe['shape_Area'] * (1./meters_per_mile)**2 )
+    merged_dataframe['E Exp Den'] = merged_dataframe['E Export'] / ( merged_dataframe['shape_Area'] * (1./meters_per_mile)**2 )
+    merged_dataframe['E Tot Den'] = merged_dataframe['E Total'] / ( merged_dataframe['shape_Area'] * (1./meters_per_mile)**2 )
     
     dest_filtered = merged_dataframe.filter(['FAF_Zone', 'Tons Import', 'Tons Export', 'Tons Total', 'Tmiles Import', 'Tmiles Export', 'Tmiles Total', 'E Import', 'E Export', 'E Total', 'Tons Imp Den', 'Tons Exp Den', 'Tons Tot Den', 'Tmil Imp Den', 'Tmil Exp Den', 'Tmil Tot Den', 'E Imp Den', 'E Exp Den', 'E Tot Den'], axis=1)
     
@@ -552,7 +555,7 @@ def main ():
     #dest['Total Import'] = dest['Total Import'].astype('float')
     #dest['Total Export'] = dest['Total Export'].astype('float')
 
-    merged_dataframe, data_filtered = mergeShapefile(data_filtered, f'{top_dir}/data/FAF5_regions/Freight_Analysis_Framework_(FAF5)_Regions.shp')
+    merged_dataframe, data_filtered = mergeShapefile(data_filtered, f'{top_dir}/data/FAF5_regions/Freight_Analysis_Framework_Regions_faf5_regions_Apri.shp')
     saveFile(data_filtered, f'mode_{args.mode}_commodity_{commodity_save}_origin_{args.origin}_dest_{args.dest}')
     saveShapefile(merged_dataframe, f'{top_dir}/data/Point2Point_outputs/mode_{args.mode}_commodity_{commodity_save}_origin_{args.origin}_dest_{args.dest}.shp')
     

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-"""
+'''
 Created on Tue Mar 28 13:27:00 2023
 @author: danikam
-"""
+'''
 
 # List of weight class names used by GREET, from heaviest to lightest
 GREET_classes_dict = {
@@ -38,6 +38,53 @@ fuels_dict = {
     15: 'Not reported',
     16: 'Not applicable',
 }
+
+# List of commodities in the FAF5 database
+faf5_commodities_list = [
+    'all',
+    'Live animals/fish',
+    'Cereal grains',
+    'Other ag prods.',
+    'Animal feed',
+    'Meat/seafood',
+    'Milled grain prods.',
+    'Other foodstuffs',
+    'Alcoholic beverages',
+    'Tobacco prods.',
+    'Building stone',
+    'Natural sands',
+    'Gravel',
+    'Nonmetallic minerals',
+    'Metallic ores',
+    'Coal',
+    'Crude petroleum',
+    'Gasoline',
+    'Fuel oils',
+    'Natural gas and other fossil products',
+    'Basic chemicals',
+    'Pharmaceuticals',
+    'Fertilizers',
+    'Chemical prods.',
+    'Plastics/rubber',
+    'Logs',
+    'Wood prods.',
+    'Newsprint/paper',
+    'Paper articles',
+    'Printed prods.',
+    'Textiles/leather',
+    'Nonmetal min. prods.',
+    'Base metals',
+    'Articles-base metal',
+    'Machinery',
+    'Electronics',
+    'Motorized vehicles',
+    'Transport equip.',
+    'Precision instruments',
+    'Furniture',
+    'Misc. mfg. prods.',
+    'Waste/scrap',
+    'Mixed freight',
+]
 
 # Dictionary to map string identifiers of percentage of ton-miles spent carrying a given commodity to human-readable commodity names
 pretty_commodities_dict = {

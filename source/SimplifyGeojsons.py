@@ -9,6 +9,7 @@ import json
 import os
 
 from CommonTools import get_top_dir
+import InfoObjects
 
 top_dir = get_top_dir()
 
@@ -81,8 +82,10 @@ if __name__ == "__main__":
     shapefiles = OrderedDict()
     
    ## Total domestic Imports and Exports
-    #shapefiles['Truck Imports and Exports'] = os.path.join("data/Point2Point_outputs/mode_truck_commodity_all_origin_all_dest_all.shp")
-    #
+    shapefiles['Truck Imports and Exports'] = os.path.join("data/Point2Point_outputs/mode_truck_commodity_all_origin_all_dest_all.shp")
+    for commodity in InfoObjects.faf5_commodities_list:
+        shapefiles[commodity] = os.path.join("data/Point2Point_outputs/", f"mode_truck_commodity_{commodity}_origin_all_dest_all.shp".replace(' ', '_').replace('/', '_'))
+    
     # Grid emission intensity
     #shapefiles['Grid Emission Intensity by Balancing Authority'] = os.path.join("data/egrid2022_subregions_merged/egrid2022_subregions_merged.shp")
     #shapefiles['Grid Emission Intensity by State'] = os.path.join("data/eia2022_state_merged/eia2022_state_merged.shp")
@@ -96,13 +99,13 @@ if __name__ == "__main__":
     ## Commercial electricity price by state
     #shapefiles['Commercial Electricity Price'] = os.path.join("data/electricity_rates_merged/electricity_rates_by_state_merged.shp")
     # Diesel price by state
-    shapefiles['Diesel Price'] = os.path.join("data/diesel_price_by_state/diesel_price_by_state.shp")
+    #shapefiles['Diesel Price'] = os.path.join("data/diesel_price_by_state/diesel_price_by_state.shp")
     #
     ##Maximum demand charges from NREL
     #shapefiles['Maximum Demand Charge'] = os.path.join("data/electricity_rates_merged/demand_charges_merged.shp")
     #
     ## Highway flows
-    shapefiles['Highway Flows Old'] = os.path.join(f'{top_dir}/data/highway_filter_testing/highway_assignments.shp')
+    #shapefiles['Highway Flows Old'] = os.path.join(f'{top_dir}/data/highway_filter_testing/highway_assignments.shp')
     #shapefiles['Highway Flows (Interstate)'] = os.path.join("data/highway_assignment_links/highway_assignment_links_interstate.shp")
     #shapefiles['Highway Flows (SU)'] = os.path.join("data/highway_assignment_links/highway_assignment_links_single_unit.shp")
     #shapefiles['Highway Flows (CU)'] = os.path.join("data/highway_assignment_links/highway_assignment_links_combined_unit.shp")
