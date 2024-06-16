@@ -1,4 +1,4 @@
-import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions, selectedTruckChargingOptions, stateSupportOptions, selectedStateSupportOptions, tcoOptions, selectedTcoOptions, emissionsOptions, selectedEmissionsOptions, gridEmissionsOptions, selectedGridEmissionsOptions, fuelLabels, dataInfo } from './name_maps.js';
+import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions, selectedTruckChargingOptions, stateSupportOptions, selectedStateSupportOptions, tcoOptions, selectedTcoOptions, emissionsOptions, selectedEmissionsOptions, gridEmissionsOptions, selectedGridEmissionsOptions, faf5Options, selectedFaf5Options, fuelLabels, dataInfo } from './name_maps.js';
 import { updateSelectedLayers, updateLegend, updateLayer, data, removeLayer, loadLayer } from './map.js'
 import { geojsonNames } from './main.js'
 
@@ -290,6 +290,10 @@ function createGridEmissionsFilename(selected_options_list) {
   return selected_options_list['Visualize By'] + "_merged.geojson";
 }
 
+function createFaf5Filename(selected_options_list) {
+  return 'mode_truck_commodity_' + selected_options_list['Commodity'] + "_origin_all_dest_all.geojson";
+}
+
 function createChargingDropdowns(key) {
   const rangeDropdownResult = createDropdown("range", "Range", "Truck Range: ", key, truckChargingOptions, selectedTruckChargingOptions, createTruckChargingFilename);
   const chargingTimeDropdownResult = createDropdown("chargingTime", "Charging Time", "Charging Time: ", key, truckChargingOptions, selectedTruckChargingOptions, createTruckChargingFilename);
@@ -315,6 +319,10 @@ function createEmissionsDropdowns(key) {
 
 function createGridEmissionsDropdowns(key) {
   const visualizeDropdownResult = createDropdown("visualize-by", "Visualize By", "Visualize by: ", key, gridEmissionsOptions, selectedGridEmissionsOptions, createGridEmissionsFilename);
+}
+
+function createFaf5Dropdowns(key) {
+  const visualizeDropdownResult = createDropdown("commodity", "Commodity", "Commodity: ", key, faf5Options, selectedFaf5Options, createFaf5Filename);
 }
 
 document.body.addEventListener('click', function(event) {
@@ -437,6 +445,10 @@ document.getElementById("area-details-button").addEventListener("click", functio
     if(selectedAreaLayerName === "Grid Emission Intensity") {
         createGridEmissionsDropdowns(selectedAreaLayerName);
     }
+  // Create a dropdown to select whether to view grid emission by state or balancing authority
+    if(selectedAreaLayerName === "Truck Imports and Exports") {
+      createFaf5Dropdowns(selectedAreaLayerName);
+    }
   }
 });
 
@@ -518,6 +530,12 @@ function resetModalContent() {
   const visualizeByDropdownContainer = document.querySelector(".visualize-by-dropdown-container");
   if (visualizeByDropdownContainer) {
     modalContent.removeChild(visualizeByDropdownContainer);
+  }
+    
+  // Remove commodity-dropdown-container if it exists
+  const commodityDropdownContainer = document.querySelector(".commodity-dropdown-container");
+  if (commodityDropdownContainer) {
+    modalContent.removeChild(commodityDropdownContainer);
   }
 
   // Remove visualize-by-dropdown-container if it exists

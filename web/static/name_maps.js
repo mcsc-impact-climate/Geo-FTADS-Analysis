@@ -196,6 +196,7 @@ export let selectedStateSupportOptions = {
     'Support Target': 'all'
 };
 
+
 export const tcoOptions = {
   'Average Payload': {
     '0 lb': '0',
@@ -265,6 +266,58 @@ export const gridEmissionsOptions = {
 
 export let selectedGridEmissionsOptions = {
     'Visualize By': 'State'
+};
+
+export const faf5Options = {
+  'Commodity': {
+    'All Commodities': 'all',
+    'Alcoholic Beverages': 'Alcoholic_beverages',
+    'Animal Feed': 'Animal_feed',
+    'Base Metal (articles)': 'Articles-base_metal',
+    'Base Metal (primary/semi-finished)': 'Base_metals',
+    'Basic Chemicals': 'Basic_chemicals',
+    'Building Stone': 'Building_stone',
+    'Cereal Grains': 'Cereal_grains',
+    'Chemical Products': 'Chemical_prods.',
+    'Coal': 'Coal',
+    'Crude Petroleum': 'Crude_petroleum',
+    'Electronics': 'Electronics',
+    'Fertilizers': 'Fertilizers',
+    'Fuel Oils': 'Fuel_oils',
+    'Furniture': 'Furniture',
+    'Gasoline': 'Gasoline',
+    'Gravel': 'Gravel',
+    'Live Animals/Fish': 'Live_animals_fish',
+    'Logs': 'Logs',
+    'Machinery': 'Machinery',
+    'Meat/Seafood': 'Meat_seafood',
+    'Metallic Ores': 'Metallic_ores',
+    'Milled Grain Products': 'Milled_grain_prods.',
+    'Misc Manufactured Products': 'Misc._mfg._prods.',
+    'Mixed Freight': 'Mixed_freight',
+    'Motorized Vehicles': 'Motorized_vehicles',
+    'Natural Gas & Other Fossil Products': 'Natural_gas_and_other_fossil_products',
+    'Natural sands': 'Natural_sands',
+    'Newsprint Paper': 'Newsprint_paper',
+    'Nonmetal Mineral Products': 'Nonmetal_min._prods.',
+    'Nonmetallic Minerals': 'Nonmetallic_minerals',
+    'Other Agricultural Products': 'Other_ag_prods.',
+    'Other Foodstuffs': 'Other_foodstuffs',
+    'Paper Articles': 'Paper_articles',
+    'Pharmaceuticals': 'Pharmaceuticals',
+    'Plastics & Rubber': 'Plastics_rubber',
+    'Precision Instruments': 'Precision_instruments',
+    'Printed Products': 'Printed_prods.',
+    'Textiles & Leather': 'Textiles_leather',
+    'Tobacco Products': 'Tobacco_prods.',
+    'Transport Equipment': 'Transport_equip.',
+    'Waste Scrap': 'Waste_scrap',
+    'Wood Products': 'Wood_prods.',
+    }
+};
+
+export let selectedFaf5Options = {
+    'Commodity': 'All'
 };
 
 // Key: geojson name, Value: color to use

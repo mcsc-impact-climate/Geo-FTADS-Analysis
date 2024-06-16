@@ -25,7 +25,7 @@ geojsons = OrderedDict()
 geojson_directory = 'geojsons_simplified'
 
 # Total domestic Imports and Exports
-geojsons['Truck Imports and Exports'] = os.path.join(geojson_directory, "mode_truck_commodity_all_origin_all_dest_all.geojson")
+geojsons['Truck Imports and Exports'] = os.path.join(geojson_directory, "faf5_freight_flows/mode_truck_commodity_all_origin_all_dest_all.geojson")
 
 # Grid emission intensity
 geojsons['Grid Emission Intensity'] = os.path.join(geojson_directory, "grid_emission_intensity/eia2022_state_merged.geojson")
