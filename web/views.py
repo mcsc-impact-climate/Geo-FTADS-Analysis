@@ -71,6 +71,8 @@ geojsons['Salt Lake City Region EV Plan'] = os.path.join(geojson_directory, "sal
 
 # Truck stop parking locations
 geojsons['Truck Stop Locations'] = os.path.join(geojson_directory, "Truck_Stop_Parking.geojson")
+# DOE Corridors
+geojsons['DOE Corridors'] = os.path.join(geojson_directory, "output.geojson")
 
 # Principal ports
 geojsons['Principal Ports'] = os.path.join(geojson_directory, "Principal_Port.geojson")

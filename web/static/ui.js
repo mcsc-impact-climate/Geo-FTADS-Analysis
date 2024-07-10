@@ -544,5 +544,24 @@ function resetModalContent() {
     modalContent.removeChild(chargingPowerDropdownContainer);
   }
 }
+function showStateRegulations(stateName) {
+  // Implement a function to show state regulations
+  // This could display a modal or update a section of the UI with the regulations
+  const modal = document.getElementById('regulations-modal');
+  const modalContent = document.getElementById('regulations-content');
+  modalContent.innerHTML = `<h2>Regulations for ${stateName}</h2><p>Loading...</p>`;
+  modal.style.display = 'block';
 
-export { populateLayerDropdown, getSelectedLayers, getSelectedLayersValues};
+  // Fetch the regulations from the server or use predefined data
+  fetch(`/get_regulations/${stateName}`)
+    .then(response => response.json())
+    .then(data => {
+      modalContent.innerHTML = `<h2>Regulations for ${stateName}</h2><p>${data.regulations}</p>`;
+    })
+    .catch(error => {
+      modalContent.innerHTML = `<h2>Regulations for ${stateName}</h2><p>Error loading regulations</p>`;
+      console.error('Error fetching regulations:', error);
+    });
+}
+
+export { populateLayerDropdown, getSelectedLayers, getSelectedLayersValues, showStateRegulations};

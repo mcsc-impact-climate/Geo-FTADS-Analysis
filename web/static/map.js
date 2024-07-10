@@ -1,5 +1,5 @@
 import { createStyleFunction, isPolygonLayer, isPointLayer, isLineStringLayer } from './styles.js';
-import { getSelectedLayers, getSelectedLayersValues} from './ui.js';
+import { getSelectedLayers, getSelectedLayersValues, showStateRegulations} from './ui.js';
 import { legendLabels, selectedGradientAttributes, geojsonColors, selectedGradientTypes } from './name_maps.js';
 
 var vectorLayers = [];
@@ -38,6 +38,15 @@ async function attachEventListeners() {
   applyButton.addEventListener('click', async () => {
     await updateSelectedLayers(); // Wait for updateSelectedLayers to complete
     updateLegend(); // Now, call updateLegend after updateSelectedLayers is done
+  });
+}
+
+function handleMapClick(event) {
+  map.forEachFeatureAtPixel(event.pixel, function(feature, layer) {
+    if (layer && isPolygonLayer(layer)) {
+      const stateName = feature.get('name'); // Assuming the state name is stored in a 'name' attribute
+      showStateRegulations(stateName);
+    }
   });
 }
 
@@ -540,4 +549,4 @@ function clearLayerSelections() {
   updateLegend();
 }
 
-export { initMap, updateSelectedLayers, updateLegend, attachEventListeners, updateLayer, attributeBounds, data, removeLayer, loadLayer };
+export { initMap, updateSelectedLayers, updateLegend, attachEventListeners, updateLayer, attributeBounds, data, removeLayer, loadLayer, handleMapClick };
