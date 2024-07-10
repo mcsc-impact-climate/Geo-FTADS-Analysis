@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Apr 10 09:24:00 2023
+Last updated: Fri Jun 28 10:21:00 2023
 
 @author: danikam
 """
@@ -31,6 +32,35 @@ def read_ba_emissions_data(top_dir):
     Returns
     -------
     egrid_data (pd.DataFrame): A pandas dataframe containing the 2022 eGrid data for each subregion (lb CO2 / MWh)
+
+    '''
+    
+    # Read in the data associated with each eGrids subregion
+    dataPath = f'{top_dir}/data/egrid2022_data.xlsx'
+    data = pd.ExcelFile(dataPath)
+    data_df = pd.read_excel(data, 'SRL22', skiprows=[0])
+    
+    # Select the columns of interest
+    # SUBRGN: eGRID sub-region acronym
+    # SRCO2RTA: eGRID subregion annual CO2 emission rate (lb CO2 / MWh)
+    data_df = data_df.filter(['SUBRGN', 'SRCO2RTA'], axis=1)#, 'SRCLPR', 'SROLPR', 'SRGSPR', 'SRNCPR', 'SRHYPR', 'SRBMPR', 'SRWIPR', 'SRSOPR', 'SRGTPR', 'SROFPR', 'SROPPR'], axis=1)
+    
+    # Rename SRCO2RTA in the merged dataframe to a more generic descriptor
+    data_df = data_df.rename(columns={'SRCO2RTA': 'CO2_rate'})
+
+    return data_df
+    
+def read_iso_emissions_data(top_dir):
+    '''
+    Reads in grid emission intensities by ISO from
+    
+    Parameters
+    ----------
+    top_dir (string): path to the top level of the git repo
+
+    Returns
+    -------
+    egrid_data (pd.DataFrame):
 
     '''
     
