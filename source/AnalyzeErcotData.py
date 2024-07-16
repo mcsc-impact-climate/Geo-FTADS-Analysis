@@ -71,12 +71,12 @@ def correct_datetime(time_str):
 def make_daily_ev_demands_fig(top_dir, filename, zone):
     daily_ev_demands = pd.read_csv(filename)
     
-    fig, ax = plt.subplots(figsize=(11, 8))
-    ax.set_xlabel('Hours', fontsize=20)
-    ax.set_ylabel('Power (MW)', fontsize=20)
+    fig, ax = plt.subplots(figsize=(12, 8))
+    ax.set_xlabel('Hours', fontsize=24)
+    ax.set_ylabel('Power (MW)', fontsize=24)
     zone_title = zone.title().replace('_', ' ')
-    ax.set_title(f'Power Demands in {zone_title} Zone', fontsize=24)
-    ax.tick_params(axis='both', which='major', labelsize=18)
+    ax.set_title(f'Power Demands in {zone_title} Zone', fontsize=26)
+    ax.tick_params(axis='both', which='major', labelsize=22)
     
     # For each zone, plot the daily variation for each center (and total over all centers)
     colors=['red', 'purple', 'orange', 'teal', 'cyan', 'magenta', 'teal']
@@ -132,7 +132,7 @@ def plot_with_historical_daily_load(top_dir, load_data_df):
         
         ymin, ymax = ax.get_ylim()
         ax.set_ylim(ymin, ymax*1.5)
-        ax.legend(fontsize=18)
+        ax.legend(fontsize=20)
         plt.savefig(f'{top_dir}/plots/daily_ev_load_{zone}.png')
 
 def plot_with_excess_capacity(top_dir, load_data_df):
@@ -186,10 +186,12 @@ def plot_with_excess_capacity(top_dir, load_data_df):
             # Plot excess relative to monthly max, along with the EV demand curves
             fig, ax = make_daily_ev_demands_fig(top_dir, filename, zone)
                     
-            ax.axhline(aggregated_data_df['Max Load (MW)'].iloc[0], label=f'Max Historical Load for Month', color='blue', linewidth=2, linestyle='--', zorder=100)
+            #ax.axhline(aggregated_data_df['Max Load (MW)'].iloc[0], label=f'Max Historical Load for Month', color='blue', linewidth=2, linestyle='--', zorder=100)
+            ax.axhline(aggregated_data_df['Max Load (MW)'].iloc[0], label=f'Max Historical Load', color='blue', linewidth=2, linestyle='--', zorder=100)
             
             handles, labels = ax.get_legend_handles_labels()
             
+            #mean_line, = ax.plot(aggregated_data_df['Mean Excess (Month) (MW)'], linewidth=3, color='navy')
             mean_line, = ax.plot(aggregated_data_df['Mean Excess (Month) (MW)'], linewidth=3, color='navy')
             std_patch = ax.fill_between(aggregated_data_df['Hour'], aggregated_data_df['Mean Excess (Month) - std (MW)'], aggregated_data_df['Mean Excess (Month) + std (MW)'], color='blue', alpha=0.4)
             extrema_patch = ax.fill_between(aggregated_data_df['Hour'], aggregated_data_df['Min Excess (Month) (MW)'], aggregated_data_df['Max Excess (Month) (MW)'], color='blue', alpha=0.2)
@@ -198,12 +200,13 @@ def plot_with_excess_capacity(top_dir, load_data_df):
             ax.set_ylim(ymin, ymax*1.5)
             month_label=month_names[month]
             zone_title = zone.title().replace('_', ' ')
-            ax.set_title(f'{zone_title}: {month_label}', fontsize=24)
+            ax.set_title(f'{zone_title}: {month_label}', fontsize=26)
             
             handles = handles + [(mean_line, std_patch), extrema_patch]
-            labels = labels + ['Mean Excess (Month) + Stdev (MW)', 'Min/Max Excess (MW)']
+            #labels = labels + ['Mean Excess (Month) + Stdev (MW)', 'Min/Max Excess (MW)']
+            labels = labels + ['Mean Excess + Stdev (MW)', 'Min/Max Excess (MW)']
             
-            ax.legend(handles, labels, fontsize=16, ncol=2)
+            ax.legend(handles, labels, fontsize=18, ncol=2)
             
             plt.savefig(f'{top_dir}/plots/daily_ev_load_with_excess_{zone}_{month_label}_monthMax.png')
             plt.close()
@@ -292,7 +295,8 @@ def plot_coast_load(top_dir, load_data_df):
         ax.set_title(f'Power Demands in {zone_title} Zone', fontsize=24)
         ax.tick_params(axis='both', which='major', labelsize=18)
         
-        ax.axhline(max_load, label=f'Max Historical Load for Month', color='blue', linewidth=2, linestyle='--', zorder=100)
+        #ax.axhline(max_load, label=f'Max Historical Load for Month', color='blue', linewidth=2, linestyle='--', zorder=100)
+        ax.axhline(max_load, label=f'Max Historical Load', color='blue', linewidth=2, linestyle='--', zorder=100)
         
         handles, labels = ax.get_legend_handles_labels()
         
@@ -371,10 +375,10 @@ def main():
     load_data_df = read_load_data(load_data_paths)
         
 #    plot_with_historical_daily_load(top_dir, load_data_df)
-#
-#    plot_with_excess_capacity(top_dir, load_data_df)
+
+    plot_with_excess_capacity(top_dir, load_data_df)
     
-    plot_coast_load(top_dir,load_data_df)
+#    plot_coast_load(top_dir,load_data_df)
     
     
 main()
