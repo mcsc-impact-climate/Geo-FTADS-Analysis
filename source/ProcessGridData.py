@@ -17,6 +17,7 @@ import geopandas as gpd
 import geopy
 from tqdm import tqdm, trange
 from CommonTools import get_top_dir, mergeShapefile, saveShapefile, state_names_to_abbr
+import os
 
 LB_PER_KG = 2.20462
 HOURS_PER_YEAR = 365*24
@@ -52,7 +53,7 @@ def read_ba_emissions_data(top_dir):
     
 def read_iso_emissions_data(top_dir):
     '''
-    Reads in grid emission intensities by ISO from
+    Reads in grid emission intensities by ISO from https://www.electricitymaps.com/data-portal (processed by Noman Bashir)
     
     Parameters
     ----------
@@ -60,22 +61,36 @@ def read_iso_emissions_data(top_dir):
 
     Returns
     -------
-    egrid_data (pd.DataFrame):
-
+    iso_emissions_data_df (pd.DataFrame): Dataframe containing the emissions data for each US ISO, in units of gCO2eq / kWh
     '''
+    columns = ['zoneName']
+    for hour in range(24):
+        columns.append(f'mean_{hour}')
+        columns.append(f'std_{hour}')
+    
+    data_df = pd.DataFrame(columns=columns)
     
     # Read in the data associated with each eGrids subregion
-    dataPath = f'{top_dir}/data/egrid2022_data.xlsx'
-    data = pd.ExcelFile(dataPath)
-    data_df = pd.read_excel(data, 'SRL22', skiprows=[0])
-    
-    # Select the columns of interest
-    # SUBRGN: eGRID sub-region acronym
-    # SRCO2RTA: eGRID subregion annual CO2 emission rate (lb CO2 / MWh)
-    data_df = data_df.filter(['SUBRGN', 'SRCO2RTA'], axis=1)#, 'SRCLPR', 'SROLPR', 'SRGSPR', 'SRNCPR', 'SRHYPR', 'SRBMPR', 'SRWIPR', 'SRSOPR', 'SRGTPR', 'SROFPR', 'SROPPR'], axis=1)
-    
-    # Rename SRCO2RTA in the merged dataframe to a more generic descriptor
-    data_df = data_df.rename(columns={'SRCO2RTA': 'CO2_rate'})
+    dataDir = f'{top_dir}/data/daily_carbon_intensity_data_usa'
+    for filename in os.listdir(dataDir):
+        filepath = os.path.join(dataDir, filename)
+        
+        # Confirm that it's a file and not a directory
+        if os.path.isfile(filepath) and filename.endswith('.csv'):
+            data_iso_df = pd.read_csv(filepath)
+            row_dict = {
+                'zoneName': filename.split('_')[0]
+            }
+            
+            for hour in range(24):
+                row_dict[f'mean_{hour}'] = data_iso_df['mean'].iloc[hour]
+                row_dict[f'std_{hour}'] = data_iso_df['std'].iloc[hour]
+        
+            # Convert row_dict to a DataFrame
+            new_row_df = pd.DataFrame([row_dict])
+            
+            # Append new_row_df to data_df
+            data_df = pd.concat([data_df, new_row_df], ignore_index=True)
 
     return data_df
     
@@ -212,30 +227,38 @@ def main():
 
     # Read in the state-level CO2 intensity from EIA
     eia_data = read_state_emissions_data (top_dir)
-    
+
     # Read in the 2022 state-level generating capacity from EIA
     state_capacity_data = read_state_capacity_data(top_dir)
-    
+
     # Read in 2022 state-level annual electricity generated from EIA
     state_generation_data = read_state_generation_data(top_dir)
-    
+
+    # Read in ISO emission rate data for 2022
+    iso_emissions_data = read_iso_emissions_data(top_dir)
+
     # Combine the capacity and generation data
     state_gen_cap_data = combine_gen_cap_data(state_capacity_data, state_generation_data)
 
     # Merge the eGrids data in with the shapefile with subregion borders
     merged_dataframe_egrid = mergeShapefile(egrid_data, f'{top_dir}/data/eGRID2022_subregions/eGRID2022 Subregions Shapefile final.shp', 'SUBRGN')
-    
+
     # Merge the state-level CO2 intensity data with the state borders shapefile
     merged_dataframe_eia = mergeShapefile(eia_data, f'{top_dir}/data/state_boundaries/tl_2012_us_state.shp', 'STUSPS')
-    
+
     # Merge the state-level 2022 capacity and generation data with the state borders shapefile
     merged_dataframe_gen_cap = mergeShapefile(state_gen_cap_data, f'{top_dir}/data/state_boundaries/tl_2012_us_state.shp', 'STUSPS')
 
+    # Merge the iso emission rate data for 2022 with the shapefile containing borders for the data source
+    merged_dataframe_iso_emissions = mergeShapefile(iso_emissions_data, f'{top_dir}/data/world.geojson', 'zoneName').dropna().drop(columns=['countryKey', 'countryName'])
+
     # Save the merged shapefiles
     saveShapefile(merged_dataframe_egrid, f'{top_dir}/data/egrid2022_subregions_merged/egrid2022_subregions_merged.shp')
-    
+
     saveShapefile(merged_dataframe_eia, f'{top_dir}/data/eia2022_state_merged/eia2022_state_merged.shp')
-    
+
     saveShapefile(merged_dataframe_gen_cap, f'{top_dir}/data/eia2022_state_merged/gen_cap_2022_state_merged.shp')
+
+    saveShapefile(merged_dataframe_iso_emissions, f'{top_dir}/data/emission_rate_by_iso.shp')
     
 main()
