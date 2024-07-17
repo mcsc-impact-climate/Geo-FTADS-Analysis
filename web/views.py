@@ -30,6 +30,8 @@ geojsons['Truck Imports and Exports'] = os.path.join(geojson_directory, "faf5_fr
 # Grid emission intensity
 geojsons['Grid Emission Intensity'] = os.path.join(geojson_directory, "grid_emission_intensity/eia2022_state_merged.geojson")
 
+geojsons['Hourly Grid Emissions'] = os.path.join(geojson_directory, "daily_grid_emission_profiles/daily_grid_emission_profile_hour0.geojson")
+
 # Grid capacity and actual energy generated for 2022
 geojsons['Grid Generation and Capacity'] = os.path.join(geojson_directory, "gen_cap_2022_state_merged.geojson")
 

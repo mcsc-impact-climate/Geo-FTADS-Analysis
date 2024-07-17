@@ -1,6 +1,7 @@
 export let selectedGradientTypes = {
   'Truck Imports and Exports': 'color',
   'Grid Emission Intensity': 'color',
+  'Hourly Grid Emissions': 'color',
   'Commercial Electricity Price': 'color',
   'Maximum Demand Charge (utility-level)': 'color',
   'Maximum Demand Charge (state-level)': 'color',
@@ -22,6 +23,7 @@ export let selectedGradientTypes = {
 export const availableGradientAttributes = {
   'Truck Imports and Exports': ['Tmil Tot D', 'Tmil Imp D', 'Tmil Exp D', 'E Tot Den', 'E Imp Den', 'E Exp Den'],
   'Grid Emission Intensity': ['CO2_rate'],
+  'Hourly Grid Emissions': ['mean', 'std_up', 'std_down'],
   'Commercial Electricity Price': ['Cents_kWh'],
   'Maximum Demand Charge (utility-level)': ['MaxDemCh'],
   'Maximum Demand Charge (state-level)': ['Average Ma', 'Median Max', 'Max Maximu'],
@@ -43,6 +45,7 @@ export const availableGradientAttributes = {
 export let selectedGradientAttributes = {
   'Truck Imports and Exports': 'Tmil Tot D',
   'Grid Emission Intensity': 'CO2_rate',
+  'Hourly Grid Emissions': 'mean',
   'Commercial Electricity Price': 'Cents_kWh',
   'Maximum Demand Charge (utility-level)': 'MaxDemCh',
   'Maximum Demand Charge (state-level)': 'Average Ma',
@@ -70,6 +73,10 @@ export const legendLabels = {
     'E Imp Den': 'Import Emissions (tons CO2 / sq mile)',
     'E Exp Den': 'Export Emissions (tons CO2 / sq mile)'},
   'Grid Emission Intensity': {'CO2_rate': 'CO2 intensity of power grid (lb/MWh)'},
+  'Hourly Grid Emissions': {
+    'mean': 'CO2eq intensity of power grid [mean] (lb/MWh)',
+    'std_up': 'CO2eq intensity of power grid [mean + 1 stdev] (lb/MWh)',
+    'std_down': 'CO2eq intensity of power grid [mean - 1 stdev] (lb/MWh)'},
   'Commercial Electricity Price': {'Cents_kWh': 'Electricity rate (cents/kWh)'},
   'Maximum Demand Charge (utility-level)': {'MaxDemCh': 'Maximum Demand Charge by Utility ($/kW)'},
   'Maximum Demand Charge (state-level)': {'Average Ma': 'Average of Max Demand Charges over Utilities ($/kW)', 'Median Max': 'Median of Max Demand Charges over Utilities ($/kW)', 'Max Maximu': 'Maximum of Max Demand Charges over Utilities  ($/kW)'},
@@ -268,6 +275,39 @@ export let selectedGridEmissionsOptions = {
     'Visualize By': 'State'
 };
 
+export const hourlyEmissionsOptions = {
+  'Hour of Day': {
+    '12am': '12',
+    '1am': '1',
+    '2am': '2',
+    '3am': '3',
+    '4am': '4',
+    '5am': '5',
+    '6am': '6',
+    '7am': '7',
+    '8am': '8',
+    '9am': '9',
+    '10am': '10',
+    '11am': '11',
+    '12pm': '12',
+    '1pm': '13',
+    '2pm': '14',
+    '3pm': '15',
+    '4pm': '16',
+    '5pm': '17',
+    '6pm': '18',
+    '7pm': '19',
+    '8pm': '20',
+    '9pm': '21',
+    '10pm': '22',
+    '11pm': '23',
+    }
+};
+
+export let selectedHourlyEmissionsOptions = {
+    'Hour of Day': '0'
+};
+
 export const faf5Options = {
   'Commodity': {
     'All Commodities': 'all',
@@ -350,6 +390,7 @@ export const geojsonColors = {
 export const geojsonTypes = {
   'Truck Imports and Exports': 'area',
   'Grid Emission Intensity': 'area',
+  'Hourly Grid Emissions': 'area',
   'Commercial Electricity Price': 'area',
   'Maximum Demand Charge (utility-level)': 'area',
   'Maximum Demand Charge (state-level)': 'area',
@@ -385,6 +426,7 @@ export const geojsonTypes = {
 export const dataInfo = {
   'Truck Imports and Exports': "Freight flow data from the FWHA's <a href='https://ops.fhwa.dot.gov/freight/freight_analysis/faf/'>Freight Analysis Framework</a> (<a href='https://opendata.arcgis.com/api/v3/datasets/e3bcc5d26e5e42709e2bacd6fc37ab43_0/downloads/data?format=shp&spatialRefId=3857&where=1%3D1'>link to download shapefile used for FAF5 region boundaries</a>). Emissions attributes are evaluated by incorporating data from the <a href='https://rosap.ntl.bts.gov/view/dot/42632/dot_42632_DS2.zip'>2002 Vehicle Inventory and Use Survey</a> and the <a href='https://greet.anl.gov/'>GREET lifecycle emissions tool</a> maintained by Argonne National Lab.",
   'Grid Emission Intensity': "Emission intensity data is obtained from the <a href='https://www.epa.gov/egrid/download-data'>eGRID database</a> (<a href='https://www.epa.gov/system/files/documents/2023-01/eGRID2021_data.xlsx'>link to download</a>). eGRID subregion boundaries are obtained from <a href='https://hub.arcgis.com/datasets/fedmaps::subregions-of-the-emissions-generation-resource-integrated-database-egrid/'>this ArcGIS Hub page</a> (<a href='https://opendata.arcgis.com/api/v3/datasets/23e16f24702948ac9e2032bfa0526a8f_1/downloads/data?format=shp&spatialRefId=4326&where=1%3D1'>link to download</a>)",
+  'Hourly Grid Emissions': "Hourly emission intensity data is obtained from the <a href='https://www.electricitymaps.com/data-portal'>ElectricityMaps</a> (<a href='https://www.epa.gov/system/files/documents/2023-01/eGRID2021_data.xlsx'>link to download</a>), and post-processed to evaluate average intensity &plusmn; 1 standard deviation for each hour of the day in 2022. ISO boundaries are obtained from the <a href='https://github.com/electricitymaps/electricitymaps-contrib/tree/master'>ElectricityMaps GitHub repository</a> (<a href='https://raw.githubusercontent.com/electricitymaps/electricitymaps-contrib/master/web/geo/world.geojson'>link to download</a>)",
   'Commercial Electricity Price': "Data is obtained from the <a href='https://www.eia.gov/electricity/data.php'>EIA's Electricity database</a> (<a href='https://www.eia.gov/electricity/data/state/sales_annual_a.xlsx'>link to download</a>).",
   'Maximum Demand Charge (state-level)': "The maximum historical demand charge in each utility region is evaluated using historical demand charge data compiled by the National Renewable Energy Lab (NREL) in <a href='https://data.nrel.gov/submissions/74'>this NREL Data Catalog</a> (<a href='https://data.nrel.gov/system/files/74/Demand%20charge%20rate%20data.xlsm'>link to download</a>).",
   'Maximum Demand Charge (utility-level)': "Maximum historical demand charges for each state are evaluated using historical demand charge data compiled by the National Renewable Energy Lab (NREL) in <a href='https://data.nrel.gov/submissions/74'>this NREL Data Catalog</a> (<a href='https://data.nrel.gov/system/files/74/Demand%20charge%20rate%20data.xlsm'>link to download</a>).",

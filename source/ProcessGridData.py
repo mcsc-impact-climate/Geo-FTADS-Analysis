@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Apr 10 09:24:00 2023
+Last updated: Fri Jun 28 10:21:00 2023
 
 @author: danikam
 """
@@ -16,6 +17,7 @@ import geopandas as gpd
 import geopy
 from tqdm import tqdm, trange
 from CommonTools import get_top_dir, mergeShapefile, saveShapefile, state_names_to_abbr
+import os
 
 LB_PER_KG = 2.20462
 HOURS_PER_YEAR = 365*24
@@ -46,6 +48,51 @@ def read_ba_emissions_data(top_dir):
     
     # Rename SRCO2RTA in the merged dataframe to a more generic descriptor
     data_df = data_df.rename(columns={'SRCO2RTA': 'CO2_rate'})
+
+    return data_df
+    
+def read_iso_emissions_data(top_dir):
+    '''
+    Reads in grid emission intensities by ISO from https://www.electricitymaps.com/data-portal (processed by Noman Bashir)
+    
+    Parameters
+    ----------
+    top_dir (string): path to the top level of the git repo
+
+    Returns
+    -------
+    iso_emissions_data_df (pd.DataFrame): Dataframe containing the emissions data for each US ISO, converted from units of gCO2eq / kWh to lb CO2eq / MWh
+    '''
+    columns = ['zoneName']
+    for hour in range(24):
+        columns.append(f'mean_{hour}')
+        columns.append(f'up_{hour}')
+        columns.append(f'down_{hour}')
+    
+    data_df = pd.DataFrame(columns=columns)
+    
+    # Read in the data associated with each eGrids subregion
+    dataDir = f'{top_dir}/data/daily_carbon_intensity_data_usa'
+    for filename in os.listdir(dataDir):
+        filepath = os.path.join(dataDir, filename)
+        
+        # Confirm that it's a file and not a directory
+        if os.path.isfile(filepath) and filename.endswith('.csv'):
+            data_iso_df = pd.read_csv(filepath)
+            row_dict = {
+                'zoneName': filename.split('_')[0]
+            }
+            
+            for hour in range(24):
+                row_dict[f'mean_{hour}'] = data_iso_df['mean'].iloc[hour] * KWH_PER_MWH / G_PER_LB
+                row_dict[f'up_{hour}'] = (data_iso_df['mean'].iloc[hour] + data_iso_df['std'].iloc[hour]) * KWH_PER_MWH / G_PER_LB
+                row_dict[f'down_{hour}'] = (data_iso_df['mean'].iloc[hour] - data_iso_df['std'].iloc[hour]) * KWH_PER_MWH / G_PER_LB
+        
+            # Convert row_dict to a DataFrame
+            new_row_df = pd.DataFrame([row_dict])
+            
+            # Append new_row_df to data_df
+            data_df = pd.concat([data_df, new_row_df], ignore_index=True)
 
     return data_df
     
@@ -177,35 +224,33 @@ def main():
     # Get the path to the top level of the Git repo
     top_dir = get_top_dir()
     
-    # Read in the grid CO2 intensity by balancing authority from eGRIDS
-    egrid_data = read_ba_emissions_data(top_dir)
-
-    # Read in the state-level CO2 intensity from EIA
-    eia_data = read_state_emissions_data (top_dir)
-    
-    # Read in the 2022 state-level generating capacity from EIA
-    state_capacity_data = read_state_capacity_data(top_dir)
-    
-    # Read in 2022 state-level annual electricity generated from EIA
-    state_generation_data = read_state_generation_data(top_dir)
-    
-    # Combine the capacity and generation data
-    state_gen_cap_data = combine_gen_cap_data(state_capacity_data, state_generation_data)
-
-    # Merge the eGrids data in with the shapefile with subregion borders
-    merged_dataframe_egrid = mergeShapefile(egrid_data, f'{top_dir}/data/eGRID2022_subregions/eGRID2022 Subregions Shapefile final.shp', 'SUBRGN')
-    
-    # Merge the state-level CO2 intensity data with the state borders shapefile
-    merged_dataframe_eia = mergeShapefile(eia_data, f'{top_dir}/data/state_boundaries/tl_2012_us_state.shp', 'STUSPS')
-    
-    # Merge the state-level 2022 capacity and generation data with the state borders shapefile
-    merged_dataframe_gen_cap = mergeShapefile(state_gen_cap_data, f'{top_dir}/data/state_boundaries/tl_2012_us_state.shp', 'STUSPS')
-
-    # Save the merged shapefiles
-    saveShapefile(merged_dataframe_egrid, f'{top_dir}/data/egrid2022_subregions_merged/egrid2022_subregions_merged.shp')
-    
-    saveShapefile(merged_dataframe_eia, f'{top_dir}/data/eia2022_state_merged/eia2022_state_merged.shp')
-    
-    saveShapefile(merged_dataframe_gen_cap, f'{top_dir}/data/eia2022_state_merged/gen_cap_2022_state_merged.shp')
+#    # Read in the grid CO2 intensity by balancing authority from eGRIDS
+#    egrid_data = read_ba_emissions_data(top_dir)
+#
+#    # Read in the state-level CO2 intensity from EIA
+#    eia_data = read_state_emissions_data (top_dir)
+#
+#    # Read in the 2022 state-level generating capacity from EIA
+#    state_capacity_data = read_state_capacity_data(top_dir)
+#
+#    # Read in 2022 state-level annual electricity generated from EIA
+#    state_generation_data = read_state_generation_data(top_dir)
+#    # Combine the capacity and generation data
+#    state_gen_cap_data = combine_gen_cap_data(state_capacity_data, state_generation_data)
+#
+#    # Merge the eGrids data in with the shapefile with subregion borders
+#    merged_dataframe_egrid = mergeShapefile(egrid_data, f'{top_dir}/data/eGRID2022_subregions/eGRID2022 Subregions Shapefile final.shp', 'SUBRGN')
+#
+#    # Merge the state-level CO2 intensity data with the state borders shapefile
+#    merged_dataframe_eia = mergeShapefile(eia_data, f'{top_dir}/data/state_boundaries/tl_2012_us_state.shp', 'STUSPS')
+#
+#    # Merge the state-level 2022 capacity and generation data with the state borders shapefile
+#    merged_dataframe_gen_cap = mergeShapefile(state_gen_cap_data, f'{top_dir}/data/state_boundaries/tl_2012_us_state.shp', 'STUSPS')
+#    # Save the merged shapefiles
+#    saveShapefile(merged_dataframe_egrid, f'{top_dir}/data/egrid2022_subregions_merged/egrid2022_subregions_merged.shp')
+#
+#    saveShapefile(merged_dataframe_eia, f'{top_dir}/data/eia2022_state_merged/eia2022_state_merged.shp')
+#
+#    saveShapefile(merged_dataframe_gen_cap, f'{top_dir}/data/eia2022_state_merged/gen_cap_2022_state_merged.shp')
     
 main()

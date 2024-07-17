@@ -47,6 +47,7 @@ def simplify(coordinate=3857, tolerance=1000):
     
         # Read in the shapefile
         shapefile = gpd.read_file(shapefile_path)
+        shapefile = shapefile.to_crs(coordinate)
         shapefile = shapefile.set_crs(coordinate)
         geojson_data = json.loads(shapefile.to_json())
     
@@ -83,13 +84,16 @@ if __name__ == "__main__":
     shapefiles = OrderedDict()
     
    ## Total domestic Imports and Exports
-    shapefiles['Truck Imports and Exports'] = os.path.join("data/Point2Point_outputs/mode_truck_commodity_all_origin_all_dest_all.shp")
-    for commodity in InfoObjects.faf5_commodities_list:
-        shapefiles[commodity] = os.path.join("data/Point2Point_outputs/", f"mode_truck_commodity_{commodity}_origin_all_dest_all.shp".replace(' ', '_').replace('/', '_'))
+#    shapefiles['Truck Imports and Exports'] = os.path.join("data/Point2Point_outputs/mode_truck_commodity_all_origin_all_dest_all.shp")
+#    for commodity in InfoObjects.faf5_commodities_list:
+#        shapefiles[commodity] = os.path.join("data/Point2Point_outputs/", f"mode_truck_commodity_{commodity}_origin_all_dest_all.shp".replace(' ', '_').replace('/', '_'))
     
     # Grid emission intensity
     #shapefiles['Grid Emission Intensity by Balancing Authority'] = os.path.join("data/egrid2022_subregions_merged/egrid2022_subregions_merged.shp")
     #shapefiles['Grid Emission Intensity by State'] = os.path.join("data/eia2022_state_merged/eia2022_state_merged.shp")
+    
+    for hour in range(24):
+        shapefiles[f'Daily Grid Emission Profile Hour {hour}'] = os.path.join(f"data/daily_grid_emission_profiles/daily_grid_emission_profile_hour{hour}.shp")
 
     # Grid generation and capacity
     #shapefiles['Grid Capacity and Generation by State'] = os.path.join("data/eia2022_state_merged/gen_cap_2022_state_merged.shp")
