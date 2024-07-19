@@ -29,7 +29,9 @@ function initMap() {
     // Set the visibility of all vector layers to false initially
   vectorLayers.forEach((layer) => {
     layer.setVisible(false);
+    
   });
+  map.on('singleclick', handleMapClick); // Add this line to handle map clicks
 }
 
 // Attach the updateSelectedLayers function to the button click event
@@ -42,13 +44,24 @@ async function attachEventListeners() {
 }
 
 function handleMapClick(event) {
-  map.forEachFeatureAtPixel(event.pixel, function(feature, layer) {
-    if (layer && isPolygonLayer(layer)) {
-      const stateName = feature.get('name'); // Assuming the state name is stored in a 'name' attribute
-      showStateRegulations(stateName);
+  map.forEachFeatureAtPixel(event.pixel, function(feature) {
+    const properties = feature.getProperties();
+    //console.log(properties); // Debug logging to see all properties
+
+    const stateAbbreviation = properties.STUSPS || properties.state || properties.STATE; // Adjust based on actual property name
+    //console.log(`State Abbreviation: ${stateAbbreviation}`); // Debug logging
+
+    const layerName = feature.get('layerName'); // Ensure each feature has a layerName property set
+    //console.log(`Layer Name: ${layerName}`); // Debug logging
+
+    if (stateAbbreviation) {
+      showStateRegulations(stateAbbreviation, properties, layerName);
+    } else {
+      console.log('State abbreviation not found in feature properties');
     }
   });
 }
+
 
 // Initialize an empty layer cache
 const layerCache = {};
@@ -505,6 +518,22 @@ function updateLegend() {
   });
 }
 
+async function fetchCSVData(csvFileName) {
+  const csvUrl = `${CSV_URL}${csvFileName}`;
+  console.log(`Fetching CSV from URL: ${csvUrl}`); // Debug logging
+  try {
+    const response = await fetch(csvUrl);
+    if (!response.ok) {
+      throw new Error(`Network response was not ok for ${csvUrl}`);
+    }
+    const csvText = await response.text();
+    return csvText;
+  } catch (error) {
+    console.error('Fetch CSV Error:', error);
+    throw error;
+  }
+}
+
 function isDictionary(obj) {
   // Check if it's an object
   if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
@@ -549,4 +578,4 @@ function clearLayerSelections() {
   updateLegend();
 }
 
-export { initMap, updateSelectedLayers, updateLegend, attachEventListeners, updateLayer, attributeBounds, data, removeLayer, loadLayer, handleMapClick };
+export { initMap, updateSelectedLayers, updateLegend, attachEventListeners, updateLayer, attributeBounds, data, removeLayer, loadLayer, handleMapClick,map, fetchCSVData };

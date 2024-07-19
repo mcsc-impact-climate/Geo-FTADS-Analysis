@@ -1,6 +1,60 @@
 import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions, selectedTruckChargingOptions, stateSupportOptions, selectedStateSupportOptions, tcoOptions, selectedTcoOptions, emissionsOptions, selectedEmissionsOptions, gridEmissionsOptions, selectedGridEmissionsOptions, faf5Options, selectedFaf5Options, fuelLabels, dataInfo } from './name_maps.js';
-import { updateSelectedLayers, updateLegend, updateLayer, data, removeLayer, loadLayer } from './map.js'
+import { updateSelectedLayers, updateLegend, updateLayer, data, removeLayer, loadLayer, fetchCSVData } from './map.js'
 import { geojsonNames } from './main.js'
+
+// Mapping of state abbreviations to full state names
+const stateNames = {
+  'AL': 'Alabama',
+  'AK': 'Alaska',
+  'AZ': 'Arizona',
+  'AR': 'Arkansas',
+  'CA': 'California',
+  'CO': 'Colorado',
+  'CT': 'Connecticut',
+  'DE': 'Delaware',
+  'FL': 'Florida',
+  'GA': 'Georgia',
+  'HI': 'Hawaii',
+  'ID': 'Idaho',
+  'IL': 'Illinois',
+  'IN': 'Indiana',
+  'IA': 'Iowa',
+  'KS': 'Kansas',
+  'KY': 'Kentucky',
+  'LA': 'Louisiana',
+  'ME': 'Maine',
+  'MD': 'Maryland',
+  'MA': 'Massachusetts',
+  'MI': 'Michigan',
+  'MN': 'Minnesota',
+  'MS': 'Mississippi',
+  'MO': 'Missouri',
+  'MT': 'Montana',
+  'NE': 'Nebraska',
+  'NV': 'Nevada',
+  'NH': 'New Hampshire',
+  'NJ': 'New Jersey',
+  'NM': 'New Mexico',
+  'NY': 'New York',
+  'NC': 'North Carolina',
+  'ND': 'North Dakota',
+  'OH': 'Ohio',
+  'OK': 'Oklahoma',
+  'OR': 'Oregon',
+  'PA': 'Pennsylvania',
+  'RI': 'Rhode Island',
+  'SC': 'South Carolina',
+  'SD': 'South Dakota',
+  'TN': 'Tennessee',
+  'TX': 'Texas',
+  'UT': 'Utah',
+  'VT': 'Vermont',
+  'VA': 'Virginia',
+  'WA': 'Washington',
+  'WV': 'West Virginia',
+  'WI': 'Wisconsin',
+  'WY': 'Wyoming'
+};
 
 function populateLayerDropdown(mapping) {
   const areaLayerDropdown = document.getElementById("area-layer-dropdown");
@@ -278,6 +332,10 @@ function createStateSupportFilename(selected_options_list) {
   return selected_options_list['Support Target'] + "_" + selected_options_list['Support Type'] + ".geojson";
 }
 
+function createStateSupportCSVFilename(selected_options_list) {
+  return selected_options_list['Support Target'] + "_" + selected_options_list['Support Type'] + ".geojson";
+}
+
 function createTcoFilename(selected_options_list) {
   return "costs_per_mile_payload" + selected_options_list['Average Payload'] + "_avVMT" + selected_options_list['Average VMT'] + '_maxChP' + selected_options_list['Max Charging Power'] + ".geojson";
 }
@@ -544,24 +602,233 @@ function resetModalContent() {
     modalContent.removeChild(chargingPowerDropdownContainer);
   }
 }
-function showStateRegulations(stateName) {
-  // Implement a function to show state regulations
-  // This could display a modal or update a section of the UI with the regulations
-  const modal = document.getElementById('regulations-modal');
-  const modalContent = document.getElementById('regulations-content');
-  modalContent.innerHTML = `<h2>Regulations for ${stateName}</h2><p>Loading...</p>`;
-  modal.style.display = 'block';
 
-  // Fetch the regulations from the server or use predefined data
-  fetch(`/get_regulations/${stateName}`)
-    .then(response => response.json())
-    .then(data => {
-      modalContent.innerHTML = `<h2>Regulations for ${stateName}</h2><p>${data.regulations}</p>`;
-    })
-    .catch(error => {
-      modalContent.innerHTML = `<h2>Regulations for ${stateName}</h2><p>Error loading regulations</p>`;
-      console.error('Error fetching regulations:', error);
-    });
+async function showStateRegulations(stateAbbreviation, properties, layerName) {
+  const modal = document.getElementById('regulations-modal');
+  const content = document.getElementById('regulations-content');
+  const selectedFuelType = selectedGradientAttributes['State-Level Incentives and Regulations'];
+  
+  const stateName = stateNames[stateAbbreviation] || stateAbbreviation;
+  content.querySelector('h2').innerText = `Regulations for ${stateName}`;
+
+  let detailsHtml = '';
+/*   for (const key in properties) {
+    if (properties.hasOwnProperty(key) && key !== 'geometry') {
+      detailsHtml += `<p><strong>${key}</strong>: ${properties[key]}</p>`;
+    }
+  } */
+
+  // Determine which CSV file(s) to fetch based on the selected layers
+  const selectedLayerCombinations = getSelectedLayerCombinations(); // Adjust this function as necessary
+  const csvFileNames = selectedLayerCombinations.map(layerCombo => `${layerCombo}.csv`);
+  
+  const groupedData = {};
+
+  // Fetch and display additional data from the corresponding CSV file(s)
+  for (const csvFileName of csvFileNames) {
+    try {
+      const response = await fetch(`${CSV_URL}${csvFileName}`);
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
+      const csvText = await response.text();
+      const csvData = Papa.parse(csvText, { header: true }).data;
+
+      // Extract support type and support target from the file name
+      const [supportTarget, supportType1] = csvFileName.replace('.csv', '').match(/^(.*)_(.*)$/).slice(1);
+      const supportType = supportType1.charAt(0).toUpperCase() + supportType1.slice(1);
+      
+      // Add support type and support target as columns to each row
+      csvData.forEach(row => {
+        row.SupportType = supportType;
+        row.SupportTarget = supportTarget;
+      });
+
+      // Filter the CSV data for the relevant state and fuel type
+      let stateData = selectedFuelType === 'all'
+        ? csvData.filter(row => row.State === stateName)
+        : csvData.filter(row => row.State === stateName && row.Types.split(', ').some(fuel => fuel.toLowerCase().startsWith(selectedFuelType.toLowerCase())));
+
+      // Group data by Support Type and Support Target
+      stateData.forEach(row => {
+        const supportType = selectedStateSupportOptions['Support Type'] || 'Unknown';
+        const supportTarget = selectedStateSupportOptions['Support Target'] || 'Unknown';
+        const fuels = row.Types ? row.Types.split(', ') : ['Unknown'];
+
+        const normalizedSupportType = supportType === 'incentives_and_regulations' 
+          ? ['Incentives', 'Regulations'] 
+          : [supportType.charAt(0).toUpperCase() + supportType.slice(1)];
+        const targets = supportTarget === 'all' 
+          ? ['fuel_use', 'infrastructure', 'vehicle_purchase'] 
+          : [supportTarget];
+        const fuelType = selectedFuelType === 'all' 
+          ? ['fuel_use', 'infrastructure', 'vehicle_purchase'] 
+          : [supportTarget];
+        normalizedSupportType.forEach(type => {
+          if (!groupedData[type]) {
+            groupedData[type] = {};
+          }
+          targets.forEach(target => {
+            if (!groupedData[type][target]) {
+              groupedData[type][target] = {};
+            }
+            fuels.forEach(fuel => {
+              if (!groupedData[type][target][fuel]) {
+                groupedData[type][target][fuel] = [];
+              }
+              //console.log(row)
+              //groupedData[type][target][fuel].push(row);
+              //console.log(type, target, fuel);
+              //console.log(row.SupportType, row.SupportTarget, row.Types)
+              if (type == row.SupportType & target == row.SupportTarget)
+                groupedData[row.SupportType][row.SupportTarget][fuel].push(row);
+            });
+          });
+          //groupedData[row.SupportType][row.SupportTarget][fuel].push(row);
+        });
+      });
+
+    } catch (error) {
+      detailsHtml += `<p>Error loading additional data from ${csvFileName}: ${error.message}</p>`;
+    }
+  }
+
+// Generate HTML content based on the grouped data
+for (const supportType in groupedData) {
+  if (Object.keys(groupedData[supportType]).length > 0) {
+    let typeContent = ''; // Temporary variable to store the content for this support type
+    for (const supportTarget in groupedData[supportType]) {
+      let targetContent = ''; // Temporary variable to store the content for this support target
+      for (const fuel in groupedData[supportType][supportTarget]) {
+        if (groupedData[supportType][supportTarget][fuel].length > 0 && (selectedFuelType === 'all' || fuel.toLowerCase().startsWith(selectedFuelType.toLowerCase()))) {
+          // let fuelContent = `<h4>${fuel}</h4><div class="fuel-content">`;
+          // groupedData[supportType][supportTarget][fuel].forEach(row => {
+          //   if (row.Types.split(', ').length > 1) {
+          //     fuelContent += `<p><i>${row.Name}</i>: <a href="${row.Source}" target="_blank">${row.Source}</a></p>`;
+          //   }
+          //   else {
+          //     fuelContent += `<p>${row.Name}: <a href="${row.Source}" target="_blank">${row.Source}</a></p>`;
+          //   }
+          // });
+          // fuelContent += `</div>`;
+          // targetContent += fuelContent;
+          let fuelContent = `<h4>${fuel}</h4><div class="fuel-content">`;
+          groupedData[supportType][supportTarget][fuel].forEach(row => {
+            const nameHtml = row.Types.split(', ').length > 1 
+              ? `<i>${row.Name}</i>` 
+              : row.Name;
+            fuelContent += `<p>${nameHtml}: <a href="${row.Source}" target="_blank">${row.Source}</a></p>`;
+          });
+          fuelContent += `</div>`;
+          targetContent += fuelContent;
+        
+
+        }
+        
+      }
+      if (targetContent) { // Add the support target header and content if there are valid entries
+        const supportTarget1 = supportTarget.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+        typeContent += `<h3 class="collapsible"><i>${supportTarget1}</i></h3><div class="content">${targetContent}</div>`;
+      }
+    }
+    if (typeContent) { // Add the support type header and content if there are valid entries
+      detailsHtml += `<h2><ins>${supportType}</ins></h2>${typeContent}`;
+    }
+  }
 }
+
+content.querySelector('p').innerHTML = detailsHtml;
+
+modal.style.display = 'flex';
+
+const closeButton = modal.querySelector('.close-regulations');
+closeButton.onclick = function() {
+  modal.style.display = 'none';
+};
+
+// Add collapsible functionality to only h3 elements
+document.querySelectorAll('h3.collapsible').forEach((header) => {
+  header.addEventListener('click', function() {
+    this.classList.toggle('active');
+    const content = this.nextElementSibling;
+    if (content.style.display === 'block') {
+      content.style.display = 'none';
+    } else {
+      content.style.display = 'block';
+    }
+  });
+});
+}
+
+
+function getSelectedLayerCombinations() {
+  const supportType = selectedStateSupportOptions['Support Type'];
+  const supportTarget = selectedStateSupportOptions['Support Target'];
+
+  console.log('hi')
+  console.log(selectedStateSupportOptions)
+
+  const combinations = [];
+
+  // Define your logic to map selected layers to CSV file names
+  // For example:
+  if (supportType == 'incentives') {
+    if (supportTarget == 'fuel_use') {
+      combinations.push('fuel_use_incentives');
+    }
+    else if (supportTarget == 'infrastructure') {
+      combinations.push('infrastructure_incentives');
+    }
+    else if (supportTarget == 'vehicle_purchase') {
+      combinations.push('vehicle_purchase_incentives');
+    }
+    else if (supportTarget == 'all') {
+      combinations.push('fuel_use_incentives');
+      combinations.push('infrastructure_incentives');
+      combinations.push('vehicle_purchase_incentives');
+    }
+  } else if (supportType == 'regulations') {
+    if (supportTarget == 'fuel_use') {
+      combinations.push('fuel_use_regulations');
+    }
+    else if (supportTarget == 'infrastructure') {
+      combinations.push('infrastructure_regulations');
+    }
+    else if (supportTarget == 'vehicle_purchase') {
+      combinations.push('vehicle_purchase_regulations');
+    }
+    else if (supportTarget == 'all') {
+      combinations.push('fuel_use_regulations');
+      combinations.push('infrastructure_regulations');
+      combinations.push('vehicle_purchase_regulations');
+    }
+  }
+  else if (supportType == 'incentives_and_regulations'){
+    if (supportTarget == 'fuel_use') {
+      combinations.push('fuel_use_regulations');
+      combinations.push('fuel_use_incentives');
+    }
+    else if (supportTarget == 'infrastructure') {
+      combinations.push('infrastructure_regulations');
+      combinations.push('infrastructure_incentives');
+    }
+    else if (supportTarget == 'vehicle_purchase') {
+      combinations.push('vehicle_purchase_regulations');
+      combinations.push('vehicle_purchase_incentives');
+    }
+    else if (supportTarget == 'all') {
+      combinations.push('fuel_use_regulations');
+      combinations.push('fuel_use_incentives');
+      combinations.push('infrastructure_regulations');
+      combinations.push('infrastructure_incentives');
+      combinations.push('vehicle_purchase_regulations');
+      combinations.push('vehicle_purchase_incentives');
+    }
+  }
+    console.log(combinations[0])
+    return combinations;
+}
+
+
 
 export { populateLayerDropdown, getSelectedLayers, getSelectedLayersValues, showStateRegulations};
