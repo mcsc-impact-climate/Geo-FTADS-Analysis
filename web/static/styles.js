@@ -156,4 +156,21 @@ function isLineStringLayer(layer) {
   return geometryType === 'LineString' || geometryType === 'MultiLineString';
 }
 
-export { createStyleFunction, isPolygonLayer, isPointLayer, isLineStringLayer };
+//Styles for Hover
+const hoverStyle = new ol.style.Style({
+  stroke: new ol.style.Stroke({
+    color: 'white',
+    width: 5
+  })
+  
+});
+
+const defaultStyle = new ol.style.Style({
+  stroke: new ol.style.Stroke({
+    color: 'black',
+    width: 1
+  })
+});
+
+
+export { createStyleFunction, isPolygonLayer, isPointLayer, isLineStringLayer, hoverStyle, defaultStyle };

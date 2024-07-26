@@ -1,4 +1,4 @@
-import { createStyleFunction, isPolygonLayer, isPointLayer, isLineStringLayer } from './styles.js';
+import { createStyleFunction, isPolygonLayer, isPointLayer, isLineStringLayer, hoverStyle, defaultStyle } from './styles.js';
 import { getSelectedLayers, getSelectedLayersValues, showStateRegulations} from './ui.js';
 import { legendLabels, selectedGradientAttributes, geojsonColors, selectedGradientTypes } from './name_maps.js';
 
@@ -31,7 +31,10 @@ function initMap() {
     layer.setVisible(false);
     
   });
-  map.on('singleclick', handleMapClick); // Add this line to handle map clicks
+  map.on('pointermove', handleMapHover);
+  map.on('singleclick', handleMapClick);
+  let lastFeature = null;
+
 }
 
 // Attach the updateSelectedLayers function to the button click event
@@ -43,24 +46,40 @@ async function attachEventListeners() {
   });
 }
 
-function handleMapClick(event) {
+let lastFeature;
+
+// Function to handle hover events
+function handleMapHover(event) {
   map.forEachFeatureAtPixel(event.pixel, function(feature) {
-    const properties = feature.getProperties();
-    //console.log(properties); // Debug logging to see all properties
-
-    const stateAbbreviation = properties.STUSPS || properties.state || properties.STATE; // Adjust based on actual property name
-    //console.log(`State Abbreviation: ${stateAbbreviation}`); // Debug logging
-
-    const layerName = feature.get('layerName'); // Ensure each feature has a layerName property set
-    //console.log(`Layer Name: ${layerName}`); // Debug logging
-
-    if (stateAbbreviation) {
-      showStateRegulations(stateAbbreviation, properties, layerName);
-    } else {
-      console.log('State abbreviation not found in feature properties');
+    if (feature !== lastFeature) {
+      if (lastFeature) {
+        lastFeature.setStyle(defaultStyle); // Reset style on the last hovered feature
+      }
+      if (feature) {
+        feature.setStyle(hoverStyle); // Apply hover style to the new feature
+      }
+      lastFeature = feature;
     }
   });
 }
+
+// Function to handle click events
+function handleMapClick(event) {
+  map.forEachFeatureAtPixel(event.pixel, function(feature) {
+    if (feature) {
+      const properties = feature.getProperties();
+      const stateAbbreviation = properties.STUSPS || properties.state || properties.STATE;
+      const layerName = feature.get('layerName');
+
+      if (stateAbbreviation) {
+        showStateRegulations(stateAbbreviation, properties, layerName);
+      } else {
+        console.log('State abbreviation not found in feature properties');
+      }
+    }
+  });
+}
+
 
 
 // Initialize an empty layer cache
@@ -578,4 +597,4 @@ function clearLayerSelections() {
   updateLegend();
 }
 
-export { initMap, updateSelectedLayers, updateLegend, attachEventListeners, updateLayer, attributeBounds, data, removeLayer, loadLayer, handleMapClick,map, fetchCSVData };
+export { initMap, updateSelectedLayers, updateLegend, attachEventListeners, updateLayer, attributeBounds, data, removeLayer, loadLayer, handleMapClick, handleMapHover, map, fetchCSVData };

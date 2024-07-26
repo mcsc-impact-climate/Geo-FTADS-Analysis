@@ -1,4 +1,4 @@
-import { initMap, updateSelectedLayers, updateLegend, attachEventListeners, handleMapClick, map } from './map.js';
+import { initMap, updateSelectedLayers, updateLegend, attachEventListeners, handleMapClick, handleMapHover, map } from './map.js';
 import { populateLayerDropdown, getSelectedLayers } from './ui.js';
 
 let geojsonNames = {};
@@ -17,7 +17,8 @@ fetch(GET_GEOJSONS)
     populateLayerDropdown(geojsonNames);
     attachEventListeners(); // Attach event listeners after populating the dropdown
     initMap(); // Initialize the map after populating the dropdown
-    map.on('singleclick', handleMapClick); // Add this line to handle map clicks
+    map.on('pointermove', handleMapHover);
+    map.on('singleclick', handleMapClick);
   })
   .catch(error => {
     console.log('Fetch Error:', error);

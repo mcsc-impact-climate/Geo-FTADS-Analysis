@@ -609,8 +609,8 @@ async function showStateRegulations(stateAbbreviation, properties, layerName) {
   const selectedFuelType = selectedGradientAttributes['State-Level Incentives and Regulations'];
   
   const stateName = stateNames[stateAbbreviation] || stateAbbreviation;
-  content.querySelector('h2').innerText = `Regulations for ${stateName}`;
-
+  content.querySelector('h1').innerText = `Regulations and Incentives for ${stateName}`;
+  content.querySelector('p').innerText = 'Click on targets to view more information.';
   let detailsHtml = '';
 /*   for (const key in properties) {
     if (properties.hasOwnProperty(key) && key !== 'geometry') {
@@ -701,17 +701,6 @@ for (const supportType in groupedData) {
       let targetContent = ''; // Temporary variable to store the content for this support target
       for (const fuel in groupedData[supportType][supportTarget]) {
         if (groupedData[supportType][supportTarget][fuel].length > 0 && (selectedFuelType === 'all' || fuel.toLowerCase().startsWith(selectedFuelType.toLowerCase()))) {
-          // let fuelContent = `<h4>${fuel}</h4><div class="fuel-content">`;
-          // groupedData[supportType][supportTarget][fuel].forEach(row => {
-          //   if (row.Types.split(', ').length > 1) {
-          //     fuelContent += `<p><i>${row.Name}</i>: <a href="${row.Source}" target="_blank">${row.Source}</a></p>`;
-          //   }
-          //   else {
-          //     fuelContent += `<p>${row.Name}: <a href="${row.Source}" target="_blank">${row.Source}</a></p>`;
-          //   }
-          // });
-          // fuelContent += `</div>`;
-          // targetContent += fuelContent;
           let fuelContent = `<h4>${fuel}</h4><div class="fuel-content">`;
           groupedData[supportType][supportTarget][fuel].forEach(row => {
             const nameHtml = row.Types.split(', ').length > 1 
@@ -721,14 +710,12 @@ for (const supportType in groupedData) {
           });
           fuelContent += `</div>`;
           targetContent += fuelContent;
-        
-
         }
         
       }
       if (targetContent) { // Add the support target header and content if there are valid entries
         const supportTarget1 = supportTarget.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
-        typeContent += `<h3 class="collapsible"><i>${supportTarget1}</i></h3><div class="content">${targetContent}</div>`;
+        typeContent += `<h3 class="collapsible">Target: ${supportTarget1}</h3><div class="content">${targetContent}</div>`;
       }
     }
     if (typeContent) { // Add the support type header and content if there are valid entries
@@ -737,8 +724,14 @@ for (const supportType in groupedData) {
   }
 }
 
-content.querySelector('p').innerHTML = detailsHtml;
-
+// Set the inner HTML
+content.innerHTML = `
+  <span class="close-regulations">&times;</span>
+  <h1>Regulations and Incentives for ${stateName}</h1>
+  <p>Click on targets to view more information.</p>
+  ${detailsHtml}
+  <p><em>Italicized regulations and incentives benefit multiple fuel types and appear multiple times.</em></p>
+`;
 modal.style.display = 'flex';
 
 const closeButton = modal.querySelector('.close-regulations');
