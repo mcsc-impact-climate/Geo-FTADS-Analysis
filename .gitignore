@@ -12,4 +12,6 @@ interactive_map
 *.pyc
 __pycache__
 .venv
-*.pyc
+*.pyc# pixi environments
+.pixi
+*.egg-info
