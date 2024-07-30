@@ -7,6 +7,7 @@ channels = ["conda-forge"]
 platforms = ["osx-arm64", "osx-64", "linux-64"]
 
 [tasks]
+runserver = "python manage.py runserver"
 
 [dependencies]
 django = ">=5.0.7,<6"
