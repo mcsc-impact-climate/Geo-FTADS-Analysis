@@ -282,7 +282,7 @@ def toShapefile(graph, filename):
 
 if __name__ == "__main__":
     #The user should change this value based upon whether or not they are starting fresh
-    load = True
+    load = False
     
     #Can be modified based on needs/testing
     if not load:
@@ -303,18 +303,27 @@ if __name__ == "__main__":
         origins = saveGraph('origins', load=True)
 
     
-    path, pathgraph = findPath(graph, origins['San Jose-San Francisco-Oakland, CA'], origins['Seattle-Tacoma, WA'])
-    newpath, newpathgraph = findPath(graph, origins['Cape Coral-Fort Myers-Naples, FL'], origins['Tallahassee-Bainbridge, FL-GA'])
-    ultranewpath, ultranewpathgraph = findPath(graph, origins['Seattle-Tacoma, WA'], origins['Tallahassee-Bainbridge, FL-GA'])
+    # path, pathgraph = findPath(graph, origins['San Jose-San Francisco-Oakland, CA'], origins['Seattle-Tacoma, WA'])
+    # newpath, newpathgraph = findPath(graph, origins['Cape Coral-Fort Myers-Naples, FL'], origins['Tallahassee-Bainbridge, FL-GA'])
+    # ultranewpath, ultranewpathgraph = findPath(graph, origins['Seattle-Tacoma, WA'], origins['Tallahassee-Bainbridge, FL-GA'])
+    
+    
+    path, pathgraph = findPath(graph, origins['Houston-Pasadena, TX'], origins['Los Angeles-Long Beach, CA'])
+    newpath, newpathgraph = findPath(graph, origins['Salt Lake City-Provo-Orem, UT-ID'], origins['Duluth-Grand Rapids, MN-WI'])
+    ultranewpath, ultranewpathgraph = findPath(graph, origins['Boston-Worcester-Providence, MA-RI-NH'], origins['Miami-Port St. Lucie-Fort Lauderdale, FL'])
     
     end = time.time()
     print(end - start)
     
     
-    visualize(graph, positions, isnx=True)
-    visualize(pathgraph, isnx=True)
+    # visualize(graph, positions, isnx=True)
+    # visualize(pathgraph, isnx=True)
     
-    toShapefile(pathgraph, 'BayToSea')
+    # toShapefile(pathgraph, 'BayToSea')
+    
+    toShapefile(pathgraph, 'TXCA')
+    toShapefile(newpathgraph, 'UTMN')
+    toShapefile(ultranewpathgraph, 'MAFL')
     
     # return centroids, graph, positions, origins, path, pathgraph
     
