@@ -167,16 +167,24 @@ The script [IdentifyFacilitiesInRadius.py](./source/IdentifyFacilitiesInRadius.p
 
 ## Analyze potential infrastructure investment savings from collective investment in truck stop charging
 
-The script [AnalyzeTruckStopCharging.py](./source/AnalyzeTruckStopCharging.py) is designed to quantify the charging demand at truck stops separated by 100 miles on average and at least 50 miles, and estimate the potential difference in infrastructure costs needed if the entire electrified trucking fleet were to electrify and either:
+The script [AnalyzeTruckStopCharging.py](./source/AnalyzeTruckStopCharging.py) is designed to quantify the charging demand at truck stops along U.S. interstates that are sparsified to support the specified truck range, and estimate the potential difference in infrastructure costs needed if the entire electrified trucking fleet were to electrify and either:
 * The full electrified fleet shared the investment and usage of charging infrastructure, or
 * The fleet was divided in half, and each half invested in and used their respective charging infrastructure separately. 
 
 The idea of this exercise is to understand the potential infrastructure savings from trucking fleets pooling infrastructure investments in charging infrastructure based on real-world freight flow data. 
 
-To run:
+The methodology is detailed in [MacDonell and Borrero, 2024](https://dspace.mit.edu/handle/1721.1/153617).
+
+To run with a specified set of options:
 
 ```bash
-python source/AnalyzeTruckStopCharging.py
+python source/AnalyzeTruckStopCharging.py -c [charging time (hours)] -m [max allowable wait time (hours)] -r [truck range (miles)]
+```
+
+To run over all options visualized in the geospatial mapping tool:
+
+```bash
+bash source/run_all_AnalyzeTruckStopCharging.sh
 ```
 
 ## Evaluating state-level electricity demand if trucking is fully electrified
