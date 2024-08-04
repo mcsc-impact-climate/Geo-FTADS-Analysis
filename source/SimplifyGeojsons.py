@@ -97,7 +97,6 @@ if __name__ == "__main__":
     shapefiles = {}
     columns_keep = {}  # Keeps track of specific columns to keep in the output geojson, if needed
 
-    """
     # Total domestic Imports and Exports
     shapefiles["Truck Imports and Exports"] = (
         "Point2Point_outputs/mode_truck_commodity_all_origin_all_dest_all.shp"
@@ -197,7 +196,7 @@ if __name__ == "__main__":
 
     # Principal ports
     shapefiles["Principal Ports"] = "Principal_Ports/Principal_Port.shp"
-    """
+    
     # Truck charger infrastructure savings (reference: https://dspace.mit.edu/handle/1721.1/153617)
     truck_ranges = ["400.0", "300.0", "200.0", "100.0"]
     max_wait_times = ["0.25", "0.5", "1.0", "2.0"]
