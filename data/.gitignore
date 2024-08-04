@@ -1,2 +1,8 @@
 *
+!GREET_LCA
+!Fuel_Corridors
+!Jacquillat_Charger_Locations.csv
+!ERCOT_Weather_Zones
+!payload_vs_mileage_best_fit_params.csv
+!daily_carbon_intensity_data_usa
 !.gitignore
