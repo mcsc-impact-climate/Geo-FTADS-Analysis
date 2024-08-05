@@ -114,7 +114,7 @@ unzip_file "zip_code_regions.zip" "zip_code_regions"
 ################################
 
 #### US state boundaries ####
-# from https://www.sciencebase.gov/catalog
+# from https://www.sciencebase.gov/catalog/item/52c78623e4b060b9ebca5be5
 download_file "https://www.sciencebase.gov/catalog/file/get/52c78623e4b060b9ebca5be5?facet=tl_2012_us_state" "state_boundaries.zip"
 unzip_file "state_boundaries.zip" "state_boundaries"
 #############################
@@ -172,7 +172,7 @@ unzip_file "bay_area_counties_data.zip" "bay_area_counties"
 ####################################
 
 #### Counties in Utah ####
-# from https://gis.utah.gov/data/boundaries/citycountystate/
+# from https://gis.utah.gov/products/sgid/boundaries/county/
 download_file "https://opendata.arcgis.com/datasets/90431cac2f9f49f4bcf1505419583753_0.zip" "utah_counties.zip"
 unzip_file "utah_counties.zip" "utah_counties"
 ##########################
