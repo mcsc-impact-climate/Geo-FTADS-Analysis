@@ -7,7 +7,6 @@ Created on Sun Mar 10 2024
 """
 
 import geopandas as gpd
-import networkx as nx
 import pandas as pd
 
 
@@ -17,6 +16,7 @@ import AnalyzeTruckStopCharging as atsc
 
 
 top_dir = get_top_dir()
+
 
 def loadFiles(location, isgeojson, pathLoc):
     '''
@@ -61,7 +61,7 @@ def applyAreaLayer(location, isgeojson, pathLoc, column, doInvert=False):
     mergedData : Geopandas DataFrame
         DataFrame containing the an updated corridor with area layer attributes merged.
 
-    '''
+    """
     pathOfInterest, toMerge = loadFiles(location, isgeojson, pathLoc)
     
     toMerge = toMerge.fillna(0)
@@ -107,9 +107,9 @@ def applyPointLayer(location: str, isgeojson: bool, pathLoc: str, distanceThresh
     
     
     filtered = atsc.filter_points_by_distance(toMerge, pathOfInterest, threshold)
-    
+
     count = len(filtered)
-    length = sum(pathOfInterest['LENGTH'])
+    length = sum(pathOfInterest["LENGTH"])
     # Number of point layer item averaged according to the length of the entire corridor (in miles)
     name = colName + '_Weighted'
     
@@ -120,13 +120,13 @@ def applyPointLayer(location: str, isgeojson: bool, pathLoc: str, distanceThresh
 
 
 def combineToSingle(corridors, name):
-    name = name + '_Combined'
-    
+    name = name + "_Combined"
+
     combined = pd.concat(corridors, ignore_index=True)
-        
+
     combined.to_file(f"{top_dir}/data/paths_of_interest/{name}.shp")
-    
-    
+
+
 if __name__ == "__main__":
     '''
     change 'location' based on shapefile of interest
@@ -218,9 +218,7 @@ if __name__ == "__main__":
     
     # applied = applyPointLayer(location=location, isgeojson=isgeojson, pathLoc=pathLoc, distanceThreshold=100, colName='Truck Stops')
     # applied.to_file(f"{top_dir}/data/paths_of_interest/BayToSea_Tester.shp")
-    
+
     # return corridors
 
 # corridors = main()
-    
-    

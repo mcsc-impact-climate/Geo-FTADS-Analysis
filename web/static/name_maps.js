@@ -129,10 +129,10 @@ export const legendLabels = {
     },
     
   'Grid Generation and Capacity': {
-    'Ann_Gen': 'Electricity Generated in 2022 (MWh)',
-    'Cap_MW': 'Summer Power Generation Capacity in 2022 (MW)',
-    'Ann_Cap': 'Theoretical Electricity Generation Capacity in 2022 (MWh)',
-    'Ann_Diff': 'Difference Between Theoretical Capacity and Actual Electricity Generation in 2022 (MWh)',
+    'Ann_Gen': 'Electricity Generated in 2022 (GWh)',
+    'Cap_MW': 'Summer Power Generation Capacity in 2022 (GW)',
+    'Ann_Cap': 'Theoretical Electricity Generation Capacity in 2022 (GWh)',
+    'Ann_Diff': 'Difference Between Theoretical Capacity and Actual Electricity Generation in 2022 (GWh)',
     'Ann_Rat': 'Ratio Between Theoretical Capacity and Actual Electricity Generation in 2022',
     },
 
