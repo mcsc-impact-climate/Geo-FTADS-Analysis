@@ -1,5 +1,5 @@
-import { createStyleFunction, isPolygonLayer, isPointLayer, isLineStringLayer, hoverStyle, defaultStyle } from './styles.js';
-import { getSelectedLayers, getSelectedLayersValues, showStateRegulations} from './ui.js';
+import { createStyleFunction, isPolygonLayer, isPointLayer, isLineStringLayer } from './styles.js';
+import { getSelectedLayers, getSelectedLayersValues, showStateRegulations, getAreaLayerName } from './ui.js';
 import { legendLabels, selectedGradientAttributes, geojsonColors, selectedGradientTypes } from './name_maps.js';
 
 var vectorLayers = [];
@@ -50,31 +50,47 @@ let lastFeature;
 
 // Function to handle hover events
 function handleMapHover(event) {
+  let featureFound = false;
   map.forEachFeatureAtPixel(event.pixel, function(feature) {
-    if (feature !== lastFeature) {
+    featureFound = true;
+    //console.log(getAreaLayerName(document.getElementById("area-layer-dropdown").value));
+    if (feature !== lastFeature && getAreaLayerName(document.getElementById("area-layer-dropdown").value) == 'State-Level Incentives and Regulations') {
       if (lastFeature) {
-        lastFeature.setStyle(defaultStyle); // Reset style on the last hovered feature
+        const lastLayerName = getAreaLayerName(document.getElementById("area-layer-dropdown").value);
+        lastFeature.setStyle(createStyleFunction(lastLayerName, 'gray', 1)); // Reset style on the last hovered feature
       }
       if (feature) {
-        feature.setStyle(hoverStyle); // Apply hover style to the new feature
+        const currentLayerName = feature.get('layerName');
+        //console.log('Current Layer Name:', currentLayerName); // Debugging
+        feature.setStyle(createStyleFunction(currentLayerName, 'white', 3, true)); // Apply hover style to the new feature
       }
+      //console.log(getAreaLayerName(document.getElementById("area-layer-dropdown").value));
       lastFeature = feature;
     }
   });
+  // If no feature was found under the cursor, reset the last hovered feature, if goes off map, last hovered feature does not stay color
+  if (!featureFound && lastFeature) {
+    const lastLayerName = 'State-Level Incentives and Regulations'; // Adjust as needed
+    lastFeature.setStyle(createStyleFunction(lastLayerName, 'gray', 1)); // Reset the last feature's style
+    lastFeature = null; // Clear lastFeature to avoid retaining hover effects
+  }
 }
+
 
 // Function to handle click events
 function handleMapClick(event) {
   map.forEachFeatureAtPixel(event.pixel, function(feature) {
-    if (feature) {
-      const properties = feature.getProperties();
-      const stateAbbreviation = properties.STUSPS || properties.state || properties.STATE;
-      const layerName = feature.get('layerName');
-
-      if (stateAbbreviation) {
-        showStateRegulations(stateAbbreviation, properties, layerName);
-      } else {
-        console.log('State abbreviation not found in feature properties');
+    const layerName = getAreaLayerName(document.getElementById("area-layer-dropdown").value) //feature.get('layerName'); //not sure if this is correct
+    if (layerName == 'State-Level Incentives and Regulations') {
+      if (feature) {
+        const properties = feature.getProperties();
+        const stateAbbreviation = properties.STUSPS || properties.state || properties.STATE;
+        //console.log(layerName);
+        if (stateAbbreviation) {
+          showStateRegulations(stateAbbreviation, properties, layerName);
+        } else {
+          console.log('State abbreviation not found in feature properties');
+        }
       }
     }
   });
@@ -136,7 +152,7 @@ async function loadLayer(layerName, filename='') {
       dataProjection: 'EPSG:3857',
       featureProjection: 'EPSG:3857',
     });
-
+    
     const attributeKey = layerName;
     let attributeName = '';
     if (layerName in selectedGradientAttributes) {

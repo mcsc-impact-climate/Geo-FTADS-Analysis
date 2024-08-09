@@ -441,7 +441,6 @@ document.body.addEventListener('click', function(event) {
 document.getElementById("area-details-button").addEventListener("click", function () {
   const areaLayerDropdown = document.getElementById("area-layer-dropdown");
   const selectedAreaLayer = areaLayerDropdown.value;
-    
   if (selectedAreaLayer !== "") {
     // Fetch details based on the selected area layer
     const selectedAreaLayerName = getAreaLayerName(selectedAreaLayer);
@@ -758,8 +757,8 @@ function getSelectedLayerCombinations() {
   const supportType = selectedStateSupportOptions['Support Type'];
   const supportTarget = selectedStateSupportOptions['Support Target'];
 
-  console.log('hi')
-  console.log(selectedStateSupportOptions)
+  //console.log('hi')
+  //console.log(selectedStateSupportOptions)
 
   const combinations = [];
 
@@ -818,10 +817,10 @@ function getSelectedLayerCombinations() {
       combinations.push('vehicle_purchase_incentives');
     }
   }
-    console.log(combinations[0])
+    //(combinations[0])
     return combinations;
 }
 
 
 
-export { populateLayerDropdown, getSelectedLayers, getSelectedLayersValues, showStateRegulations};
+export { populateLayerDropdown, getSelectedLayers, getSelectedLayersValues, showStateRegulations, getAreaLayerName};
