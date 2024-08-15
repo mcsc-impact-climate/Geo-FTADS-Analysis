@@ -1,5 +1,5 @@
-import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions, selectedTruckChargingOptions, stateSupportOptions, selectedStateSupportOptions, tcoOptions, selectedTcoOptions, emissionsOptions, selectedEmissionsOptions, gridEmissionsOptions, selectedGridEmissionsOptions, faf5Options, selectedFaf5Options, fuelLabels, dataInfo } from './name_maps.js';
-import { updateSelectedLayers, updateLegend, updateLayer, data, removeLayer, loadLayer, fetchCSVData } from './map.js'
+import { geojsonTypes, availableGradientAttributes, selectedGradientAttributes, legendLabels, truckChargingOptions, selectedTruckChargingOptions, stateSupportOptions, selectedStateSupportOptions, tcoOptions, selectedTcoOptions, emissionsOptions, selectedEmissionsOptions, gridEmissionsOptions, hourlyEmissionsOptions, selectedHourlyEmissionsOptions, selectedGridEmissionsOptions, faf5Options, selectedFaf5Options, fuelLabels, dataInfo } from './name_maps.js';
+import { updateSelectedLayers, updateLegend, updateLayer, data, removeLayer, loadLayer } from './map.js'
 import { geojsonNames } from './main.js'
 
 // Mapping of state abbreviations to full state names
@@ -348,6 +348,10 @@ function createGridEmissionsFilename(selected_options_list) {
   return selected_options_list['Visualize By'] + "_merged.geojson";
 }
 
+function createHourlyEmissionsFilename(selected_options_list) {
+  return "daily_grid_emission_profile_hour" + selected_options_list['Hour of Day'] + ".geojson";
+}
+
 function createFaf5Filename(selected_options_list) {
   return 'mode_truck_commodity_' + selected_options_list['Commodity'] + "_origin_all_dest_all.geojson";
 }
@@ -377,6 +381,10 @@ function createEmissionsDropdowns(key) {
 
 function createGridEmissionsDropdowns(key) {
   const visualizeDropdownResult = createDropdown("visualize-by", "Visualize By", "Visualize by: ", key, gridEmissionsOptions, selectedGridEmissionsOptions, createGridEmissionsFilename);
+}
+
+function createHourlyEmissionsDropdowns(key) {
+  const visualizeDropdownResult = createDropdown("hour-of-day", "Hour of Day", "Hour of day: ", key, hourlyEmissionsOptions, selectedHourlyEmissionsOptions, createHourlyEmissionsFilename);
 }
 
 function createFaf5Dropdowns(key) {
@@ -502,7 +510,11 @@ document.getElementById("area-details-button").addEventListener("click", functio
     if(selectedAreaLayerName === "Grid Emission Intensity") {
         createGridEmissionsDropdowns(selectedAreaLayerName);
     }
-  // Create a dropdown to select whether to view grid emission by state or balancing authority
+    // Create a dropdown to select hour of day for hourly grid emissions by ISO
+    if(selectedAreaLayerName === "Hourly Grid Emissions") {
+        createHourlyEmissionsDropdowns(selectedAreaLayerName);
+    }
+    // Create a dropdown to select whether to view grid emission by state or balancing authority
     if(selectedAreaLayerName === "Truck Imports and Exports") {
       createFaf5Dropdowns(selectedAreaLayerName);
     }
@@ -587,6 +599,12 @@ function resetModalContent() {
   const visualizeByDropdownContainer = document.querySelector(".visualize-by-dropdown-container");
   if (visualizeByDropdownContainer) {
     modalContent.removeChild(visualizeByDropdownContainer);
+  }
+    
+  // Remove hour-of-day-dropdown-container if it exists
+  const hourOfDayDropdownContainer = document.querySelector(".hour-of-day-dropdown-container");
+  if (hourOfDayDropdownContainer) {
+    modalContent.removeChild(hourOfDayDropdownContainer);
   }
     
   // Remove commodity-dropdown-container if it exists

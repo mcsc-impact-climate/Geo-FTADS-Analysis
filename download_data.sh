@@ -39,13 +39,13 @@ cd data
 
 #### FAF5 Regions ####
 # from https://geodata.bts.gov/datasets/usdot::freight-analysis-framework-faf5-regions
-download_file "https://opendata.arcgis.com/api/v3/datasets/e3bcc5d26e5e42709e2bacd6fc37ab43_0/downloads/data?format=shp&spatialRefId=3857&where=1%3D1" "FAF5_regions.zip"
+download_file "https://stg-arcgisazurecdataprod.az.arcgis.com/exportfiles-273-10162/NTAD_Freight_Analysis_Framework_Regions_-8678979836664102029.zip?sv=2018-03-28&sr=b&sig=aNMmUZdj7CFgNNXzryo6cEJPKoOTD7fosDRDd9KsL9A%3D&se=2024-07-31T22%3A24%3A16Z&sp=r" "FAF5_regions.zip"
 unzip_file "FAF5_regions.zip" "FAF5_regions"
 ######################
 
 #### FAF5 Network Links ####
 # from https://geodata.bts.gov/datasets/usdot::freight-analysis-framework-faf5-network-links
-download_file "https://opendata.arcgis.com/api/v3/datasets/cbfd7a1457d749ae865f9212c978c645_0/downloads/data?format=shp&spatialRefId=3857&where=1%3D1" "FAF5_network_links.zip"
+download_file "https://stg-arcgisazurecdataprod.az.arcgis.com/exportfiles-273-10164/NTAD_Freight_Analysis_Framework_Network_Links_-2286167086800774353.zip?sv=2018-03-28&sr=b&sig=hiBwWlLYrOLmNUPPaGCwQ8AHEUcNiE1mRgYjC7DnGWA%3D&se=2024-07-24T14%3A00%3A36Z&sp=r" "FAF5_network_links.zip"
 unzip_file "FAF5_network_links.zip" "FAF5_network_links"
 ############################
 
@@ -114,7 +114,7 @@ unzip_file "zip_code_regions.zip" "zip_code_regions"
 ################################
 
 #### US state boundaries ####
-# from https://www.sciencebase.gov/catalog
+# from https://www.sciencebase.gov/catalog/item/52c78623e4b060b9ebca5be5
 download_file "https://www.sciencebase.gov/catalog/file/get/52c78623e4b060b9ebca5be5?facet=tl_2012_us_state" "state_boundaries.zip"
 unzip_file "state_boundaries.zip" "state_boundaries"
 #############################
@@ -172,14 +172,14 @@ unzip_file "bay_area_counties_data.zip" "bay_area_counties"
 ####################################
 
 #### Counties in Utah ####
-# from https://gis.utah.gov/data/boundaries/citycountystate/
+# from https://gis.utah.gov/products/sgid/boundaries/county/
 download_file "https://opendata.arcgis.com/datasets/90431cac2f9f49f4bcf1505419583753_0.zip" "utah_counties.zip"
 unzip_file "utah_counties.zip" "utah_counties"
 ##########################
 
 #### Truck stop parking data ####
 # from https://geodata.bts.gov/datasets/usdot::truck-stop-parking
-download_file "https://opendata.arcgis.com/api/v3/datasets/0849b1bd4a5e4b4e831877b7c25d6062_0/downloads/data?format=shp&spatialRefId=3857&where=1%3D1" "Truck_Stop_Parking.zip"
+download_file "https://stg-arcgisazurecdataprod.az.arcgis.com/exportfiles-273-10043/NTAD_Truck_Stop_Parking_-2623767270591943357.zip?sv=2018-03-28&sr=b&sig=G5yCQkJZAajvpB1NwdERdL22M3D5OOJlGU%2BPQ0NVYz8%3D&se=2024-08-03T19%3A56%3A17Z&sp=r" "Truck_Stop_Parking.zip"
 unzip_file "Truck_Stop_Parking.zip" "Truck_Stop_Parking"
 #################################
 
@@ -202,6 +202,11 @@ unzip_file "Native_Load_2023.zip" "Native_Load_2023"
 download_file "https://www.ercot.com/files/docs/2024/02/06/Native_Load_2024.zip" "Native_Load_2024.zip"
 unzip_file "Native_Load_2024.zip" "Native_Load_2024"
 #############################################################
+
+#### geojson file with the geospatial regions covered by ElectricityMaps ####
+# Open Database License (https://opendatacommons.org/licenses/odbl/)
+# Attribution: ElectricityMaps (website: https://www.electricitymaps.com/data-portal. GitHub: https://github.com/electricitymaps/electricitymaps-contrib)
+download_file https://raw.githubusercontent.com/electricitymaps/electricitymaps-contrib/master/web/geo/world.geojson
 
 # Change back to the original directory
 cd ..

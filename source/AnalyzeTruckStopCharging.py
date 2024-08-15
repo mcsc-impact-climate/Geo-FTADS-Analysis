@@ -1,28 +1,31 @@
+"""
+Created on Sat Aug 3 14:47:00 2024
+@author: danikam
+Associated publication: MacDonell, D. and Borrero, M. (2024) - https://dspace.mit.edu/handle/1721.1/153617
+"""
+
 import geopandas as gpd
 from shapely.ops import nearest_points
 from CommonTools import get_top_dir, saveShapefile
-import multiprocessing
 from geopy.distance import great_circle
 import concurrent.futures
 import scipy.special
 from scipy.integrate import quad
 import numpy as np
 from scipy.stats import norm
-import time
 from functools import lru_cache
-import logging
-import random
-import pandas as pd
-from shapely.geometry import Point
 import argparse
+import os
+
 
 # Define the process_truck_stop_wrapper function outside of other functions
 def process_truck_stop_wrapper(row, highways_gdf, attribute_name, distance_threshold):
     idx, truck_stop = row
     process_truck_stop(truck_stop, highways_gdf, attribute_name, distance_threshold)
 
+
 def filter_points_by_distance(points_gdf, highways_gdf, distance_threshold):
-    '''
+    """
     Removes points that lie more than the given distance threshold away from a highway.
 
     Parameters
@@ -36,18 +39,20 @@ def filter_points_by_distance(points_gdf, highways_gdf, distance_threshold):
     filtered_points_gdf (gpd.DataFrame): Points of interest, with points more than the distance threshold from a highway removed
 
     NOTE: None
-    '''
+    """
     # Buffer the highways by the given threshold to create a buffer around them
     buffered_highways = highways_gdf.buffer(distance_threshold)
 
     # Create a GeoDataFrame of the buffered highways
-    buffered_highways_gdf = gpd.GeoDataFrame(geometry=buffered_highways, crs=highways_gdf.crs)
+    buffered_highways_gdf = gpd.GeoDataFrame(
+        geometry=buffered_highways, crs=highways_gdf.crs
+    )
 
     # Iterate over each point
     filtered_points = []
     for idx, point in points_gdf.iterrows():
         # Check if the truck stop is within 100 meters of any buffered highway
-        if buffered_highways_gdf.intersects(point['geometry']).any():
+        if buffered_highways_gdf.intersects(point["geometry"]).any():
             filtered_points.append(point)
 
     # Create a GeoDataFrame from the filtered truck stops
@@ -80,7 +85,9 @@ def select_truck_stops(gdf, min_distance=80500, target_avg_distance=160934):
             continue
 
         # Calculate distances from the current point to all selected points
-        distances = np.array([row['geometry'].distance(stop['geometry']) for stop in selected_stops])
+        distances = np.array(
+            [row["geometry"].distance(stop["geometry"]) for stop in selected_stops]
+        )
 
         # Check if the current point satisfies the minimum distance condition
         if np.all(distances >= min_distance):
@@ -88,22 +95,28 @@ def select_truck_stops(gdf, min_distance=80500, target_avg_distance=160934):
             new_avg_distance = np.mean(distances)
 
             # Only add this point if it would bring the average distance closer to the target
-            if abs(new_avg_distance - target_avg_distance) <= abs(np.mean(distances) - target_avg_distance):
+            if abs(new_avg_distance - target_avg_distance) <= abs(
+                np.mean(distances) - target_avg_distance
+            ):
                 selected_stops.append(row)
 
     # Convert the list of selected stops back to a geodataframe
-    selected_gdf = gpd.GeoDataFrame(selected_stops, columns=gdf.columns).set_crs("EPSG:3857")
+    selected_gdf = gpd.GeoDataFrame(selected_stops, columns=gdf.columns).set_crs(
+        "EPSG:3857"
+    )
 
     return selected_gdf
 
 
 def find_nearest_highway_attribute(truck_stop_point, highways_gdf, attribute_name):
-    nearest_distance = float('inf')  # Initialize with a large value
+    nearest_distance = float("inf")  # Initialize with a large value
     nearest_highway_attribute = None
 
     for idx, highway in highways_gdf.iterrows():
         # Find the nearest point on this highway to the truck stop
-        nearest_point_on_highway = nearest_points(truck_stop_point, highway['geometry'])[0]
+        nearest_point_on_highway = nearest_points(
+            truck_stop_point, highway["geometry"]
+        )[0]
 
         # Calculate the distance between the truck stop and the nearest point on the highway
         distance_to_highway = truck_stop_point.distance(nearest_point_on_highway)
@@ -115,19 +128,27 @@ def find_nearest_highway_attribute(truck_stop_point, highways_gdf, attribute_nam
 
     return nearest_highway_attribute
 
-def add_trips_per_day(truck_stops_gdf, highways_gdf, attribute_name, distance_threshold):
+
+def add_trips_per_day(
+    truck_stops_gdf, highways_gdf, attribute_name, distance_threshold
+):
     print("Starting add_trips_per_day_serial function")
 
     for truck_stop_index, truck_stop in truck_stops_gdf.iterrows():
         try:
             print(f"Processing truck stop: {truck_stop.name}")
-            nearby_highways_gdf = highways_gdf[highways_gdf.distance(truck_stop['geometry']) <= distance_threshold]
+            nearby_highways_gdf = highways_gdf[
+                highways_gdf.distance(truck_stop["geometry"]) <= distance_threshold
+            ]
 
             if not nearby_highways_gdf.empty:
-                nearest_highway_attribute = find_nearest_highway_attribute(truck_stop['geometry'], nearby_highways_gdf,
-                                                                           attribute_name)
+                nearest_highway_attribute = find_nearest_highway_attribute(
+                    truck_stop["geometry"], nearby_highways_gdf, attribute_name
+                )
                 if nearest_highway_attribute is not None:
-                    truck_stops_gdf.at[truck_stop_index, attribute_name] = nearest_highway_attribute
+                    truck_stops_gdf.at[truck_stop_index, attribute_name] = (
+                        nearest_highway_attribute
+                    )
 
             else:
                 print(f"No nearby highways for truck stop: {truck_stop.name}")
@@ -136,6 +157,7 @@ def add_trips_per_day(truck_stops_gdf, highways_gdf, attribute_name, distance_th
             print(f"Exception occurred: {e}")
 
     return truck_stops_gdf
+
 
 def count_truck_stops_within_radius(truck_stops_gdf, radius_miles):
     """
@@ -162,13 +184,17 @@ def count_truck_stops_within_radius(truck_stops_gdf, radius_miles):
     n_stops = len(truck_stops_gdf)
     for idx, truck_stop in truck_stops_gdf.iterrows():
         if idx % 100 == 0:
-            print('Processed %d of %d stops' % (idx, n_stops))
+            print("Processed %d of %d stops" % (idx, n_stops))
 
         # Create a Point geometry for the current truck stop
-        current_point = truck_stop['geometry']
+        current_point = truck_stop["geometry"]
 
         # Use spatial indexing to find candidate truck stops within the bounding box of the radius
-        possible_neighbors = list(truck_stops_gdf.sindex.intersection(current_point.buffer(radius_meters).bounds))
+        possible_neighbors = list(
+            truck_stops_gdf.sindex.intersection(
+                current_point.buffer(radius_meters).bounds
+            )
+        )
 
         # Initialize a count for truck stops within the radius
         count_within_radius = 0
@@ -176,7 +202,7 @@ def count_truck_stops_within_radius(truck_stops_gdf, radius_miles):
         # Iterate over potential neighbors and check if they are within the radius
         for neighbor_idx in possible_neighbors:
             if idx != neighbor_idx:  # Skip the current truck stop
-                neighbor_point = truck_stops_gdf.loc[neighbor_idx, 'geometry']
+                neighbor_point = truck_stops_gdf.loc[neighbor_idx, "geometry"]
 
                 # Calculate the great-circle distance in meters between the two truck stops
                 distance = current_point.distance(neighbor_point)
@@ -190,11 +216,14 @@ def count_truck_stops_within_radius(truck_stops_gdf, radius_miles):
 
     # Create a new GeoDataFrame with the 'N_in_200mi' attribute
     truck_stops_with_counts_gdf = truck_stops_gdf.copy()
-    truck_stops_with_counts_gdf['N_in_200mi'] = counts
+    truck_stops_with_counts_gdf["N_in_200mi"] = counts
 
     return truck_stops_with_counts_gdf
 
-def count_truck_stops_within_radius_parallel(truck_stops_gdf, radius_miles, num_processes):
+
+def count_truck_stops_within_radius_parallel(
+    truck_stops_gdf, radius_miles, num_processes
+):
     """
     Count the number of other truck stops within the specified radius (in miles) of each truck stop using parallel processing.
 
@@ -219,7 +248,9 @@ def count_truck_stops_within_radius_parallel(truck_stops_gdf, radius_miles, num_
 
         # Iterate over each truck stop and submit it for processing
         for idx, truck_stop in truck_stops_gdf.iterrows():
-            future = executor.submit(process_truck_stop, truck_stop, truck_stops_gdf, radius_miles)
+            future = executor.submit(
+                process_truck_stop, truck_stop, truck_stops_gdf, radius_miles
+            )
             futures.append(future)
 
         # Wait for all futures to complete and retrieve the results
@@ -230,10 +261,11 @@ def count_truck_stops_within_radius_parallel(truck_stops_gdf, radius_miles, num_
 
     # Create a new GeoDataFrame with the 'N_in_200mi' attribute
     truck_stops_with_counts_gdf = truck_stops_gdf.copy()
-    truck_stops_with_counts_gdf['N_in_200mi'] = counts
+    truck_stops_with_counts_gdf["N_in_200mi"] = counts
     print(truck_stops_with_counts_gdf)
 
     return truck_stops_with_counts_gdf.to_crs("EPSG:3857")
+
 
 def process_truck_stop(truck_stop, truck_stops_gdf, radius_miles):
     """
@@ -247,10 +279,12 @@ def process_truck_stop(truck_stop, truck_stops_gdf, radius_miles):
     Returns:
     - int: The count of other truck stops within the radius.
     """
-    current_point = truck_stop['geometry']
+    current_point = truck_stop["geometry"]
 
     # Use spatial indexing to find candidate truck stops within the bounding box of the radius
-    possible_neighbors = list(truck_stops_gdf.sindex.intersection(current_point.buffer(radius_miles).bounds))
+    possible_neighbors = list(
+        truck_stops_gdf.sindex.intersection(current_point.buffer(radius_miles).bounds)
+    )
 
     # Initialize a count for truck stops within the radius
     count_within_radius = 0
@@ -258,12 +292,11 @@ def process_truck_stop(truck_stop, truck_stops_gdf, radius_miles):
     # Iterate over potential neighbors and check if they are within the radius
     for neighbor_idx in possible_neighbors:
         if truck_stop.name != neighbor_idx:  # Skip the current truck stop
-            neighbor_point = truck_stops_gdf.loc[neighbor_idx, 'geometry']
+            neighbor_point = truck_stops_gdf.loc[neighbor_idx, "geometry"]
 
             # Calculate the great-circle distance in miles between the two truck stops
             distance = great_circle(
-                (current_point.y, current_point.x),
-                (neighbor_point.y, neighbor_point.x)
+                (current_point.y, current_point.x), (neighbor_point.y, neighbor_point.x)
             ).miles
 
             # Check if the distance is within the specified radius
@@ -271,6 +304,8 @@ def process_truck_stop(truck_stop, truck_stops_gdf, radius_miles):
                 count_within_radius += 1
 
     return count_within_radius
+
+
 @lru_cache(maxsize=None)
 def calculate_charges_per_day(trucks_per_day, n_stops_in_range, range_miles):
     """
@@ -283,10 +318,11 @@ def calculate_charges_per_day(trucks_per_day, n_stops_in_range, range_miles):
     Returns:
     charges_per_day (float): Average number of truck charges at the station per day
     """
-    #charges_per_day = trucks_per_day / 2.#/ (1+n_stops_in_range)
-    charges_per_day = trucks_per_day * 100. / range_miles
+    # charges_per_day = trucks_per_day / 2.#/ (1+n_stops_in_range)
+    charges_per_day = trucks_per_day * 100.0 / range_miles
 
     return charges_per_day
+
 
 @lru_cache(maxsize=None)
 def p_x_trucks_at_stop(charges_per_day, x_trucks, charging_time=0.5):
@@ -304,25 +340,35 @@ def p_x_trucks_at_stop(charges_per_day, x_trucks, charging_time=0.5):
     p_x_at_stop (float): Binomial probability
     """
     # Probability that any given truck is charging at the stop is just given by the ratio of charging time to the number of hours (24) in a day
-    p_given_truck_at_stop = charging_time / 24.
+    p_given_truck_at_stop = charging_time / 24.0
 
     # Convert charges per day to an integer
     charges_per_day = int(charges_per_day)
 
     # If np>5 and n(1-p)>5, use the gaussian approximation of the binomial distribution
-    if charges_per_day * p_given_truck_at_stop > 5 and charges_per_day * (1 - p_given_truck_at_stop) > 5:
+    if (
+        charges_per_day * p_given_truck_at_stop > 5
+        and charges_per_day * (1 - p_given_truck_at_stop) > 5
+    ):
         # Calculate mean (μ) and standard deviation (σ) of the binomial distribution
         mean = charges_per_day * p_given_truck_at_stop
-        std_dev = np.sqrt(charges_per_day * p_given_truck_at_stop * (1 - p_given_truck_at_stop))
+        std_dev = np.sqrt(
+            charges_per_day * p_given_truck_at_stop * (1 - p_given_truck_at_stop)
+        )
 
         # Calculate the Gaussian approximation using norm.pdf
         gaussian_appx = norm.pdf(x_trucks, loc=mean, scale=std_dev)
 
         p_x_at_stop = gaussian_appx
     else:
-        p_x_at_stop = scipy.special.binom(charges_per_day - 1, x_trucks) * p_given_truck_at_stop ** x_trucks * (1.-p_given_truck_at_stop) ** (charges_per_day - 1 - x_trucks)
+        p_x_at_stop = (
+            scipy.special.binom(charges_per_day - 1, x_trucks)
+            * p_given_truck_at_stop**x_trucks
+            * (1.0 - p_given_truck_at_stop) ** (charges_per_day - 1 - x_trucks)
+        )
 
     return p_x_at_stop
+
 
 @lru_cache(maxsize=None)
 def p_waiting_for_charger(t, n_chargers, charging_time):
@@ -341,6 +387,7 @@ def p_waiting_for_charger(t, n_chargers, charging_time):
 
     """
     return (1 - t / charging_time) ** n_chargers
+
 
 @lru_cache(maxsize=None)
 def mu_queue_lt_chargers(trucks_queued, n_chargers, charging_time=0.5):
@@ -364,20 +411,25 @@ def mu_queue_lt_chargers(trucks_queued, n_chargers, charging_time=0.5):
 
     # Integrate over the probability from 0 to the full charging time to evaluate the average time spent mu_0 waiting for a charger for the first truck in the queue
     mu_0, res = quad(this_p_waiting_for_charger, 0, charging_time)
-    mu_last = mu_0      # Update the time that the truck at the front of the queue waited to start charging
-    mu_queue = mu_0     # Update the total time the truck of interest has spent waiting in the queue to mu_0
+    mu_last = mu_0  # Update the time that the truck at the front of the queue waited to start charging
+    mu_queue = mu_0  # Update the total time the truck of interest has spent waiting in the queue to mu_0
 
     # Go through all subsequent trucks in the queue and evaluate the average length of time they wait for a charger
     for i in range(1, trucks_queued + 1):
         # The ith truck in the queue is now waiting for n_chargers-i chargers, i of the chargers are in use by the trucks that were queued in front of it
         def this_p_waiting_for_charger(t):
-            return p_waiting_for_charger(t, n_chargers-i, charging_time)
+            return p_waiting_for_charger(t, n_chargers - i, charging_time)
 
         # Now we integrate starting from when the last truck started charging (mu_last) to the total charging time to get the average that the truck now at the start of the queue waits to start charging
-        mu_front_of_queue, res = quad(this_p_waiting_for_charger, mu_last, charging_time)
-        mu_last = mu_front_of_queue                 # Update the time that the truck at the front of the queue waited to start charging
-        mu_queue = mu_last + mu_front_of_queue      # Update the total time the truck of interest has spent waiting in the queue by mu_last
+        mu_front_of_queue, res = quad(
+            this_p_waiting_for_charger, mu_last, charging_time
+        )
+        mu_last = mu_front_of_queue  # Update the time that the truck at the front of the queue waited to start charging
+        mu_queue = (
+            mu_last + mu_front_of_queue
+        )  # Update the total time the truck of interest has spent waiting in the queue by mu_last
     return mu_queue
+
 
 @lru_cache(maxsize=None)
 def mu_queue(trucks_queued, n_chargers, charging_time=0.5):
@@ -405,6 +457,7 @@ def mu_queue(trucks_queued, n_chargers, charging_time=0.5):
         R = int(trucks_queued - F * n_chargers)
         return mu_queue_lt_chargers(R, n_chargers, charging_time) + charging_time * F
 
+
 @lru_cache(maxsize=None)
 def average_wait_time(charges_per_day, n_chargers, charging_time=0.5):
     """
@@ -420,12 +473,23 @@ def average_wait_time(charges_per_day, n_chargers, charging_time=0.5):
     mu_queue (float): Average time the truck spends waiting for a charger to free up
     """
     x_trucks_arr = np.arange(n_chargers, charges_per_day)
-    p_x_values = np.array([p_x_trucks_at_stop(charges_per_day, x, charging_time) for x in x_trucks_arr])
-    mu_values = np.array([mu_queue(int(x - n_chargers), n_chargers, charging_time) for x in x_trucks_arr])
+    p_x_values = np.array(
+        [p_x_trucks_at_stop(charges_per_day, x, charging_time) for x in x_trucks_arr]
+    )
+    mu_values = np.array(
+        [mu_queue(int(x - n_chargers), n_chargers, charging_time) for x in x_trucks_arr]
+    )
     av_t_wait = np.sum(p_x_values * mu_values)
     return av_t_wait
 
-def get_min_chargers(trucks_per_day, n_stops_in_range, range_miles=200., charging_time=4., max_wait_time=1.):
+
+def get_min_chargers(
+    trucks_per_day,
+    n_stops_in_range,
+    range_miles=200.0,
+    charging_time=4.0,
+    max_wait_time=1.0,
+):
     """
     Calculates the minimum number of chargers and charger-to-truck ratio (where the trucks in the ratio is the number of trucks stopping at the station to charge per day)
 
@@ -442,7 +506,9 @@ def get_min_chargers(trucks_per_day, n_stops_in_range, range_miles=200., chargin
     """
 
     # Calculate the average number of trucks that will need to stop and charge at the truck stop per day
-    charges_per_day = int(calculate_charges_per_day(trucks_per_day, n_stops_in_range, range_miles))
+    charges_per_day = int(
+        calculate_charges_per_day(trucks_per_day, n_stops_in_range, range_miles)
+    )
 
     if charges_per_day == 0:
         charges_per_day = 1
@@ -458,11 +524,14 @@ def get_min_chargers(trucks_per_day, n_stops_in_range, range_miles=200., chargin
             min_chargers = n_chargers
             break
 
-    min_ratio = 1.*min_chargers / (1.*charges_per_day)
+    min_ratio = 1.0 * min_chargers / (1.0 * charges_per_day)
 
     return min_chargers, min_ratio, charges_per_day
 
-def apply_min_chargers(truck_stops_gdf, range_miles, charging_time=4., max_wait_time=1.):
+
+def apply_min_chargers(
+    truck_stops_gdf, range_miles, charging_time=4.0, max_wait_time=1.0
+):
     """
     Apply the get_min_chargers function to each truck stop in the GeoDataFrame and add the results as attributes.
 
@@ -480,17 +549,19 @@ def apply_min_chargers(truck_stops_gdf, range_miles, charging_time=4., max_wait_
     # Iterate over each truck stop
     n_stops = len(truck_stops_gdf)
     for idx, truck_stop in truck_stops_gdf.iterrows():
-        print('Processing stop %d of %d'%(idx, n_stops))
-#        if idx > 1:
-#            min_chargers_list.append(0)
-#            charger_to_truck_ratio_list.append(0)
-#            CPD_list.append(0)
-#        else:
-        trucks_per_day = truck_stop['Tot Trips']
-        n_stops_in_range = truck_stop['N_in_200mi']
+        print("Processing stop %d of %d" % (idx, n_stops))
+        #        if idx > 1:
+        #            min_chargers_list.append(0)
+        #            charger_to_truck_ratio_list.append(0)
+        #            CPD_list.append(0)
+        #        else:
+        trucks_per_day = truck_stop["Tot Trips"]
+        n_stops_in_range = truck_stop["N_in_200mi"]
 
         # Call the get_min_chargers function to calculate min chargers and ratio
-        min_chargers, charger_to_truck_ratio, charges_per_day = get_min_chargers(trucks_per_day, n_stops_in_range, range_miles, charging_time, max_wait_time)
+        min_chargers, charger_to_truck_ratio, charges_per_day = get_min_chargers(
+            trucks_per_day, n_stops_in_range, range_miles, charging_time, max_wait_time
+        )
 
         # Append the results to the lists
         min_chargers_list.append(min_chargers)
@@ -498,71 +569,113 @@ def apply_min_chargers(truck_stops_gdf, range_miles, charging_time=4., max_wait_
         CPD_list.append(charges_per_day)
 
     # Add the results as new attributes to the GeoDataFrame
-    truck_stops_gdf['Min_Charge'] = min_chargers_list
-    truck_stops_gdf['Min_Ratio'] = charger_to_truck_ratio_list
-    truck_stops_gdf['CPD'] = CPD_list
+    truck_stops_gdf["Min_Charge"] = min_chargers_list
+    truck_stops_gdf["Min_Ratio"] = charger_to_truck_ratio_list
+    truck_stops_gdf["CPD"] = CPD_list
 
     return truck_stops_gdf
 
+
 parser = argparse.ArgumentParser()
-parser.add_argument('-c', '--charging_time', default='4', type=float, help = 'Charging time (hours)')
-parser.add_argument('-m', '--max_wait_time', default='1', type=float, help = 'Maximum allowable wait time (hours)')
-parser.add_argument('-r', '--range_miles', default='200', type=float, help = 'Truck range (miles)')
+parser.add_argument(
+    "-c", "--charging_time", default="4", type=float, help="Charging time (hours)"
+)
+parser.add_argument(
+    "-m",
+    "--max_wait_time",
+    default="1",
+    type=float,
+    help="Maximum allowable wait time (hours)",
+)
+parser.add_argument(
+    "-r", "--range_miles", default="200", type=float, help="Truck range (miles)"
+)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    args = parser.parse_args()
 
-  args = parser.parse_args()
-  
-  # Get the path to the top level of the Git repo
-  top_dir = get_top_dir()
+    # Get the path to the top level of the Git repo
+    top_dir = get_top_dir()
 
-#  # Read the shapefiles and ensure the CRS is a projected coordinate system to evaluate separation distances
-#  truck_stops_gdf = gpd.read_file(f'{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking.shp').to_crs("EPSG:3857")
-#  highways_gdf = gpd.read_file(f'{top_dir}/data/highway_assignment_links/highway_assignment_links_interstate.shp').to_crs("EPSG:3857")
-#
-#  # Distance threshold between truck stops and highways set to 1km
-#  truck_stops_gdf = filter_points_by_distance(points_gdf=truck_stops_gdf, highways_gdf=highways_gdf, distance_threshold=1000)
-#
-#  # Save the points along interstates
-#  saveShapefile(truck_stops_gdf, f'{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate.shp')
-#
-#  # Add the trips per day for the nearest highway link to each truck stop
-#  truck_stops_gdf = gpd.read_file(f'{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate.shp').to_crs("EPSG:3857")
-#  truck_stops_gdf = add_trips_per_day(truck_stops_gdf, highways_gdf, attribute_name='Tot Trips', distance_threshold=1000)
-#
-#  # Save the augmented truck_stops_gdf as a shapefile
-#  saveShapefile(truck_stops_gdf, f'{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_Tot_Trips.shp')
-#
-#  # Open the augmented truck stops geodataframe
-#  truck_stops_gdf = gpd.read_file(f'{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_Tot_Trips.shp').to_crs("EPSG:3857")
-#
-#  # Randomly select truck stops so they're separated by at least 50 miles and 100 miles on average
-#  truck_stops_gdf = select_truck_stops(truck_stops_gdf)
-#  saveShapefile(truck_stops_gdf,f'{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_Tot_Trips_Sparse.shp')
-#
-#  truck_stops_gdf = gpd.read_file(f'{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_Tot_Trips_Sparse.shp').to_crs("EPSG:3857")
-#
-#  # Call the function to count truck stops within the radius and add the count as an attribute
-#  truck_stops_gdf = count_truck_stops_within_radius(truck_stops_gdf, args.range_miles)
-#
-#  # Save the augmented truck_stops_gdf as a shapefile
-#  saveShapefile(truck_stops_gdf, f'{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_Tot_Trips_and_Stops_Within_200mi.shp')
+    # Filter for truck stops within 1 km of interstates
+    stops_along_interstate_save_path = (
+        f"{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate.shp"
+    )
+    if not os.path.isfile(stops_along_interstate_save_path):
+        # Read the shapefiles and ensure the CRS is a projected coordinate system to evaluate separation distances
+        truck_stops_gdf = gpd.read_file(
+            f"{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking.shp"
+        ).to_crs("EPSG:3857")
+        highways_gdf = gpd.read_file(
+            f"{top_dir}/data/highway_assignment_links/highway_assignment_links_interstate.shp"
+        ).to_crs("EPSG:3857")
 
-  # Open the augmented truck stops geodataframe
-  truck_stops_gdf = gpd.read_file(f'{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_Tot_Trips_and_Stops_Within_200mi.shp').to_crs("EPSG:3857")
+        # Distance threshold between truck stops and highways set to 1km
+        truck_stops_gdf = filter_points_by_distance(
+            points_gdf=truck_stops_gdf,
+            highways_gdf=highways_gdf,
+            distance_threshold=1000,
+        )
 
-  # For each truck stop, calculate the number of chargers needed to keep quick charging wait times below 30 minutes and add it as an attribute, along with the charger-to-truck ratio
-  truck_stops_gdf = apply_min_chargers(truck_stops_gdf, args.range_miles, float(args.charging_time), float(args.max_wait_time))
+        # Save the points along interstates
+        saveShapefile(truck_stops_gdf, stops_along_interstate_save_path)
 
-  # Now suppose we only have half the highway flows (equivalent to splitting the flows between two companies). Calculate the updated min_chargers
-  truck_stops_gdf_half = truck_stops_gdf.copy()
-  truck_stops_gdf_half['Tot Trips'] = truck_stops_gdf_half['Tot Trips'] / 2.
+    # Add the trips per day for the nearest highway link to each truck stop
+    with_tot_trips_save_path = f"{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_Tot_Trips.shp"
+    if not os.path.isfile(with_tot_trips_save_path):
+        truck_stops_gdf = gpd.read_file(
+            f"{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate.shp"
+        ).to_crs("EPSG:3857")
+        truck_stops_gdf = add_trips_per_day(
+            truck_stops_gdf,
+            highways_gdf,
+            attribute_name="Tot Trips",
+            distance_threshold=1000,
+        )
 
-  truck_stops_gdf_half = apply_min_chargers(truck_stops_gdf_half, args.range_miles, float(args.charging_time), float(args.max_wait_time))
+        # Save the augmented truck_stops_gdf as a shapefile
+        saveShapefile(truck_stops_gdf, with_tot_trips_save_path)
 
-  truck_stops_gdf['Half_CPD'] = truck_stops_gdf_half['CPD']
-  truck_stops_gdf['Half_Charge'] = truck_stops_gdf_half['Min_Charge']
-  truck_stops_gdf['Half_Ratio'] = truck_stops_gdf_half['Min_Ratio']
-  truck_stops_gdf['Col_Save'] = 100.*(1.-truck_stops_gdf['Min_Ratio']/truck_stops_gdf['Half_Ratio'])
+    # Randomly sparsify truck stops so their typical spatial separation is appropriate for the given truck range
+    truck_stops_gdf = gpd.read_file(
+        f"{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_Tot_Trips.shp"
+    ).to_crs("EPSG:3857")
 
-  saveShapefile(truck_stops_gdf, f'{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_min_chargers_range_{args.range_miles}_chargingtime_{args.charging_time}_maxwait_{args.max_wait_time}.shp')
+    truck_stops_gdf = select_truck_stops(truck_stops_gdf)
+
+    # Reset the index and drop the old index and ensure the CRS is projection
+    truck_stops_gdf = truck_stops_gdf.reset_index(drop=True).to_crs("EPSG:3857")
+
+    # Call the function to count truck stops within the radius and add the count as an attribute
+    truck_stops_gdf = count_truck_stops_within_radius(truck_stops_gdf, args.range_miles)
+
+    # For each truck stop, calculate the number of chargers needed to keep quick charging wait times below 30 minutes and add it as an attribute, along with the charger-to-truck ratio
+    truck_stops_gdf = apply_min_chargers(
+        truck_stops_gdf,
+        args.range_miles,
+        float(args.charging_time),
+        float(args.max_wait_time),
+    )
+
+    # Now suppose we only have half the highway flows (equivalent to splitting the flows between two companies). Calculate the updated min_chargers
+    truck_stops_gdf_half = truck_stops_gdf.copy()
+    truck_stops_gdf_half["Tot Trips"] = truck_stops_gdf_half["Tot Trips"] / 2.0
+
+    truck_stops_gdf_half = apply_min_chargers(
+        truck_stops_gdf_half,
+        args.range_miles,
+        float(args.charging_time),
+        float(args.max_wait_time),
+    )
+
+    truck_stops_gdf["Half_CPD"] = truck_stops_gdf_half["CPD"]
+    truck_stops_gdf["Half_Charge"] = truck_stops_gdf_half["Min_Charge"]
+    truck_stops_gdf["Half_Ratio"] = truck_stops_gdf_half["Min_Ratio"]
+    truck_stops_gdf["Col_Save"] = 100.0 * (
+        1.0 - truck_stops_gdf["Min_Ratio"] / truck_stops_gdf["Half_Ratio"]
+    )
+
+    saveShapefile(
+        truck_stops_gdf,
+        f"{top_dir}/data/Truck_Stop_Parking/Truck_Stop_Parking_Along_Interstate_with_min_chargers_range_{args.range_miles}_chargingtime_{args.charging_time}_maxwait_{args.max_wait_time}.shp",
+    )
