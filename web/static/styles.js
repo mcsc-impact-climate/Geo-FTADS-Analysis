@@ -1,7 +1,8 @@
 import { selectedGradientAttributes, geojsonColors, selectedGradientTypes } from './name_maps.js';
 import { attributeBounds } from './map.js'
 
-function createStyleFunction(layerName) {
+function createStyleFunction(layerName, boundaryColor='gray', boundaryWidth=1, isHover = false) {
+  //console.log('print');
   return function(feature) {
     const attributeKey = layerName;
     const useGradient = layerName in selectedGradientAttributes;
@@ -13,11 +14,12 @@ function createStyleFunction(layerName) {
         gradientType = selectedGradientTypes[layerName];
         attributeValue = feature.get(attributeName);
     }
-
     const bounds = attributeBounds[layerName]; // Get the bounds for this specific geojson
     const layerColor = geojsonColors[layerName] || 'blue'; // Fetch color from dictionary, or default to blue
+    //console.log(geojsonColors[layerName]);
     const geometryType = feature.getGeometry().getType();
 
+    
     if (geometryType === 'Point' || geometryType === 'MultiPoint') {
       if (useGradient && bounds) {
         if (gradientType === 'size') {
@@ -58,21 +60,21 @@ function createStyleFunction(layerName) {
               image: new ol.style.Circle({
                 radius: 3, // Default point size
                 fill: new ol.style.Fill({
-                  color: layerColor,
+                  color: fillColor,
                 }),
               }),
               zIndex: 10, // Higher zIndex so points appear above polygons
             });
           }
     } else if (geometryType === 'Polygon' || geometryType === 'MultiPolygon') {
-        if (useGradient && bounds) {
+      if (useGradient && bounds) {
         const component = Math.floor(255 - (255 * (attributeValue - bounds.min) / (bounds.max - bounds.min)));
         const fillColor = `rgb(255, ${component}, ${component})`;
 
       return new ol.style.Style({
         stroke: new ol.style.Stroke({
-          color: 'gray',
-          width: 1,
+          color: boundaryColor,
+          width: boundaryWidth,
         }),
         fill: new ol.style.Fill({
           color: fillColor,
@@ -80,13 +82,13 @@ function createStyleFunction(layerName) {
         zIndex: 1 // Lower zIndex so polygons appear below points
       });
     } else {
-          return new ol.style.Style({
-        stroke: new ol.style.Stroke({
-          color: 'gray',
-          width: 1,
+        return new ol.style.Style({
+          stroke: new ol.style.Stroke({
+          color: boundaryColor,
+          width: boundaryWidth,
         }),
         fill: new ol.style.Fill({
-          color: layerColor,
+          color: 'yellow',
         }),
         zIndex: 1 // Lower zIndex so polygons appear below points
       });
@@ -155,5 +157,7 @@ function isLineStringLayer(layer) {
   const geometryType = features[0].getGeometry().getType();
   return geometryType === 'LineString' || geometryType === 'MultiLineString';
 }
+
+
 
 export { createStyleFunction, isPolygonLayer, isPointLayer, isLineStringLayer };

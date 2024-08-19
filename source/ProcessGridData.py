@@ -52,12 +52,11 @@ def read_ba_emissions_data(top_dir):
     data_df = data_df.rename(columns={"SRCO2RTA": "CO2_rate", "SUBRGN": "ZipSubregi"})
 
     return data_df
-
-
+    
 def read_iso_emissions_data(top_dir):
-    """
+    '''
     Reads in grid emission intensities by ISO from https://www.electricitymaps.com/data-portal (processed by Noman Bashir)
-
+    
     Parameters
     ----------
     top_dir (string): path to the top level of the git repo
@@ -65,40 +64,30 @@ def read_iso_emissions_data(top_dir):
     Returns
     -------
     iso_emissions_data_df (pd.DataFrame): Dataframe containing the emissions data for each US ISO, converted from units of gCO2eq / kWh to lb CO2eq / MWh
-    """
-    columns = ["zoneName"]
+    '''
+    columns = ['zoneName']
     for hour in range(24):
-        columns.append(f"mean_{hour}")
-        columns.append(f"up_{hour}")
-        columns.append(f"down_{hour}")
-
+        columns.append(f'mean_{hour}')
+        columns.append(f'std_{hour}')
+    
     data_df = pd.DataFrame(columns=columns)
-
+    
     # Read in the data associated with each eGrids subregion
-    dataDir = f"{top_dir}/data/daily_carbon_intensity_data_usa"
+    dataDir = f'{top_dir}/data/daily_carbon_intensity_data_usa'
     for filename in os.listdir(dataDir):
         filepath = os.path.join(dataDir, filename)
-
+        
         # Confirm that it's a file and not a directory
-        if os.path.isfile(filepath) and filename.endswith(".csv"):
+        if os.path.isfile(filepath) and filename.endswith('.csv'):
             data_iso_df = pd.read_csv(filepath)
-            row_dict = {"zoneName": filename.split("_")[0]}
-
+            row_dict = {
+                'zoneName': filename.split('_')[0]
+            }
+            
             for hour in range(24):
-                row_dict[f"mean_{hour}"] = (
-                    data_iso_df["mean"].iloc[hour] * KWH_PER_MWH / G_PER_LB
-                )
-                row_dict[f"up_{hour}"] = (
-                    (data_iso_df["mean"].iloc[hour] + data_iso_df["std"].iloc[hour])
-                    * KWH_PER_MWH
-                    / G_PER_LB
-                )
-                row_dict[f"down_{hour}"] = (
-                    (data_iso_df["mean"].iloc[hour] - data_iso_df["std"].iloc[hour])
-                    * KWH_PER_MWH
-                    / G_PER_LB
-                )
-
+                row_dict[f'mean_{hour}'] = data_iso_df['mean'].iloc[hour]
+                row_dict[f'std_{hour}'] = data_iso_df['std'].iloc[hour]
+        
             # Convert row_dict to a DataFrame
             new_row_df = pd.DataFrame([row_dict])
 
@@ -106,7 +95,6 @@ def read_iso_emissions_data(top_dir):
             data_df = pd.concat([data_df, new_row_df], ignore_index=True)
 
     return data_df
-
 
 def read_state_emissions_data(top_dir):
     """
@@ -297,6 +285,10 @@ def main():
 
     # Read in 2022 state-level annual electricity generated from EIA
     state_generation_data = read_state_generation_data(top_dir)
+
+    # Read in ISO emission rate data for 2022
+    iso_emissions_data = read_iso_emissions_data(top_dir)
+    
     # Combine the capacity and generation data
     state_gen_cap_data = combine_gen_cap_data(
         state_capacity_data, state_generation_data
@@ -327,6 +319,9 @@ def main():
         columns=["AWATER", "ALAND", "Shape_Area"]
     )
 
+    # Merge the iso emission rate data for 2022 with the shapefile containing borders for the data source
+    merged_dataframe_iso_emissions = mergeShapefile(iso_emissions_data, f'{top_dir}/data/world.geojson', 'zoneName').dropna().drop(columns=['countryKey', 'countryName'])
+
     # Save the merged shapefiles
     saveShapefile(
         merged_dataframe_egrid,
@@ -342,6 +337,10 @@ def main():
         merged_dataframe_gen_cap,
         f"{top_dir}/data/eia2022_state_merged/gen_cap_2022_state_merged.shp",
     )
-
+    
+    saveShapefile(
+      merged_dataframe_iso_emissions, 
+      f"{top_dir}/data/emission_rate_by_iso.shp"
+    )
 
 main()

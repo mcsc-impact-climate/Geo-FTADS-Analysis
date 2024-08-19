@@ -73,14 +73,14 @@ def correct_datetime(time_str):
 
 def make_daily_ev_demands_fig(top_dir, filename, zone):
     daily_ev_demands = pd.read_csv(filename)
-
-    fig, ax = plt.subplots(figsize=(11, 8))
-    ax.set_xlabel("Hours", fontsize=20)
-    ax.set_ylabel("Power (MW)", fontsize=20)
-    zone_title = zone.title().replace("_", " ")
-    ax.set_title(f"Power Demands in {zone_title} Zone", fontsize=24)
-    ax.tick_params(axis="both", which="major", labelsize=18)
-
+    
+    fig, ax = plt.subplots(figsize=(12, 8))
+    ax.set_xlabel('Hours', fontsize=24)
+    ax.set_ylabel('Power (MW)', fontsize=24)
+    zone_title = zone.title().replace('_', ' ')
+    ax.set_title(f'Power Demands in {zone_title} Zone', fontsize=26)
+    ax.tick_params(axis='both', which='major', labelsize=22)
+    
     # For each zone, plot the daily variation for each center (and total over all centers)
     colors = ["red", "purple", "orange", "teal", "cyan", "magenta", "teal"]
     i_center = 0
@@ -163,10 +163,10 @@ def plot_with_historical_daily_load(top_dir, load_data_df):
             i_month += 1
 
         ymin, ymax = ax.get_ylim()
-        ax.set_ylim(ymin, ymax * 1.5)
-        ax.legend(fontsize=18)
-        plt.savefig(f"{top_dir}/plots/daily_ev_load_{zone}.png")
 
+        ax.set_ylim(ymin, ymax*1.5)
+        ax.legend(fontsize=20)
+        plt.savefig(f'{top_dir}/plots/daily_ev_load_{zone}.png')
 
 def plot_with_excess_capacity(top_dir, load_data_df):
     pattern = re.compile(r"daily_ev_load_([^\.]+).csv")
@@ -582,12 +582,9 @@ def main():
         f"{top_dir}/data/Native_Load_2024/Native_Load_2024.xlsx",
     ]
     load_data_df = read_load_data(load_data_paths)
-
-    #    plot_with_historical_daily_load(top_dir, load_data_df)
-    #
-    #    plot_with_excess_capacity(top_dir, load_data_df)
-
+        
+    plot_with_historical_daily_load(top_dir, load_data_df)
+    plot_with_excess_capacity(top_dir, load_data_df)
     plot_coast_load(top_dir, load_data_df)
-
 
 main()
