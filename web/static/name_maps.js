@@ -415,7 +415,7 @@ export const geojsonTypes = {
   'Bay Area EV Roadmap': 'area',
   'Salt Lake City Region EV Plan': 'area',
   'Truck Stop Locations': ['point', 'other'],
-  'DOE Corridors': ['point', 'other'],
+  //'DOE Corridors': ['point', 'other'],
   'Principal Ports': ['point', 'other'],
   'Truck Stop Charging': ['point', 'other'],
   'Lifecycle Truck Emissions': 'area',
