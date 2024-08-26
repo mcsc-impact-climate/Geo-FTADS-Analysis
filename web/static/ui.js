@@ -736,7 +736,7 @@ for (const supportType in groupedData) {
       }
     }
     if (typeContent) { // Add the support type header and content if there are valid entries
-      detailsHtml += `<h2><ins>${supportType}</ins></h2>${typeContent}`;
+      detailsHtml += `<h2><ins>${supportType}</ins></h2>${typeContent}<div style="margin-bottom: 15px;"></div>`;
     }
   }
 }
