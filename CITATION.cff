@@ -4,11 +4,16 @@ authors:
 - family-names: "MacDonell"
   given-names: "Danika"
   orcid: "https://orcid.org/0000-0001-5533-6300"
+- family-names: "Borrero"
+  given-names: "Micah"
+  orcid: "https://orcid.org/0009-0005-1745-2972"
 - family-names: "Kasami"
   given-names: "Brilant"
-  
-title: "Geo-FTADS"
+  orcid: "https://orcid.org/0000-0002-0897-151X"
+- family-names: "Helena"
+  given-names: "De Figueiredo Valente"
+title: "FAF5-Analysis"
 version: v0.1.0
-#doi: zzz
+doi: 10.5281/zenodo.13205855
 date-released: 2024-08-03
-url: "https://github.com/mcsc-impact-climate/geo_ftads"
+url: "https://github.com/mcsc-impact-climate/FAF5-Analysis"

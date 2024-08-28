@@ -1,0 +1,439 @@
+City,Company,State,Latitude,Longitude,Capacity (million standard cubic feet per day),Process,Reference
+Kenai,Tesoro Alaska Petroleum Co,AK,60.5549341706504,-151.189566327234,13,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Phoenix,Air Liquide,AZ,,,,,
+Vancouver,BOC,BC,,,,,
+Bakersfield,"Equilon Enterprise, LLC",CA,,,,,
+Bakersfield,Lone Star Gas Processing,CA,,,,,
+Bakersfield,San Joaquin Refining Co,CA,35.3581972784809,-119.057484380156,4,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Benicia,Valero Energy Corp,CA,38.0776890917355,-122.161346601153,135,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Carson,Air Products and Chemicals; Inc.,CA,33.840620533626,-118.259281462633,100,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Carson,ARCO Products Co,CA,,,,,
+City of Commerce (just sou,Henkel Corp,CA,,,,,
+El Segundo,Chevron Products Co,CA,33.9196809249922,-118.414417308215,74,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Fresno,Praxair; Inc.,CA,,,,,
+Los Angeles,Air Products and Chemicals; Inc.,CA,,,,,
+Martinez (San Fransisco),Air Products and Chemicals; Inc.,CA,37.9915638937146,-122.114609358662,88,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Martinez (San Fransisco),Air Products and Chemicals; Inc.,CA,,,,,
+Martinez (San Fransisco),Shell Oil Co,CA,37.9915638937146,-122.114609358662,35,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Martinez (San Fransisco),Tosco Corp,CA,,,,,
+Martinez (San Fransisco),Martinez Refining Co LLC,CA,37.9915638937146,-122.114609358662,179,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Ontario,Praxair; Inc.,CA,34.0487313807824,-117.631932454394,20.5,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Richmond,Chevron Products Co,CA,37.9358,-122.3477,330,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Rodeo,Tosco Corp,CA,,,,,
+Rodeo,ConocoPhillips,CA,37.9413230349846,-122.354288835016,120,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Sacramento,Air Products and Chemicals; Inc.,CA,,,,,
+San Carlos,Praxair; Inc.,CA,,,,,
+San Francisco,Air Liquide,CA,,,,,
+Santa Clara,Air Products and Chemicals; Inc.,CA,,,,,
+Santa Clara,Air Products and Chemicals; Inc.,CA,,,,,
+South San Francisco,Praxair; Inc.,CA,,,,,
+South San Francisco,Praxair; Inc.,CA,,,,,
+Torrance,ExxonMobile,CA,,,,,
+Torrance,Praxair; Inc.,CA,,,,,
+Wilmington,Air Products and Chemicals; Inc.,CA,33.7836419551727,-118.266624943142,160,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Wilmington,Air Products and Chemicals; Inc.,CA,,,,,
+Wilmington,"Equilon Enterprise, LLC",CA,,,,,
+Wilmington,"Equilon Enterprise, LLC",CA,,,,,
+Wilmington,Tosco Corp,CA,,,,,
+Wilmington,Phillips Petroleum Co,CA,33.7836419551727,-118.266624943142,105,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Denver,Air Products and Chemicals; Inc.,CO,,,,,
+Denver,AirGas,CO,,,,,
+Loveland,Praxair; Inc.,CO,,,,,
+Barber's Point,Chevron Products Co,HI,,,,,
+Honolulu,Air Liquide America Corp,HI,,,,,
+Honolulu,BOC Group; Inc,HI,,,,,
+Kapolei,BHP Hawaii Refinery,HI,21.340435062175,-158.069329015923,18,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Kapolei (Ewa Beach),The Gas Co,HI,,,,,
+Billings,Conoco Inc,MT,45.7752075949249,-108.547892102644,36,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Billings,Exxon Company,MT,45.7752075949249,-108.547892102644,23,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Butte,Praxair; Inc.,MT,,,,,
+Great Falls,Montana Refining,MT,47.5042027586061,-111.287722490785,20,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Laurel,CENEX,MT,45.6745473749227,-108.771078528724,70,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Henderson,Kerr-McGee Chemical Corp,NV,,,,,
+Henderson,Pioneer Chlor Alkali Co; Inc,NV,,,,,
+Portland,Air Liquide,OR,,,,,
+Portland,Air Liquide America Corp,OR,,,,,
+Portland,Elf Atochem North America Inc,OR,,,,,
+Cedar City,Western Electrochemical Co,UT,,,,,
+Garfield,Praxair; Inc.,UT,,,,,
+Salt Lake City,Praxair; Inc.,UT,,,,,
+Salt Lake City,Linde,UT,40.7542381337446,-111.891131435553,31,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Bellingham,Georgia-Pacific West; Inc,WA,,,,,
+Blaine (Ferndale),ARCO Products Co,WA,,,,,
+Ferndale,BP West Coast Products LLC,WA,48.8551517413028,-122.602110221121,186,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Elma,Morton International,WA,,,,,
+Kalama,Messer - MG Industries,WA,,,,,
+Longview,Solvay Interox,WA,,,,,
+Longview,Weyerhaeuser Co,WA,,,,,
+Moses Lake,Eka Chemicals,WA,,,,,
+Tacoma,Pioneer Chlor Alkali Co; Inc,WA,,,,,
+Cheyenne,Frontier Refining,WY,41.1473958971874,-104.79916238531,0,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Wright,Western Gas Resources Inc,WY,,,,,
+Sante Fe Springs,CENCO Refining Company,CA,,,,,
+Wilmington,Shell Chemical Co,CA,,,,,
+Wilmington,Phillips Petroleum Co,CA,33.7816444800374,-118.26164678471,105,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Tacoma,Atofina,WA,,,,,
+Anniston,Solutia Inc,AL,,,,,
+Burkville,GE - Plastics,AL,,,,,
+Decatur,Air Products and Chemicals; Inc.,AL,,,,,
+Decatur,BP Amoco,AL,34.5705087369209,-87.0020262416448,10,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Decatur,Lagus Corp,AL,,,,,
+Decatur,Solutia Inc,AL,,,,,
+Huntsville,Teledyne Advanced Materials,AL,,,,,
+McIntosh,Olin Corp,AL,,,,,
+McIntosh,Praxair; Inc.,AL,31.2658333930067,-88.0299897281443,11.5,Byproduct,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Mobile,Occidental Petroleum Corp,AL,,,,,
+Muscle Shoals,Air Products and Chemicals; Inc.,AL,,,,,
+Muscle Shoals,Occidental Petroleum Corp,AL,,,,,
+Perdue Hill,442 Corp,AL,,,,,
+Theodore,Air Products and Chemicals; Inc.,AL,,,,,
+Theodore,Degussa Corp,AL,,,,,
+Tuscaloosa,Hunt Refining Co,AL,33.2096186019648,-87.5293586173456,40,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Stuttgart,Riceland Foods,AR,,,,,
+Hartford,AirGas,CT,,,,,
+Suffield Depot,Praxair; Inc.,CT,,,,,
+Delaware City,Air Products and Chemicals; Inc.,DE,39.5785927016173,-75.5970715566939,197.8,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Delaware City,"Motiva Enterprises, LLC",DE,,,,,
+Delaware City,Prime Gas Inc,DE,,,,,
+New Castle,Air Products and Chemicals; Inc.,DE,,,,,
+New Castle,BOC Group; Inc,DE,,,,,
+New Castle,Occidental Chemical Corp,DE,,,,,
+New Castle,SPI Polyols Inc,DE,,,,,
+New Castle,Linde,DE,39.6623097189318,-75.5763870282003,1.5,,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Ft Lauderdale,TriGas,FL,,,,,
+Gonzalez,BOC North America,FL,,,,,
+Orlando,Air Liquide,FL,,,,,
+Orlando,Praxair; Inc.,FL,,,,,
+Orlando,Praxair; Inc.,FL,,,,,
+Pace,Air Products and Chemicals; Inc.,FL,,,,,
+Pensacola,Solutia Inc,FL,,,,,
+Tampa,Air Products,FL,,,,,
+Tampa,Air Products and Chemicals; Inc.,FL,,,,,
+Augusta,DSM Chemicals North America,GA,,,,,
+Augusta,Holox Inc,GA,,,,,
+Augusta,Huron Tech Corp,GA,,,,,
+Augusta,Olin Corp,GA,,,,,
+Augusta,,GA,,,,,
+Augusta,,GA,,,,,
+Brunswick,Millennium Specialty Chemicals,GA,,,,,
+Conyers,Air Products and Chemicals; Inc.,GA,,,,,
+Gainesville,Cargill,GA,,,,,
+Macon,Archer Daniels Midland Comp,GA,,,,,
+Norcross,Praxair; Inc.,GA,33.9373198089264,-84.2094727157193,3.98,,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Rincon,Fort James Corp,GA,,,,,
+Valdosta,Sunoco,GA,,,,,
+Bradley (Kankakee),Brown Industries,IL,,,,,
+Bradley (near Kankakee -87,Bunge Foods Group,IL,,,,,
+Champaign,AC Humko,IL,,,,,
+Chicago,Air Products and Chemicals; Inc.,IL,,,,,
+Chicago,Airgas,IL,,,,,
+Chicago,Airgas,IL,,,,,
+Chicago,BOC,IL,,,,,
+Chicago,Praxair,IL,41.8545877143719,-87.6674268350197,220.76,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Chicago,Praxis,IL,41.8545877143719,-87.6674268350197,11.5,Byproduct,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Decatur,Archer Daniels Midland Comp,IL,,,,,
+Decatur,Linde,IL,39.8585016610672,-88.9448647129898,10,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Granite City,Air Products and Chemicals; Inc.,IL,,,,,
+Granite City,Air Products and Chemicals; Inc.,IL,,,,,
+Hartford,Clark Oil & Refining Corp,IL,,,,,
+Jacksonville,AC Humko,IL,,,,,
+Joliet,Lipton,IL,,,,,
+Joliet,Air Products,IL,41.5340067602067,-88.1260547829922,18,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Lemont,BOC North America,IL,,,,,
+Lemont,CITGO Petroleum Corp,IL,,,,,
+Lemont,PDV Midwest Refining LLC,IL,41.6725296421656,-87.9987286067328,12,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Mapleton,Goldschmidt,IL,,,,,
+Morris,Millennium Petrochemicals Inc,IL,,,,,
+Robinson,Marathon Ashland Petroleum LLC,IL,,,,,
+Sauget,Air Products and Chemicals; Inc.,IL,,,,,
+Sauget,Industrial Gas Products,IL,38.5924013807556,-90.1660573782397,1.5,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Wood River,"Equilon Enterprise, LLC",IL,,,,,
+Wood River,WRB Refining LP,IL,38.8663147175959,-90.0909076775428,190,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Butler,Air Products and Chemicals; Inc.,IN,,,,,
+Crawfordsville,BOC Group; Inc,IN,,,,,
+Decatur,Central Soya Co,IN,,,,,
+Mount Vernon,GE - Plastics,IN,,,,,
+Rockport,Messer - MG Industries,IN,,,,,
+Rockport,Rockport Works,IN,37.8854174225431,-87.0528433121678,0.72,,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Seymour,Praxair; Inc.,IN,,,,,
+Whiting,BP Amoco Corp,IN,41.672726475662,-87.4858025907801,0,,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Whiting,Praxair; Inc.,IN,,,,,
+Whiting,Praxair; Inc.,IN,,,,,
+Calvert City,West Lake CA&O Corp,KY,37.0278468300627,-88.351153508168,4.15,,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Louisville,Golden Foods,KY,,,,,
+X,Formosa Plastics Corp USA,LA,,,,,
+Baton Rouge,Praxair,LA,,,,,
+Baton Rouge,Air Products,LA,30.463658618129,-91.1240531327219,120,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Convent,Air Products and Chemicals; Inc.,LA,,,,,
+Convent,"Motiva Enterprises, LLC",LA,30.0123166512681,-90.8203409088744,110,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Convent,Occidental Petroleum Corp,LA,,,,,
+Geismar,Air Products and Chemicals; Inc.,LA,,,,,
+Geismar,Air Products and Chemicals; Inc.,LA,,,,,
+Geismar,Air Products and Chemicals; Inc.,LA,,,,,
+Geismar,Air Products and Chemicals; Inc.,LA,,,,,
+Geismar,BASF Corp,LA,,,,,
+Geismar,BASF Corp,LA,,,,,
+Geismar,Praxair; Inc.,LA,,,,,
+Geismar,Shell Chemical Co,LA,30.2341892951012,-90.9983653216573,90,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Geismar,Union Texas Petroleum/BASF/GE Petroch,LA,,,,,
+Geismar,Vulcan Materials Co,LA,,,,,
+Geismar (Baton Rouge),Praxair; Inc.,LA,,,,,
+Gramercy,LaRoche Industries Inc,LA,,,,,
+Luling,Monsanto,LA,29.8819271805834,-90.32605323553,100,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+New Orleans,Air Products and Chemicals; Inc.,LA,29.9680712664308,-90.0547998209484,26.35,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+New Orleans,Air Products and Chemicals; Inc.,LA,29.9680712664308,-90.0547998209484,100,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Norco,Shell Oil Co,LA,,,,,
+Norco,Valero,LA,30.0023571802354,-90.4066249437219,100,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Plaquemine,Air Liquide America Corp,LA,,,,,
+Plaquemine,Air Products and Chemicals; Inc.,LA,30.2836496642118,-91.2433403798268,30,Byproduct,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Plaquemine,Dow Chemicals USA,LA,,,,,
+Plaquemine,Georgia Gulf Corp,LA,,,,,
+Saint Gabriel,Pioneer Chlor Alkali Co; Inc,LA,,,,,
+Taft,Air Products and Chemicals; Inc.,LA,29.9857219652667,-90.4439387652093,21,Byproduct,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Taft,CYX Chemicals USA Inc,LA,,,,,
+Taft,Occidental Petroleum Corp,LA,,,,,
+Boston,Air Products and Chemicals; Inc.,MA,,,,,
+Orrington,HoltraChem Manufacturing Company,ME,,,,,
+Ecorse,Praxair; Inc.,MI,,,,,
+Lansing,Airgas,MI,,,,,
+Hannibal,Air Products and Chemicals; Inc.,MO,,,,,
+St. Louis,Air Products,MO,,,,,
+St. Louis,BOC,MO,,,,,
+St. Louis,Praxair; Inc.,MO,,,,,
+St. Louis,Praxair; Inc.,MO,,,,,
+Columbus,Eka Chemicals,MS,,,,,
+Hamilton,Kerr-McGee Chemical Corp,MS,,,,,
+Hamilton,Air Liquide,Ontario,43.2448389957224,-79.9585673146604,2.2,SMR,
+Hattiesburg,Hercules Inc,MS,,,,,
+Pascagoula,Chevron Products Co,MS,30.3661848019164,-88.5452279347634,229,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Pascagoula,First Chemical Corp,MS,,,,,
+Vicksburg,Ergon Refining,MS,32.3055483136535,-90.8871659408726,13,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Acme,Holtra Chemical Manufacturing Company,NC,,,,,
+Charlotte,Air Products and Chemicals; Inc.,NC,,,,,
+Charlotte,C & T Refinery,NC,,,,,
+Charlotte,National Welders,NC,,,,,
+Raleigh,Mallinckrodt Inc,NC,,,,,
+Belvedere,Praxair; Inc.,NJ,,,,,
+Deepwater (Carney's Point,Praxair; Inc.,NJ,,,,,
+Paulsboro,Valero Refining Co,NJ,39.8415250101353,-75.2422565992115,9,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Glenmont,Air Products and Chemicals; Inc.,NY,,,,,
+Niagara Falls,Niachlor Inc,NY,,,,,
+Niagara Falls,Occidental Petroleum Corp,NY,,,,,
+Niagara Falls,Praxair; Inc.,NY,43.0902510400447,-79.0228714898934,22.5,Byproduct,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Ashtabula,ASHTA Chemicals Inc,OH,,,,,
+Ashtabula,Praxair; Inc.,OH,,,,,
+Barberton,Praxair; Inc.,OH,,,,,
+Cincinnati,Air Products and Chemicals; Inc.,OH,39.1438870676903,-84.5111192395838,2.3,,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Cincinnati,BOC North America,OH,,,,,
+Cincinnati,Praxair; Inc.,OH,,,,,
+Cleveland,AGA,OH,,,,,
+Euclid,GE; Lighting Business Group,OH,,,,,
+Lima,BOC North America,OH,,,,,
+Lima,BOC North America,OH,,,,,
+Lima,BOC North America,OH,,,,,
+Lima ,Linde,OH,40.7345553335669,-84.1093155268119,60,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Middletown,Air Products and Chemicals; Inc.,OH,39.4983768102014,-84.3737826336672,1,,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Middletown,Air Products and Chemicals; Inc.,OH,,,,,
+North Baltimore,Air Products and Chemicals; Inc.,OH,,,,,
+North Royalton,Praxair; Inc.,OH,,,,,
+Painesville,"Praxair, Inc.",OH,,,,,
+Sidney,Cargill,OH,,,,,
+Toledo,BP Oil,OH,41.6621359076623,-83.5823618304261,0,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Toledo,BP Oil,OH,,,,,
+Toledo,"Sunoco, Inc",OH,,,,,
+Sarnia,"Praxair, Inc.",Ontario,,,,,
+Sarnia,"Praxair, Inc.",Ontario,,,,,
+Sarnia,Air Products Canada (owned by AP&C; U,Ontario,42.9813027914927,-82.3365219756716,11.5,Byproduct,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Sarnia,Air Products Canada (owned by AP&C; U,Ontario,42.9813027914927,-82.3365219756716,82,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Bethlehem,Praxair; Inc.,PA,,,,,
+Butler,Air Products,PA,,,,,
+Butler,Air Products and Chemicals; Inc.,PA,,,,,
+Fairless Hills,Praxair; Inc.,PA,,,,,
+Karns City (listed as Karn,Pennzoil Co,PA,,,,,
+Petrolia,Witco Corp,PA,,,,,
+Pittsburgh,Praxair; Inc.,PA,,,,,
+Rouseville,Calumet Lubricants Co,PA,,,,,
+St. Marys,Messer - MG Industries,PA,,,,,
+West Leechburg,Praxair; Inc.,PA,40.6324947757228,-79.616500935176,1.92,,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Bayamon,Caribbean Petroleum Corp,PR,,,,,
+Yabucoa,Puerto Rico Sun Oil Co,PR,,,,,
+Becancour,HydrogenA1,Quebec,46.3226611225143,-72.3643836517528,8.074,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Magog,BOC Canada,Quebec,45.2170124268859,-72.1634633827446,5.76,Byproduct,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Slatersville,Praxair; Inc.,RI,,,,,
+Charleston,Olin Corp,TN,,,,,
+Chattanooga,Archer Daniels Midland Comp,TN,,,,,
+Chattanooga,BOC,TN,,,,,
+Chattanooga,BOC,TN,,,,,
+Chattanooga,Bunge Foods Group,TN,,,,,
+Kingsport,Eastman Chemical Co,TN,,,,,
+Memphis,Atofina,TN,,,,,
+Memphis,Hunt-Wesson Inc,TN,,,,,
+Memphis,Penn Specialty Chemical Inc,TN,,,,,
+Memphis,Witco Corp,TN,,,,,
+Memphis,Valero Refining Co,TN,35.1189594447165,-89.9808876659498,30,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Green Bay,Fort Howard Corp,WI,,,,,
+Milton,Tomah Products; Inc,WI,,,,,
+Port Edwards,Vulcan Materials Co,WI,,,,,
+Belle,Praxair; Inc.,WV,,,,,
+Charleston,Airgas,WV,,,,,
+Institute,Aventis CropScience,WV,,,,,
+Natrium,PPG Industries; Inc,WV,,,,,
+New Martinsville,Bayer Corp,WV,,,,,
+New Martinsville,,WV,,,,,
+Newell,Ergon WV,WV,40.6182866681043,-80.5981245868073,3,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Proctor (Natrium),General Hydrogen,WV,39.7113309055223,-80.8242407499913,1.205,Byproduct,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+South Charleston,Air Products and Chemicals; Inc.,WV,,,,,
+Weirton,BOC Group; Inc,WV,,,,,
+Salisbury,Air Products and Chemicals; Inc.,MD,38.3697597374577,-75.5919477711664,0.77,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Tuscola,Air Products and Chemicals; Inc.,IL,39.7969379595112,-88.2800106154607,1.807,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Pensacola,"BOC Group, Inc",FL,,,,,
+Decatur,Lagus Corp,AL,,,,,
+Institute,"Praxair, Inc.",WV,38.3820978158514,-81.7768761239599,3,,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Norcross,"Praxair, Inc.",GA,33.9367016900137,-84.2074173188702,3.98,,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Green Bay,Fort James Corp,WI,,,,,
+Eastover,Huron Tech Corp,SC,,,,,
+Delaware City,Occidental Petroleum Corp,DE,,,,,
+Delaware City,Air Products,DE,39.5798986414178,-75.5976126388715,199.3,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Smackover,Cross Oil & Refining Co; Inc,AR,33.3624915204641,-92.730707384445,3,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Council Bluffs,Bunge Foods Group,IA,,,,,
+Des Moines,Archer Daniels Midland Comp,IA,,,,,
+Sioux City,Cargill,IA,,,,,
+Conway,Brown Industries,KS,,,,,
+Conway,Koch Industries,KS,,,,,
+El Dorado,Frontier Eldorado Refining,KS,37.8235995477843,-96.8640326932383,56,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Salina,Brown Industries,KS,,,,,
+Wichita,Airgas,KS,,,,,
+Wichita,Airgas,KS,,,,,
+Wichita,Cargill,KS,,,,,
+Wichita,Vulcan Materials Co,KS,,,,,
+Lake Charles,Air Liquide America Corp,LA,,,,,
+Lake Charles,CITGO Petroleum Corp,LA,,,,,
+Lake Charles,Lyondell Chemical Company,LA,,,,,
+Lake Charles,PPG Industries; Inc,LA,,,,,
+Lake Charles,Praxair; Inc.,LA,,,,,
+Lake Charles,Praxair; Inc.,LA,,,,,
+Princeton,Calumet Lubricants Co,LA,32.5893447317585,-93.5156502093957,4,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Shreveport,Pennzoil Co,LA,,,,,
+Shreveport,Calumet Lubricants Co,LA,32.4717265469722,-93.7855780952329,12,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Sulphur,CONDEA Vista Co,LA,30.2260039515581,-93.3560678754395,126,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Westlake,Jupiter Chemicals - should be sold to,LA,,,,,
+Westlake,Tessenderlo Kerley,LA,30.2580786867644,-93.2643338307481,35,,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Mankato,Archer Daniels Midland Comp,MN,,,,,
+Mankato,Honeymead Products,MN,,,,,
+Roseville,Praxair; Inc.,MN,,,,,
+Roseville,Praxair; Inc.,MN,,,,,
+St. Paul,Koch Refining,MN,,,,,
+St. Paul,Flint Hills Resources LP,MN,44.9577938312046,-93.1157501665668,199,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+St. Paul Park,Marathon Ashland Petroleum Co,MN,,,,,
+St. Paul Park,St Paul Park Refining Co,MN,44.8362453340259,-92.9945194049994,10,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Kansas City,Praxair; Inc.,MO,,,,,
+St. Joseph,Ag Processing Inc,MO,,,,,
+Lincoln,Archer Daniels Midland Comp,NE,,,,,
+Omaha,Penn Specialty Chemical Inc,NE,,,,,
+Ardmore,Ultramar Diamond Shamrock Corp,OK,,,,,
+Ardmore,Valero Refining Co,OK,34.1797865365248,-97.1294878467711,27,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Muskogee,Fort James Corp,OK,,,,,
+Tulsa,Airgas,OK,,,,,
+Bay City,Celanese Ltd.,TX,,,,,
+Baytown,Air Products and Chemicals; Inc.,TX,29.7541513451037,-94.9815995836883,82,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Baytown,Bayer Corp,TX,,,,,
+Baytown,Bayer Corp,TX,,,,,
+Baytown,ExxonMobile Chemical,TX,,,,,
+Beaumont,ExxonMobile Chemical,TX,30.0784410231355,-94.1399265035586,0,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Bishop,Celanese Ltd.,TX,,,,,
+Borger,Phillips Petroleum Co,TX,,,,,
+Borger,WRB Refining LP,TX,35.6664257602668,-101.393050018068,91,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Channelview,Equistar Chemicals (was Lyondell Petr,TX,,,,,
+Channelview,Praxair; Inc.,TX,29.7905258484387,-95.1217018616113,40,Byproduct,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Clear Lake City,Air Products and Chemicals; Inc.,TX,29.5781434748714,-95.1320851395226,27,Byproduct,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Clear Lake City,Celanese Ltd.,TX,,,,,
+Corpus Christi,Air Liquide America Corp,TX,,,,,
+Corpus Christi,Coastal Refining & Marketing Inc,TX,,,,,
+Corpus Christi,Javelina Co,TX,27.7315323889456,-97.4149148023289,35,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Corpus Christi,Occidental Petroleum Corp,TX,,,,,
+Corpus Christi,Valero Refining Co,TX,27.7315323889456,-97.4149148023289,160,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Corpus Christi,Air Products,TX,27.7315323889456,-97.4149148023289,30,,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Dallas,Air Liquide,TX,32.8041315275714,-96.798095132266,0.83,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Dallas,Air Liquide America Corp,TX,,,,,
+Deer Park,Air Liquide America Corp,TX,,,,,
+Deer Park,Deer Park Refining Limited Partnershi,TX,,,,,
+Deer Park,Millennium Petrochemicals Inc,TX,,,,,
+Deer Park,OxyVinyls LP,TX,,,,,
+Deer Park,Rohm and Has Co,TX,,,,,
+Fort Worth,Bunge Foods Group,TX,,,,,
+Freeport,Air Liquide America Corp,TX,28.9491038293717,-95.3592017344561,115,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Freeport,BASF Corp,TX,,,,,
+Freeport,Dow Chemicals USA,TX,,,,,
+Freeport,Praxair,TX,28.9491038293717,-95.3592017344561,170,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Houston,Air Liquide,TX,,,,,
+Houston,Air Products,TX,,,,,
+Houston,Air Products and Chemicals; Inc.,TX,,,,,
+Houston,Praxair,TX,29.75032996077,-95.3669678545137,100,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Ingleside,Air Liquide America Corp,TX,27.8668504302634,-97.206494755583,0.7,,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Kingsville,Air Liquide America Corp,TX,,,,,
+La Porte,Air Products and Chemicals; Inc.,TX,,,,,
+La Porte,Air Products and Chemicals; Inc.,TX,,,,,
+La Porte,OxyVinyls LP,TX,,,,,
+La Porte,Praxair; Inc.,TX,,,,,
+La Porte,Praxair; Inc.,TX,29.6632107813913,-95.0186155728785,25,,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+La Porte,Air Liquide,TX,29.6632107813913,-95.0186155728785,131,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Mont Belvieu,Air Products and Chemicals; Inc.,TX,29.8443152338723,-94.8848939135242,69,Byproduct,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Mont Belvieu,Belvieu Environmental Fuels,TX,,,,,
+Mont Belvieu,Praxair; Inc.,TX,29.8443152338723,-94.8848939135242,29,,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Odessa,Air Liquide America Corp,TX,,,,,
+Odessa,Rexene Corp,TX,,,,,
+Odessa,Sterling Pulp Chemical; Ltd,TX,,,,,
+Orange,DuPont,TX,,,,,
+Pasadena,Air Products and Chemicals; Inc.,TX,29.6566324220415,-95.1661195025585,80,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Pasadena,Air Liquide,TX,29.6566324220415,-95.1661195025585,100,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Point Comfort,Formosa Plastics Corp USA,TX,,,,,
+Sherman,Ag Processing Inc,TX,,,,,
+Silsbee,South Hampton Refining Co,TX,30.3468427053821,-94.173888367546,0,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Texas City,BP Amoco Corp,TX,,,,,
+Texas City,Praxair; Inc.,TX,29.4070758043616,-94.9606713612538,100,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Texas City,Praxair; Inc.,TX,29.4070758043616,-94.9606713612538,165,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Texas City,Praxair; Inc.,TX,29.4070758043616,-94.9606713612538,69,Byproduct,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Texas City,Union Carbide Corp,TX,,,,,
+Three Rivers,Ultramar Diamond Shamrock Corp,TX,,,,,
+Victoria (Beaumont),DuPont,TX,28.8266409237337,-96.9778315167959,0,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Gallatin,Air Products and Chemicals; Inc.,TX,31.8926758284625,-95.1558520265054,0.75,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Baytown,Air Products and Chemicals; Inc.,TX,29.7534578114564,-94.9707943088898,12,,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Lake Charles,"Praxair, Inc.",LA,,,,,
+Texas City,"Praxair, Inc.",TX,,,,,
+Cotton Valley,Calumet Lubricants Co,LA,32.8123145566074,-93.4235724605922,2,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Mankato,Cenex Harvest States Cooperatives,MN,,,,,
+Lake Charles,CONDEA Vista Co,LA,,,,,
+Sweeny,Phillips Petroleum Co,TX,29.0448765209396,-95.6992961156684,0,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Mont Belvieu,Belvieu Environmental Fuels,TX,,,,,
+Sacramento,Air Products ,CA,38.569411838503,-121.478873110508,2.3,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+New Orleans ,Air Products ,LA,30.0742685171316,-89.7661620361388,26.35,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+St. John,Air Liquide,Canada,45.2859896280028,-66.0796582977211,16.599,Byproduct,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Anacortes,Air Liquide,WA,48.4948651291252,-122.633085046516,7.5,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Pesqueria,Air Liquide,Mexico,25.7909081408759,-100.048230695769,0.246,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Edmonton,Air Products,Canada,53.5167279861449,-113.514700914202,176,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Fort Saskatchewan,Air Products,Canada,53.6983674868441,-113.227354509852,153,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Scotford,Air Products,Canada,53.7622545496559,-113.083772889669,150,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Catlettsburg,Air Products,KY,38.4173602554947,-82.601911446433,34,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Garyville,Air Products,LA,30.0721878716074,-90.6284842286572,120,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+St. Charles,Air Products,LA,29.8831654217691,-90.3780701066515,150,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Detroit,Air Products,MI,42.3678289543807,-83.0937137217966,60,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Midland,Air Products,MI,43.6265461306131,-84.2320486527899,0.75,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Palmyra,Air Products,MO,39.7990699058841,-91.5266694487438,0.96,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Gallatin,Air Products,TN,36.3785639710194,-86.4534991598547,0.75,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Port Arthur,Air Products,TX ,29.9211678432135,-93.9767879187933,450,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Saraland,Linde,AL,30.8311938776239,-88.0963468882344,10,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Romeoville,Linde,IL,41.6419056241563,-88.0928787960361,60,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Oregon,Linde,OH,41.6550295433434,-83.4358936416189,120,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Asbestos,Linde,Canada,45.7738447220532,-71.9540179232569,7.055,,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+River Rouge,Praxair,MI,42.2735325388136,-83.1247631357595,1.44,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Hemlock,Praxair,MI,43.4178629489044,-84.2303313153097,,,
+Monterrey,Praxair,Mexico,25.6730523495046,-100.316968719654,0.72,SMR,https://h2tools.org/hyarc/hydrogen-data/merchant-hydrogen-plant-capacities-north-america
+Commerce City,Suncor Energy,CO,39.8915018566951,-104.833067636138,22,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+McPherson,CHS McPherson Refinery,KS,38.3754804057908,-97.6599285900218,42,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Coffeyville,Coffeyville Resources,KS,37.0396241724015,-95.6292601176477,22,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Linden,Phillips Petroleum Co,NJ,40.626508011306,-74.2399927500989,22,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Artesia,Hollyfrontier Navajo Refining,NM,32.8413833027797,-104.420597828618,38,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Ponca City,Phillips Petroleum Co,OK,36.7275852216214,-97.0608036689408,35,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Wynnewood,Wynnewood Refining Co,OK,34.6445418917834,-97.1633325944419,10,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Warren,United Refining,PA,41.8458715502309,-79.146544968847,10,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
+Sinclair,Sinclair Wyoming Refining Co,WY,41.7769909269604,-107.119758374247,52,SMR,https://h2tools.org/hyarc/hydrogen-data/captive-purpose-refinery-hydrogen-production-capacities-individual-us
