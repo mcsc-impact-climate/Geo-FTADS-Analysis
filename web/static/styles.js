@@ -60,7 +60,7 @@ function createStyleFunction(layerName, boundaryColor='gray', boundaryWidth=1, i
               image: new ol.style.Circle({
                 radius: 3, // Default point size
                 fill: new ol.style.Fill({
-                  color: fillColor,
+                  color: layerColor,
                 }),
               }),
               zIndex: 10, // Higher zIndex so points appear above polygons
