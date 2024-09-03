@@ -192,21 +192,19 @@ def get_northeast(top_dir):
 
     Returns
     -------
-    df_northeast (pd.DataFrame): Geospatial dataframe represening the combined boundary of the northeastern states
+    df_northeast (pd.DataFrame): Geospatial dataframe representing the combined boundary of the northeastern states
     """
 
     df_states = read_states_shapefile(top_dir)
     in_states = ["ME", "MA", "NH", "VT", "RI", "CT", "NY", "PA", "NJ"]
 
-    # Filter for the highway in the specified states
-    bool_in_states = df_states["STUSPS"] == in_states[0]
-    for state in in_states[1:]:
-        bool_in_states = bool_in_states | (["STUSPS"] == state)
+    # Filter for the states in the specified list
+    bool_in_states = df_states["STUSPS"].isin(in_states)
 
     # Select the boundaries for the states of interest
     df_in_states = df_states[bool_in_states]
 
-    # Combine all the county boundaries into one shapefile
+    # Combine all the state boundaries into one shapefile
     df_northeast = df_in_states.dissolve()
 
     return df_northeast
