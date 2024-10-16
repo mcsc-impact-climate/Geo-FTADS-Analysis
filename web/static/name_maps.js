@@ -13,7 +13,7 @@ export let selectedGradientTypes = {
   'Planned Electrolyzers': 'size',
   'Hydrogen from Refineries': 'size',
   'State-Level Incentives and Regulations': 'color',
-  'Truck Stop Charging': 'size',
+  'Savings from Pooled Charging Infrastructure': 'size',
   'Lifecycle Truck Emissions': 'color',
   'Total Cost of Truck Ownership': 'color',
   'Grid Generation and Capacity': 'color',
@@ -35,7 +35,7 @@ export const availableGradientAttributes = {
   'Planned Electrolyzers': ['Power_kW'],
   'Hydrogen from Refineries': ['Cap_MMSCFD'],
   'State-Level Incentives and Regulations': ['all', 'Biodiesel', 'Ethanol', 'Electricit', 'Hydrogen', 'Natural Ga', 'Propane', 'Renewable'],// 'Emissions'],
-  'Truck Stop Charging': ['Tot Trips', 'CPD', 'Half_CPD', 'Min_Charge', 'Half_Charg', 'Min_Ratio', 'Half_Ratio', 'Col_Save'],
+  'Savings from Pooled Charging Infrastructure': ['Tot Trips', 'CPD', 'Half_CPD', 'Min_Charge', 'Half_Charg', 'Min_Ratio', 'Half_Ratio', 'Col_Save'],
   'Lifecycle Truck Emissions': ['C_mi_tot', 'C_mi_grid'],
   'Total Cost of Truck Ownership': ['$_mi_tot', 'dies_tot', 'diff_tot', 'perc_tot'],
   'Grid Generation and Capacity': ['Ann_Gen', 'Cap_MW', 'Ann_Cap', 'Ann_Diff', 'Ann_Rat'],
@@ -57,7 +57,7 @@ export let selectedGradientAttributes = {
   'Planned Electrolyzers': 'Power_kW',
   'Hydrogen from Refineries': 'Cap_MMSCFD',
   'State-Level Incentives and Regulations': 'all',
-  'Truck Stop Charging': 'Tot Trips',
+  'Savings from Pooled Charging Infrastructure': 'Tot Trips',
   'Lifecycle Truck Emissions': 'C_mi_tot',
   'Total Cost of Truck Ownership': '$_mi_tot',
   'Grid Generation and Capacity': 'Ann_Gen',
@@ -105,7 +105,7 @@ export const legendLabels = {
 //    'Emissions': 'Incentives and Regulations (Emissions)',
  },
     
-  'Truck Stop Charging': {
+  'Savings from Pooled Charging Infrastructure': {
     'Tot Trips': 'Trucks Passing Per Day',
     'CPD': 'Truck Charges Per Day (Full Fleet)',
     'Half_CPD': 'Truck Charges Per Day (Half Fleet)',
@@ -382,7 +382,7 @@ export const geojsonColors = {
   'LNG Stations': 'orange',
   'CNG Stations': 'purple',
   'LPG Stations': 'cyan',
-  'Truck Stop Charging': 'red',
+  'Savings from Pooled Charging Infrastructure': 'red',
   'Principal Ports': 'purple',
 };
 
@@ -417,7 +417,7 @@ export const geojsonTypes = {
   'Truck Stop Locations': ['point', 'other'],
   //'DOE Corridors': ['point', 'other'],
   'Principal Ports': ['point', 'other'],
-  'Truck Stop Charging': ['point', 'other'],
+  'Savings from Pooled Charging Infrastructure': ['point', 'other'],
   'Lifecycle Truck Emissions': 'area',
   'Total Cost of Truck Ownership': 'area',
   'Grid Generation and Capacity': 'area',
@@ -426,12 +426,12 @@ export const geojsonTypes = {
 
 export const dataInfo = {
   'Truck Imports and Exports': "Freight flow data from the FWHA's <a href='https://ops.fhwa.dot.gov/freight/freight_analysis/faf/'>Freight Analysis Framework</a> (<a href='https://opendata.arcgis.com/api/v3/datasets/e3bcc5d26e5e42709e2bacd6fc37ab43_0/downloads/data?format=shp&spatialRefId=3857&where=1%3D1'>link to download shapefile used for FAF5 region boundaries</a>). Emissions attributes are evaluated by incorporating data from the <a href='https://rosap.ntl.bts.gov/view/dot/42632/dot_42632_DS2.zip'>2002 Vehicle Inventory and Use Survey</a> and the <a href='https://greet.anl.gov/'>GREET lifecycle emissions tool</a> maintained by Argonne National Lab.",
-  'Grid Emission Intensity': "Emission intensity data is obtained from the <a href='https://www.epa.gov/egrid/download-data'>eGRID database</a> (<a href='https://www.epa.gov/system/files/documents/2023-01/eGRID2021_data.xlsx'>link to download</a>). eGRID subregion boundaries are obtained from <a href='https://hub.arcgis.com/datasets/fedmaps::subregions-of-the-emissions-generation-resource-integrated-database-egrid/'>this ArcGIS Hub page</a> (<a href='https://opendata.arcgis.com/api/v3/datasets/23e16f24702948ac9e2032bfa0526a8f_1/downloads/data?format=shp&spatialRefId=4326&where=1%3D1'>link to download</a>)",
+  'Grid Emission Intensity': "Emission intensity data is obtained from the <a href='https://www.epa.gov/egrid/download-data'>eGRID database</a> (<a href='https://www.epa.gov/system/files/documents/2024-01/egrid2022_data.xlsx'>link to download</a>). eGRID subregion boundaries are obtained from <a href='https://hub.arcgis.com/datasets/fedmaps::subregions-of-the-emissions-generation-resource-integrated-database-egrid/'>this ArcGIS Hub page</a> (<a href='https://opendata.arcgis.com/api/v3/datasets/23e16f24702948ac9e2032bfa0526a8f_1/downloads/data?format=shp&spatialRefId=4326&where=1%3D1'>link to download</a>)",
   'Hourly Grid Emissions': "Hourly emission intensity data is obtained from <a href='https://www.electricitymaps.com/data-portal/united-states-of-america'>ElectricityMaps</a>, and post-processed to evaluate average emission intensity &plusmn; 1 standard deviation for each hour of the day in 2022. ISO boundaries are obtained from the <a href='https://github.com/electricitymaps/electricitymaps-contrib/tree/master'>ElectricityMaps GitHub repository</a> (<a href='https://raw.githubusercontent.com/electricitymaps/electricitymaps-contrib/master/web/geo/world.geojson'>link to download</a>).<br><br><b>Original Data Source Attribution:</b> Electricity Maps (2024). United States of America 2022-23 Hourly Carbon Intensity Data (Version January 17, 2024). Electricity Maps Data Portal. https://www.electricitymaps.com/data-portal.",
   'Commercial Electricity Price': "Data is obtained from the <a href='https://www.eia.gov/electricity/data.php'>EIA's Electricity database</a> (<a href='https://www.eia.gov/electricity/data/state/sales_annual_a.xlsx'>link to download</a>).",
   'Maximum Demand Charge (state-level)': "The maximum historical demand charge in each utility region is evaluated using historical demand charge data compiled by the National Renewable Energy Lab (NREL) in <a href='https://data.nrel.gov/submissions/74'>this NREL Data Catalog</a> (<a href='https://data.nrel.gov/system/files/74/Demand%20charge%20rate%20data.xlsm'>link to download</a>).<br><br><b>Original Data Source Attribution:</b> McLaren, Joyce, Pieter Gagnon, Daniel Zimny-Schmitt, Michael DeMinco, and Eric Wilson. 2017. 'Maximum demand charge rates for commercial and industrial electricity tariffs in the United States.' NREL Data Catalog. Golden, CO: National Renewable Energy Laboratory. Last updated: July 24, 2024. DOI: 10.7799/1392982.<br><br><b>Original Data Source Credit:</b> <ul><li>The National Renewable Energy Laboratory (NREL)</li><li>U.S. Department of Energy (DOE)</li><li>Alliance for Sustainable Energy, LLC ('Alliance')</li></ul>",
   'Maximum Demand Charge (utility-level)': "Maximum historical demand charges for each state are evaluated using historical demand charge data compiled by the National Renewable Energy Lab (NREL) in <a href='https://data.nrel.gov/submissions/74'>this NREL Data Catalog</a> (<a href='https://data.nrel.gov/system/files/74/Demand%20charge%20rate%20data.xlsm'>link to download</a>). <br><br><b>Original Data Source Attribution:</b> McLaren, Joyce, Pieter Gagnon, Daniel Zimny-Schmitt, Michael DeMinco, and Eric Wilson. 2017. 'Maximum demand charge rates for commercial and industrial electricity tariffs in the United States.' NREL Data Catalog. Golden, CO: National Renewable Energy Laboratory. Last updated: July 24, 2024. DOI: 10.7799/1392982.<br><br><b>Original Data Source Credit:</b> <ul><li>The National Renewable Energy Laboratory (NREL)</li><li>U.S. Department of Energy (DOE)</li><li>Alliance for Sustainable Energy, LLC ('Alliance')</li></ul>",
-  'State-Level Incentives and Regulations': "This data was collected by manually combing through the DOE AFDC's <a href='https://afdc.energy.gov/laws/state'>State Laws and Incentives Database</a> and collecting relevant information about laws and incentives that could be relevant for heavy duty trucking.",
+  'State-Level Incentives and Regulations': "State-level incentives and regulations to support heavy-duty vehicles in transitioning to alternative energy carriers. This data was collected by manually combing through the DOE AFDC's <a href='https://afdc.energy.gov/laws/state'>State Laws and Incentives Database</a> and collecting relevant information about laws and incentives that could be relevant for heavy duty trucking.",
   'Highway Flows (Interstate)': "This layer was obtained by combining the <a href='https://geodata.bts.gov/datasets/usdot::freight-analysis-framework-faf5-network-links'>FAF5 network links</a> (<a href='https://opendata.arcgis.com/api/v3/datasets/cbfd7a1457d749ae865f9212c978c645_0/downloads/data?format=shp&spatialRefId=3857&where=1%3D1'>link to download</a>) with the 2022 FAF5 Highway Network Assignments from the <a href='https://ops.fhwa.dot.gov/freight/freight_analysis/faf/'>FAF5 website</a> (<a href='https://ops.fhwa.dot.gov/freight/freight_analysis/faf/faf_highway_assignment_results/FAF5_2022_HighwayAssignmentResults_04_07_2022.zip'>link to download</a>), and selecting for links on the interstate system.",
   'Operational Electrolyzers': "Data on operational electrolyzers was extracted from a <a href='https://www.hydrogen.energy.gov/docs/hydrogenprogramlibraries/pdfs/23003-electrolyzer-installations-united-states.pdf?Status=Master'>DOE Hydrogen program record</a> entitled 'Electrolyzer Installations in the United States' and dated June 2, 2023.",
   'Installed Electrolyzers': "Data on installed electrolyzers was extracted from a <a href='https://www.hydrogen.energy.gov/docs/hydrogenprogramlibraries/pdfs/23003-electrolyzer-installations-united-states.pdf?Status=Master'>DOE Hydrogen program record</a> entitled 'Electrolyzer Installations in the United States' and dated June 2, 2023.",
@@ -452,7 +452,7 @@ export const dataInfo = {
   'Truck Stop Locations': "Locations of truck stops parking facilities in the U.S. Obtained from the DOT Bureau of Transportation Statistics's <a href='https://geodata.bts.gov/datasets/usdot::truck-stop-parking'>Truck Stop Parking database</a> (<a href='https://opendata.arcgis.com/api/v3/datasets/0849b1bd4a5e4b4e831877b7c25d6062_0/downloads/data?format=shp&spatialRefId=3857&where=1%3D1'>link to download</a>)",
   //'DOE corridors': "Locations of truck stops parking facilities in the U.S. Obtained from the DOT Bureau of Transportation Statistics's <a href='https://geodata.bts.gov/datasets/usdot::truck-stop-parking'>Truck Stop Parking database</a> (<a href='https://opendata.arcgis.com/api/v3/datasets/0849b1bd4a5e4b4e831877b7c25d6062_0/downloads/data?format=shp&spatialRefId=3857&where=1%3D1'>link to download</a>)",
   'Principal Ports': "Locations of principal ports in the US. Obtained from <a href='https://geodata.bts.gov/datasets/usdot::principal-ports/'>USDOT BTS</a> (<a href='https://opendata.arcgis.com/api/v3/datasets/e3b6065cce144be8a13a59e03c4195fe_1/downloads/data?format=shp&spatialRefId=4326&where=1%3D1'>link to download</a>).",
-  'Truck Stop Charging': "These layers are used to visualize an analysis of theoretical savings from pooled investment in charging infrastructure at selected U.S. truck stops. The analysis integrates truck stop locations in the U.S. (see 'Truck Stop Locations' layer for details), along with highway freight flow data from the Freight Analysis Framework - see 'Highway Flows (Interstate)' layer for details.",
+  'Savings from Pooled Charging Infrastructure': "These layers are used to visualize an analysis <a href='https://dspace.mit.edu/handle/1721.1/153617'>presented in this publication</a> of theoretical savings from pooled investment in charging infrastructure at selected U.S. truck stops. The analysis integrates truck stop locations in the U.S. (see 'Truck Stop Locations' layer for details), along with highway freight flow data from the Freight Analysis Framework - see 'Highway Flows (Interstate)' layer for details.",
   'Lifecycle Truck Emissions': "Estimated lifecycle emissions per mile for the Tesla Semi due to charging and battery manufacturing. Charging emissions are based on the CO2e emission intensity of the grid balancing authority region. Emissions are calculated using the model developed by <a href='https://chemrxiv.org/engage/chemrxiv/article-details/656e4691cf8b3c3cd7c96810'>Sader et al.</a>, calibrated to <a href='https://runonless.com/run-on-less-electric-depot-reports/'>NACFE Run on Less data</a> for the Tesla Semi from the 2023 PepsiCo Semi pilot.<br><br><a href='https://github.com/mcsc-impact-climate/Green_Trucking_Analysis'>Link to Git repo with code used to produce these layers</a>",
   'Total Cost of Truck Ownership': "Estimated lifecycle total cost of ownership per mile for the Tesla Semi due to truck purchase, charging, labor, maintenance, insurance and other operating costs. Charging costs are evaluated using state-level commercial electricity price and demand charge. Costs are calculated using the model developed by <a href='https://chemrxiv.org/engage/chemrxiv/article-details/656e4691cf8b3c3cd7c96810'>Sader et al.</a>, calibrated to <a href='https://runonless.com/run-on-less-electric-depot-reports/'>NACFE Run on Less data</a> for the Tesla Semi from the 2023 PepsiCo Semi pilot.<br><br><a href='https://github.com/mcsc-impact-climate/Green_Trucking_Analysis'>Link to Git repo with code used to produce these layers</a>",
   'Grid Generation and Capacity': "Grid electricity generation and net summer power capacity by state for 2022, along with estimated theoretical maximum generation capacity and its difference and ratio relative to the actual grid electricity generation. Theoretical maximum electricity generation capacity is obtained under the assumption that the grid operates at its net summer power capacity year-round. <br><br>Data is obtained from the EIA's <a href='https://www.eia.gov/electricity/data/state/'>state-level electricity database</a>.<br><a href='https://www.eia.gov/electricity/data/state/annual_generation_state.xls'>Link to download annual generation data</a><br><a href='https://www.eia.gov/electricity/data/state/existcapacity_annual.xlsx'>Link to download net summer power capacity data</a>",
