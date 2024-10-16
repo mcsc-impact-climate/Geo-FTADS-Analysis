@@ -15,7 +15,7 @@ function createStyleFunction(layerName, boundaryColor='gray', boundaryWidth=1, i
         attributeValue = feature.get(attributeName);
     }
     const bounds = attributeBounds[layerName]; // Get the bounds for this specific geojson
-    const layerColor = geojsonColors[layerName] || 'blue'; // Fetch color from dictionary, or default to blue
+    const layerColor = geojsonColors[layerName] || 'yellow'; // Fetch color from dictionary, or default to blue
     //console.log(geojsonColors[layerName]);
     const geometryType = feature.getGeometry().getType();
 
@@ -61,7 +61,7 @@ function createStyleFunction(layerName, boundaryColor='gray', boundaryWidth=1, i
               image: new ol.style.Circle({
                 radius: 3, // Default point size
                 fill: new ol.style.Fill({
-                  color: fillColor,
+                  color: layerColor,
                 }),
               }),
               zIndex: 10, // Higher zIndex so points appear above polygons
@@ -89,7 +89,7 @@ function createStyleFunction(layerName, boundaryColor='gray', boundaryWidth=1, i
           width: boundaryWidth,
         }),
         fill: new ol.style.Fill({
-          color: 'yellow',
+          color: layerColor,
         }),
         zIndex: 1 // Lower zIndex so polygons appear below points
       });

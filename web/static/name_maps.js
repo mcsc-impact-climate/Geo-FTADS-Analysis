@@ -362,9 +362,6 @@ export let selectedFaf5Options = {
 
 // Key: geojson name, Value: color to use
 export const geojsonColors = {
-  'Truck Imports and Exports': 'red',
-  'Commercial Electricity Price': 'blue',
-  'Highway Flows (SU)': 'cyan',
   'Highway Flows (Interstate)': 'black',
   'Operational Electrolyzers': 'DarkGreen',
   'Installed Electrolyzers': 'LimeGreen',
