@@ -1,0 +1,14 @@
+{
+"type": "FeatureCollection",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "Nearest Center": "Fort Worth", "Latitude": 32.415333773546898, "Longitude": -97.227385273596298, "An E Dem": 2351545.7193385228, "Av P Dem": 268.44129216193181, "scaled_size": 160.0, "zone": "north_central" }, "geometry": { "type": "Point", "coordinates": [ -97.227385273596298, 32.415333773546898 ] } },
+{ "type": "Feature", "properties": { "Nearest Center": "Waco", "Latitude": 31.582834764720999, "Longitude": -97.103580078035193, "An E Dem": 1248421.2259123013, "Av P Dem": 142.51383857446362, "scaled_size": 24.13140366307973, "zone": "north_central" }, "geometry": { "type": "Point", "coordinates": [ -97.103580078035193, 31.582834764720999 ] } },
+{ "type": "Feature", "properties": { "Nearest Center": "Georgetown", "Latitude": 30.685558604508099, "Longitude": -97.656919659061401, "An E Dem": 1133687.5940980725, "Av P Dem": 129.41639202032792, "scaled_size": 10.0, "zone": "south_central" }, "geometry": { "type": "Point", "coordinates": [ -97.656919659061401, 30.685558604508099 ] } },
+{ "type": "Feature", "properties": { "Nearest Center": "San Marcus", "Latitude": 29.882652081225402, "Longitude": -97.921841357253498, "An E Dem": 1842666.9631751722, "Av P Dem": 210.35010995150367, "scaled_size": 97.322901705457795, "zone": "south_central" }, "geometry": { "type": "Point", "coordinates": [ -97.921841357253498, 29.882652081225402 ] } },
+{ "type": "Feature", "properties": { "Nearest Center": "Schulenburg", "Latitude": 29.693537299146499, "Longitude": -96.915958030812106, "An E Dem": 1580062.7828485714, "Av P Dem": 180.37246379549902, "scaled_size": 64.978717902264009, "zone": "south_central" }, "geometry": { "type": "Point", "coordinates": [ -96.915958030812106, 29.693537299146499 ] } },
+{ "type": "Feature", "properties": { "Nearest Center": "Chappel Hill", "Latitude": 30.134438183837201, "Longitude": -96.242926229003501, "An E Dem": 2087323.3877235686, "Av P Dem": 238.27892553922015, "scaled_size": 127.45651326633958, "zone": "south_central" }, "geometry": { "type": "Point", "coordinates": [ -96.242926229003501, 30.134438183837201 ] } },
+{ "type": "Feature", "properties": { "Nearest Center": "Madisonville", "Latitude": 30.950814105186701, "Longitude": -95.9117436382204, "An E Dem": 1515564.6084584531, "Av P Dem": 173.00965849982342, "scaled_size": 57.034667640573971, "zone": "east" }, "geometry": { "type": "Point", "coordinates": [ -95.9117436382204, 30.950814105186701 ] } },
+{ "type": "Feature", "properties": { "Nearest Center": "Richland", "Latitude": 31.905790150906299, "Longitude": -96.385128681776095, "An E Dem": 1809445.8565818241, "Av P Dem": 206.55774618513973, "scaled_size": 93.231155806880039, "zone": "east" }, "geometry": { "type": "Point", "coordinates": [ -96.385128681776095, 31.905790150906299 ] } }
+]
+}
