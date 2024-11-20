@@ -94,7 +94,7 @@ def main():
     # Get the path to the top level of the Git repo
     top_dir = get_top_dir()
 
-    ev_load_data_gpd = gpd.read_file(f"{top_dir}/geojsons/TT_charger_locations.json")
+    ev_load_data_gpd = gpd.read_file(f"{top_dir}/data/TT_charger_locations.json")
 
     ev_daily_load_profile_df = get_ev_load_profile(
         top_dir, f"{top_dir}/data/Borlaug_et_al_most_extreme_HDEV_load_profile.csv"

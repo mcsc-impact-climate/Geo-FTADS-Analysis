@@ -166,6 +166,7 @@ def make_charger_circles(charger_locations_gdf, radius):
     radius_meters = radius * METERS_PER_MILE
 
     # Convert to projected coordinate system to evaluate a circle of a given radius around the central coordinates
+    charger_locations_gdf = charger_locations_gdf.set_crs("EPSG:4326")
     charger_locations_gdf = charger_locations_gdf.to_crs("EPSG:3857")
 
     charger_circles_gdf = gpd.GeoDataFrame(
@@ -318,11 +319,14 @@ def evaluate_annual_e_demand_charger(
     )
 
     # Add the summed 'An E Dem' values to the respective charger locations
+    print(charger_locations_gdf.columns)
+    print(aggregated_data.columns)
     charger_locations_gdf = charger_locations_gdf.merge(
         aggregated_data, on="Nearest Center", how="left"
     )
 
     # Fill any NaNs with 0 if any location did not have any overlapping highways
+    print(charger_locations_gdf.columns)
     charger_locations_gdf["An E Dem"] = charger_locations_gdf["An E Dem"].fillna(0)
 
     # Also evaluate average power demand over the year
@@ -569,6 +573,7 @@ def assign_zones(charger_gdf, boundary_gdf):
     """
     # Ensure the GeoDataFrames are set with the correct CRS
     if charger_gdf.crs != boundary_gdf.crs:
+        charger_gdf = charger_gdf.set_crs("EPSG:4326")
         charger_gdf = charger_gdf.to_crs(boundary_gdf.crs)
 
     # Perform spatial join
@@ -589,7 +594,7 @@ def main():
 
     # Get charger locations, state boundary, and highways for Texas (only run in if the geojsons don't already exist)
     charger_location_path = f"{top_dir}/data/Jacquillat_Charger_Locations.csv"
-    charger_location_geojson_path = f"{top_dir}/geojsons/TT_charger_locations.json"
+    charger_location_geojson_path = f"{top_dir}/data/TT_charger_locations.json"
     ercot_boundaries_path = (
         f"{top_dir}/data/ERCOT_Weather_Zones/ERCOT_Weather_Zones.shp"
     )
@@ -599,12 +604,12 @@ def main():
     )
     texas_highways_geojson_path = f"{top_dir}/geojsons/texas_state_highways.json"
 
-    if os.path.exists(charger_location_geojson_path):
-        charger_locations_gdf = gpd.read_file(charger_location_geojson_path)
-    else:
-        charger_locations_gdf = get_charger_locations(
-            charger_location_path, charger_location_geojson_path
-        )
+#    if os.path.exists(charger_location_geojson_path):
+#        charger_locations_gdf = gpd.read_file(charger_location_geojson_path)
+#    else:
+    charger_locations_gdf = get_charger_locations(
+        charger_location_path, charger_location_geojson_path
+    )
 
     if os.path.exists(ercot_boundaries_geojson_path):
         ercot_boundaries_gdf = gpd.read_file(ercot_boundaries_geojson_path)

@@ -71,7 +71,7 @@ def correct_datetime(time_str):
     return time_str
 
 
-def make_daily_ev_demands_fig(top_dir, filename, zone):
+def make_daily_ev_demands_fig(top_dir, filename, zone, include_all_centers=True):
     daily_ev_demands = pd.read_csv(filename)
     
     fig, ax = plt.subplots(figsize=(12, 8))
@@ -84,7 +84,11 @@ def make_daily_ev_demands_fig(top_dir, filename, zone):
     # For each zone, plot the daily variation for each center (and total over all centers)
     colors = ["red", "purple", "orange", "teal", "cyan", "magenta", "teal"]
     i_center = 0
-    for center in daily_ev_demands.columns:
+    if include_all_centers:
+        centers = daily_ev_demands.columns
+    else:
+        centers = ["Total (MW)"]
+    for center in centers:
         if center == "Hours":
             continue
         elif "(MW)" in center:
@@ -118,14 +122,14 @@ def make_daily_ev_demands_fig(top_dir, filename, zone):
     return fig, ax
 
 
-def plot_with_historical_daily_load(top_dir, load_data_df):
+def plot_with_historical_daily_load(top_dir, load_data_df, include_all_centers=True):
     pattern = re.compile(r"daily_ev_load_([^\.]+).csv")
     for filename in glob.glob(f"{top_dir}/data/daily_ev_load_*.csv"):
         match = pattern.search(filename)
         if match:
             zone = match.group(1)
 
-        fig, ax = make_daily_ev_demands_fig(top_dir, filename, zone)
+        fig, ax = make_daily_ev_demands_fig(top_dir, filename, zone, include_all_centers)
 
         # Extract the date for filtering
         load_data_df["Date"] = load_data_df["Hour Ending"].dt.date
@@ -166,9 +170,12 @@ def plot_with_historical_daily_load(top_dir, load_data_df):
 
         ax.set_ylim(ymin, ymax*1.5)
         ax.legend(fontsize=20)
-        plt.savefig(f'{top_dir}/plots/daily_ev_load_{zone}.png')
+        if include_all_centers:
+            plt.savefig(f'{top_dir}/plots/daily_ev_load_{zone}_allcenters.png')
+        else:
+            plt.savefig(f'{top_dir}/plots/daily_ev_load_{zone}.png')
 
-def plot_with_excess_capacity(top_dir, load_data_df):
+def plot_with_excess_capacity(top_dir, load_data_df, include_all_centers=True):
     pattern = re.compile(r"daily_ev_load_([^\.]+).csv")
     for filename in glob.glob(f"{top_dir}/data/daily_ev_load_*.csv"):
         match = pattern.search(filename)
@@ -248,7 +255,7 @@ def plot_with_excess_capacity(top_dir, load_data_df):
             )
 
             # Plot excess relative to monthly max, along with the EV demand curves
-            fig, ax = make_daily_ev_demands_fig(top_dir, filename, zone)
+            fig, ax = make_daily_ev_demands_fig(top_dir, filename, zone, include_all_centers)
 
             ax.axhline(
                 aggregated_data_df["Max Load (MW)"].iloc[0],
@@ -294,23 +301,27 @@ def plot_with_excess_capacity(top_dir, load_data_df):
             ]
 
             ax.legend(handles, labels, fontsize=16, ncol=2)
-
-            plt.savefig(
-                f"{top_dir}/plots/daily_ev_load_with_excess_{zone}_{month_label}_monthMax.png"
-            )
+            if include_all_centers:
+                plt.savefig(
+                    f"{top_dir}/plots/daily_ev_load_with_excess_{zone}_{month_label}_monthMax_allcenters.png"
+                )
+            else:
+                plt.savefig(
+                    f"{top_dir}/plots/daily_ev_load_with_excess_{zone}_{month_label}_monthMax.png"
+                )
             plt.close()
 
             # Plot excess relative to yearly max, along with the EV demand curves
-            fig, ax = make_daily_ev_demands_fig(top_dir, filename, zone)
+            fig, ax = make_daily_ev_demands_fig(top_dir, filename, zone, include_all_centers)
 
-            ax.axhline(
-                max_load,
-                label="Max Historical Load for Year",
-                color="blue",
-                linewidth=2,
-                linestyle="--",
-                zorder=100,
-            )
+#            ax.axhline(
+#                max_load,
+#                label="Max Historical Load for Year",
+#                color="blue",
+#                linewidth=2,
+#                linestyle="--",
+#                zorder=100,
+#            )
 
             handles, labels = ax.get_legend_handles_labels()
 
@@ -343,9 +354,14 @@ def plot_with_excess_capacity(top_dir, load_data_df):
 
             ax.legend(handles, labels, fontsize=16, ncol=2)
 
-            plt.savefig(
-                f"{top_dir}/plots/daily_ev_load_with_excess_{zone}_{month_label}_yearMax.png"
-            )
+            if include_all_centers:
+                plt.savefig(
+                    f"{top_dir}/plots/daily_ev_load_with_excess_{zone}_{month_label}_yearMax_allcenters.png"
+                )
+            else:
+                plt.savefig(
+                    f"{top_dir}/plots/daily_ev_load_with_excess_{zone}_{month_label}_yearMax.png"
+                )
             plt.close()
 
 
@@ -584,7 +600,10 @@ def main():
     load_data_df = read_load_data(load_data_paths)
         
     plot_with_historical_daily_load(top_dir, load_data_df)
+    plot_with_historical_daily_load(top_dir, load_data_df, include_all_centers=False)
+
     plot_with_excess_capacity(top_dir, load_data_df)
-    plot_coast_load(top_dir, load_data_df)
+    plot_with_excess_capacity(top_dir, load_data_df, include_all_centers=False)
+    #plot_coast_load(top_dir, load_data_df)
 
 main()
