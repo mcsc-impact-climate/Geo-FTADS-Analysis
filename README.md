@@ -2,7 +2,9 @@
 
 # Interactive geospatial decision support tool for trucking fleet decarbonization
 
-This repo contains code to produce and interactively visualize publicly available geospatial data to support trucking fleets in navigating the transition to alternative energy carriers. The tool uses data from the "freight analysis framework" (FAF5) database and other public data sources.
+This repo contains code to produce and synthesize visualize publicly available geospatial data to support trucking fleets in navigating the transition to alternative energy carriers. The tool uses data from the "freight analysis framework" (FAF5) database and other public data sources.
+
+The layers can be interactively visualized using the Geo-FTADS tool ([link to the Geo-FTADS code repo](https://github.com/mcsc-impact-climate/Geo-FTADS)).
 
 ## Pre-requisites
 * python3
@@ -25,23 +27,6 @@ The script [`download_data.sh`](./download_data.sh) downloads all the data neede
 ```bash
 bash download_data.sh
 ```
-
-## Running the geospatial mapping tool
-
-The code in [web](./web) contains all functionality to visualize the geojsons interactively on a web interface. The code can be executed as follows:
-
-```bash
-# Install python requirements if needed
-install -r requirements.txt
-```
-
-```bash 
-python manage.py runserver
-```
-
-If that executes without issue, you should be able to view the map in your browser at http://127.0.0.1:5000/transportation. It currently looks something like this:
-
-![Interactive Web Map](./images/web_map.png)
 
 ## Processing highway assignments
 
