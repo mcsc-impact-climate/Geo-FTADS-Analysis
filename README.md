@@ -1,10 +1,10 @@
 [![DOI](https://zenodo.org/badge/749951605.svg)](https://zenodo.org/doi/10.5281/zenodo.13205855)
 
-# Interactive geospatial decision support tool for trucking fleet decarbonization
+# Backend to produce layers for the Geo-TIDE tool
 
 This repo contains code to produce and synthesize visualize publicly available geospatial data to support trucking fleets in navigating the transition to alternative energy carriers. The tool uses data from the "freight analysis framework" (FAF5) database and other public data sources.
 
-The layers can be interactively visualized using the Geo-FTADS tool ([link to the Geo-FTADS code repo](https://github.com/mcsc-impact-climate/Geo-FTADS)).
+The layers can be interactively visualized using the Geo-TIDE tool ([link to the Geo-TIDE code repo](https://github.com/mcsc-impact-climate/Geo-TIDE)).
 
 ## Pre-requisites
 * python3
