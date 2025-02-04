@@ -65,6 +65,10 @@ def simplify(shapefiles, columns_keep, coordinate=3857, tolerance=1000):
         simplified_features = []
 
         for feature in geojson_data["features"]:
+            if feature["geometry"] is None:
+                print(f"Skipping feature with None geometry: {feature.get('properties')}")
+                continue  # Skip features with no geometry
+
             geometry = shape(feature["geometry"])
 
             # Check the geometry type and simplify accordingly
@@ -226,5 +230,13 @@ if __name__ == "__main__":
             shapefiles[
                 "State-Level Support (%s_%s)" % (support_target, support_type)
             ] = f"incentives_and_regulations_merged/{support_target}_{support_type}.shp"
+
+     Zero emission freight corridor strategy from the joint office
+    for phase in range(1,5):
+        shapefiles[f"ZEF Corridor Strategy Phase {phase} Corridors"] = f"zef-gis-files/GIS_Files_for_Publication/Phase_{phase}/ZEF_Corridor_Strategy_Phase{phase}_Corridors/ZEF_Corridor_Strategy_Phase{phase}_Corridors.shp"
+        
+    for phase, phase_read in zip(["1", "3", "4"], ["Phase1_Phase2", "Phase3", "Phase4"]):
+        for infra in ["Facilities", "Hubs"]:
+            shapefiles[f"ZEF Corridor Strategy Phase {phase} {infra}"] = f"zef-gis-files/GIS_Files_for_Publication/Phase_{phase}/ZEF_Corridor_Strategy_{phase_read}_{infra}/ZEF_Corridor_Strategy_{phase_read}_{infra}.shp"
 
     simplify(shapefiles, columns_keep, coordinate=3857)
