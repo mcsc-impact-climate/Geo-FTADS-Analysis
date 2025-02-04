@@ -37,7 +37,7 @@ def mergeShapefile(dest, shapefile_path, min_tonnage=None, road_class=None):
     print("Reading in shapefile")
 
     shapefile = gpd.read_file(
-        shapefile_path, include_fields=["ID", "geometry", "Class", "STATE", "LENGTH"]
+        shapefile_path, columns=["ID", "geometry", "Class", "STATE", "LENGTH", "Road_Name"]
     )
     print(shapefile.columns)
     print("Shapefile has been read in")
